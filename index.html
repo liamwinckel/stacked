@@ -20,7 +20,10 @@ html,body{margin:0;background:var(--bot);color:var(--text);font:16px/1.35 -apple
 .bgfx{position:fixed;inset:0;z-index:-1;background:linear-gradient(180deg,var(--top) 0%,var(--mid) 45%,var(--bot) 100%)}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation;padding:0}
 input,textarea{font:inherit}
-#app{max-width:520px;margin:0 auto;min-height:100vh;position:relative}
+#app{max-width:520px;margin:0 auto;height:100%;position:relative;display:flex;flex-direction:column;min-height:0}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+#app>.hd{flex:none;position:relative}
+#app>main.pg{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
 .i{width:22px;height:22px;flex:none;vertical-align:middle}
 .hd{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;background:var(--bot);border-bottom:1px solid var(--line)}
 .sbcover{position:fixed;left:0;right:0;top:0;height:env(safe-area-inset-top);background:var(--bot);z-index:30;pointer-events:none}
@@ -299,6 +302,11 @@ em{font-style:normal;font-size:12px;font-weight:600;color:var(--mute)}em.up{colo
 .vopt>div>*{text-align:center;justify-self:stretch}.vopt>div>:first-child{text-align:left}
 .vopt .vh{padding-top:8px;padding-bottom:8px}.vopt .vh span{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);white-space:nowrap}
 .vopt b{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}.vopt b small{display:block;font-size:11px;font-weight:500;color:var(--mute)}.vopt .rec{background:rgba(var(--pkr),.08)}.vopt .rec span{color:var(--pk);font-weight:700}
+.wgv{border-left:3px solid;padding:8px 0 8px 12px}.wgv b{display:block;font-size:16px}.wgv span{display:block;font-size:13px;color:var(--soft);margin-top:2px}.wgv em{display:block;font-style:normal;font-size:12px;color:var(--mute);margin-top:4px}
+.wgfix{margin-top:10px;padding:10px 12px;border-radius:8px;background:rgba(255,122,122,.08);border:1px solid rgba(255,122,122,.35);font-size:13px;color:var(--soft)}.wgfix b{color:var(--text)}
+.wgrows>div{display:grid;grid-template-columns:96px 1fr;column-gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}.wgrows>div:last-child{border:0}.wgrows span{grid-row:span 2;font-size:12px;color:var(--mute);padding-top:2px}.wgrows b{font-size:15px;font-weight:600}.wgrows em{font-style:normal;font-size:12px;color:var(--mute)}
+.wgbar{height:10px;border-radius:5px;background:rgba(255,255,255,.08);margin-top:12px;overflow:hidden}.wgbar i{display:block;height:100%;background:var(--pk);border-radius:5px}
+input[type=date].inp{color-scheme:dark;min-height:44px}
 .toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 64px);transform:translateX(-50%);background:#fff;color:var(--toastc);padding:10px 16px;border-radius:999px;font-weight:600;font-size:14px;z-index:99;transition:opacity .3s;white-space:nowrap}
 .prbox{margin:14px 20px 0;padding:10px;border:1px solid var(--pk);color:var(--pklt);border-radius:6px;font-weight:600;text-align:center}
 </style>
@@ -426,7 +434,7 @@ function startWorkout(rid,did){
   if(did){const d=D(rid,did);name=d.name;items=d.items.map(it=>mkItem(it.exId,it.sets,it.sn,it.rr,it.tw,it.tr))}
   let dl=false;if(S.deloadNext&&items.length){dl=true;S.deloadNext=false;items.forEach(it=>{if(ex(it.exId).type!=='bodyweight')it.sets.forEach(x=>{x.w=rnd(x.w*.6);delete x.p})})}
   S.session={id:uid(),rid:rid||null,did:did||null,name:dl?name+' (Deload)':name,start:Date.now(),items,i:0,s:0,rest:null,deload:dl};if(dl)setTimeout(()=>toast('Deload: weights set to 60% today'),400);
-  V.inSession=true;V.ov=!items.length;V.animIn=true;save();render();V.animIn=false;scrollTo(0,0);
+  V.inSession=true;V.ov=!items.length;V.animIn=true;save();render();V.animIn=false;scr0();
 }
 function grp(i){const its=S.session.items;let a=i;while(a>0&&its[a-1].sn)a--;let b=i;while(b<its.length-1&&its[b].sn)b++;return [a,b]}
 function seqList(){const its=S.session.items,out=[];let i=0;while(i<its.length){const [a,b]=grp(i);const mx=Math.max(...its.slice(a,b+1).map(x=>x.sets.length));for(let r=0;r<mx;r++)for(let k=a;k<=b;k++)if(r<its[k].sets.length)out.push([k,r]);i=b+1}return out}
@@ -680,8 +688,9 @@ function closePanel(){const el=$('#sp');const done=()=>{V.ov=true;V.ovEdit=false
 function openPanel(){V.ov=false;V.animIn=true;render();V.animIn=false}
 
 function renderSub(){const k=V.sub.split(':')[0],id=V.sub.slice(k.length+1);return k==='routines'?renderRoutines():k==='routine'?renderRoutine(id):k==='day'?renderDay(id):k==='exercises'?renderExercises():k==='hist'?renderHist(id):renderHome()}
+function scr0(){const m=document.querySelector('#app main');if(m)m.scrollTop=0}
 function render(){
-  const app=$('#app');let out;
+  const app=$('#app');let out;const pm=document.querySelector('#app main'),pmt=pm?pm.scrollTop:0,vk=[V.tab,V.sub,!!V.inSession,V.ov].join('|'),samev=vk===V._vk;V._vk=vk;
   if(S.session&&V.inSession)out=renderSession();
   else{if(!S.session)V.inSession=false;out=(V.sub?renderSub():({home:renderHome,log:renderLog,goals:renderGoals,more:renderMore}[V.tab])())+renderTabs()}
   if(V.calc)out+=renderCalc();
@@ -689,6 +698,7 @@ function render(){
   if(SWO){SWO.bg.remove();SWO=null}
   const sp=$('#sp'),st=sp?sp.scrollTop:0;
   app.innerHTML=out;
+  if(samev&&pmt){const nm=document.querySelector('#app main');if(nm)nm.scrollTop=pmt}
   const sp2=$('#sp');if(sp2&&st)sp2.scrollTop=st;
   try{document.body.style.overflow=sp2?'hidden':''}catch(e){}
   if(V.anim){const m=$('#app main');if(m&&m.classList)m.classList.add(V.anim);V.anim=null}
@@ -716,7 +726,7 @@ function finishNow(){
   const dec=entries.map(e=>ex(e.exId)).filter(e=>isDeclining(e.id));if(dec.length)recap.push(['dn',`${esc(dec[0].name)} has dropped 3 sessions running. Consider a lighter week`]);
   S.session=null;V.inSession=false;V.ov=false;V.restOpen=false;V.tab='home';V.sub=null;
   const tk=new Date().toDateString();const nowFull=closedCount(dayStats(dayStart(Date.now())))===5;if(nowFull&&S.stackDay!==tk){S.stackDay=tk;setTimeout(()=>prPop('Today\'s Stack','All five bars closed. Stacked!'),700)}
-  save();render();scrollTo(0,0);
+  save();render();scr0();
   const reps=sum(entries.map(e=>sum(dn(e).map(x=>x.r))));
   openSheet(`<div class="sh-t center">Workout Complete 🏆<div class="xs mute" style="font-weight:400">${esc(h.name)} · ${mmss(h.dur)}</div></div>${statsGrid(entries.length,sum(entries.map(e=>dn(e).length)),reps,fmt(Math.round(volOf(h))))}${prs.length?`<div class="prbox">New PR${prs.length>1?'s':''}: ${prs.map(esc).join(', ')}</div>`:''}${recap.length?`<div class="recap">${recap.map(([k,t])=>`<div class="${k}"><i></i>${t}</div>`).join('')}</div>`:''}<button class="pkb" data-a="close">Nice</button>`);
 }
@@ -777,8 +787,9 @@ function liftCap(){const p=P();let c={beg:2,int:1,adv:.5}[p.exp]||1;if(p.age>=60
 
 function planCard(){const n=nutritionCard(true),p=P(),[vl,vh]=volTarget(),mid=Math.round((vl+vh)/2);
   const opts=[['Minimum',vl,.75,'Fair'],['Recommend',mid,1,'Good'],['Maximum',vh,1.12,'Best']].map(([l,v,m,keep])=>{const tot=v*5.5,ses=Math.max(2,Math.min(6,Math.ceil(tot/20))),mins=tot*2.5+ses*10;return {l,v,m,keep,ses,hrs:mins/60}});
-  const G0=S.planGoal||{};let gl='',calc=null,col='To goal';const wk=x=>x==null||!isFinite(x)?'–':x<1?'<1 wk':x>104?'2+ yrs':`~${Math.round(x)} wk`;
-  if(p.goal==='fat'){const xs=[...S.body].sort((a,b)=>b.date-a.date),bwE=xs.find(b=>b.bw),bfE=xs.find(b=>b.bf),tg=(S.bodyGoal||{}).bf;
+  const G0=S.planGoal||{};let gl='',calc=null,col='To goal';const WG=S.weightGoal&&S.weightGoal.date>Date.now()?S.weightGoal:null;const wk=x=>x==null||!isFinite(x)?'–':x<1?'<1 wk':x>104?'2+ yrs':`~${Math.round(x)} wk`;
+  if(WG){gl=`${fmt(WG.target)} ${U()} by ${new Date(WG.date).toLocaleDateString(undefined,{month:'short',day:'numeric'})}`;const wks=(WG.date-Date.now())/(7*864e5);calc=()=>wks;col=WG.target<(curBW()||0)?'Muscle kept':'To goal'}
+  else if(p.goal==='fat'){const xs=[...S.body].sort((a,b)=>b.date-a.date),bwE=xs.find(b=>b.bw),bfE=xs.find(b=>b.bf),tg=(S.bodyGoal||{}).bf;
     if(bwE&&bfE&&tg&&bfE.bf>tg){const lbm=bwE.bw*(1-bfE.bf/100),tw=lbm/(1-tg/100),w=(bwE.bw-tw)/(.007*bwE.bw);gl=`Reach ${tg}% body fat · ${fmt(Math.round(bwE.bw-tw))} ${U()} to lose`;calc=()=>w;col='Muscle kept'}
     else gl=tg?'Log bodyweight + body fat to estimate':'Set a body fat target in Goals → Body'}
   else if(p.goal==='muscle'){const amt=G0.lean||(U()==='kg'?2.5:5),mo={beg:2,int:1,adv:.5}[p.exp]*(U()==='kg'?.4536:1);gl=`Gain ${amt} ${U()} of lean muscle`;calc=m=>amt/(mo*m)*4.35}
@@ -837,27 +848,28 @@ function progSeries(k){const all=3650;if(k==='bw')return bodySeries('bw',all);if
 const PM=[['bw','Bodyweight'],['bf','Body fat %'],['lbm','Lean mass'],['bench','Bench'],['squat','Squat'],['deadlift','Deadlift'],['ohp','OHP']];
 function progChart(){const avail=PM.filter(([k])=>progSeries(k).length>=2);if(!avail.length)return '';let k=V.pm&&avail.find(a=>a[0]===V.pm)?V.pm:avail[0][0];const ser=progSeries(k),cap=k==='bf'||k==='lbm'?1:k==='bw'?1.5:liftCap();
   const recent=ser.filter(p=>p[0]>=dayN(Date.now())-84),pj=recent.length>=3&&linreg(recent)?[4,8,12].map(w=>[dayN(Date.now())+w*7,project(recent,w,cap)]):[];
-  const pts=ser.concat(pj),x0=ser[0][0],x1=Math.max(dayN(Date.now()),pj.length?pj[2][0]:ser[ser.length-1][0]);let y0=Math.min(...pts.map(p=>p[1])),y1=Math.max(...pts.map(p=>p[1]));const pad=(y1-y0||1)*.12;y0-=pad;y1+=pad;
+  const WG=k==='bw'&&S.weightGoal?S.weightGoal:null,tgP=WG?[dayN(WG.date),WG.target]:null;const pts=ser.concat(pj,tgP?[tgP]:[]),x0=ser[0][0],x1=Math.max(dayN(Date.now()),pj.length?pj[2][0]:ser[ser.length-1][0],tgP?tgP[0]:0);let y0=Math.min(...pts.map(p=>p[1])),y1=Math.max(...pts.map(p=>p[1]));const pad=(y1-y0||1)*.12;y0-=pad;y1+=pad;
   const Wd=340,H=170,L=38,R=10,T=12,B=26,X=x=>L+(x-x0)/(x1-x0||1)*(Wd-L-R),Y=y=>T+(1-(y-y0)/(y1-y0))*(H-T-B);
   const u=k==='bf'?'%':U(),fv=v=>k==='bf'?(Math.round(v*10)/10):Math.round(v);
   const grid=[0,.5,1].map(f=>{const v=y0+(y1-y0)*f;return `<line x1="${L}" x2="${Wd-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="rgba(255,255,255,.07)"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end" font-size="10" fill="var(--mute)">${fv(v)}</text>`}).join('');
   const tx=X(dayN(Date.now())),last=ser[ser.length-1];
   const line=`<polyline points="${ser.map(p=>X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join(' ')}" fill="none" stroke="var(--pk)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`+ser.map(p=>`<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="2.6" fill="var(--pk)"/>`).join('');
+  const tgm=tgP?`<line x1="${X(last[0]).toFixed(1)}" y1="${Y(last[1]).toFixed(1)}" x2="${X(tgP[0]).toFixed(1)}" y2="${Y(tgP[1]).toFixed(1)}" stroke="var(--pk)" stroke-width="1.2" stroke-dasharray="2 4" opacity=".7"/><rect x="${(X(tgP[0])-5).toFixed(1)}" y="${(Y(tgP[1])-5).toFixed(1)}" width="10" height="10" transform="rotate(45 ${X(tgP[0]).toFixed(1)} ${Y(tgP[1]).toFixed(1)})" fill="var(--pk)"/>`:'';
   const proj=pj.length?`<polyline points="${[last].concat(pj).map(p=>X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join(' ')}" fill="none" stroke="var(--cy)" stroke-width="2" stroke-dasharray="5 5" stroke-linecap="round"/>`+pj.map((p,i)=>`<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="${i===2?4:2.5}" fill="${i===2?'var(--cy)':'var(--bot)'}" stroke="var(--cy)" stroke-width="1.5"/>`).join('')+`<text x="${Math.min(X(pj[2][0]),Wd-R-2)}" y="${Y(pj[2][1])-9}" text-anchor="end" font-size="11" font-weight="700" fill="var(--cy)">${fv(pj[2][1])}${u==='%'?'%':''}</text>`:'';
   const dfmt=d=>new Date(d*864e5).toLocaleDateString(undefined,{month:'short',day:'numeric'});
   const chg=ser.length>1?last[1]-ser[0][1]:0;
   return `<div class="wcard"><div class="row" style="justify-content:space-between"><div class="xs mute" style="letter-spacing:.08em">PROGRESS</div><div class="xs" style="color:${k==='bw'?'var(--soft)':(k==='bf'?-chg:chg)>=0?'#5fe39a':'#ff8c8c'};font-weight:700">${chg>0?'+':''}${fv(chg)}${u==='%'?' pts':' '+u} since ${dfmt(ser[0][0])}</div></div>
   <div class="chips2" style="padding:10px 0 0">${avail.map(([kk,l])=>`<button class="${kk===k?'on':''}" data-a="pmset" data-x="${kk}">${l}</button>`).join('')}</div>
-  <svg viewBox="0 0 ${Wd} ${H}" class="pchart">${grid}<line x1="${tx}" x2="${tx}" y1="${T}" y2="${H-B}" stroke="rgba(255,255,255,.18)" stroke-dasharray="2 4"/>${line}${proj}
+  <svg viewBox="0 0 ${Wd} ${H}" class="pchart">${grid}<line x1="${tx}" x2="${tx}" y1="${T}" y2="${H-B}" stroke="rgba(255,255,255,.18)" stroke-dasharray="2 4"/>${tgm}${line}${proj}
   <text x="${L}" y="${H-8}" font-size="10" fill="var(--mute)">${dfmt(x0)}</text><text x="${tx}" y="${H-8}" text-anchor="middle" font-size="10" fill="var(--soft)">Today</text>${pj.length?`<text x="${Wd-R}" y="${H-8}" text-anchor="end" font-size="10" fill="var(--cy)">+12 wk</text>`:''}</svg>
-  <div class="pleg"><span><i style="background:var(--pk)"></i>Logged</span>${pj.length?'<span><i class="dash"></i>Projected</span>':'<span class="mute">Projection after 3+ entries over 2+ weeks</span>'}</div></div>`}
+  <div class="pleg"><span><i style="background:var(--pk)"></i>Logged</span>${tgP?'<span><i style="background:var(--pk);width:8px;height:8px;transform:rotate(45deg);vertical-align:1px"></i>Goal</span>':''}${pj.length?'<span><i class="dash"></i>Projected</span>':'<span class="mute">Projection after 3+ entries over 2+ weeks</span>'}</div></div>`}
 function nutritionCard(raw){const xs=[...S.body].sort((a,b)=>b.date-a.date);const bwE=xs.find(b=>b.bw);if(!bwE)return '';
   const toLb=v=>U()==='kg'?v*2.20462:v,fromLb=v=>U()==='kg'?v/2.20462:v;
   const bw=toLb(bwE.bw),bfE=xs.find(b=>b.bf),bfAssumed=!bfE,bf=bfE?bfE.bf:(S.sex==='f'?28:20),lbm=bw*(1-bf/100);
   const wk=S.history.filter(h=>h.date>Date.now()-28*864e5).length/4;const af=wk>=5?1.725:wk>=3?1.55:wk>=1?1.45:1.375;
   const pf=P(),hcm=pf.height?(U()==='kg'?pf.height:pf.height*2.54):0;const bmr=(bfAssumed&&pf.age&&hcm)?10*(bw/2.20462)+6.25*hcm-5*pf.age+(S.sex==='f'?-161:5):370+21.6*(lbm/2.20462),tdee=bmr*af;
-  const tg=S.bodyGoal||{};let auto=({fat:'cut',muscle:'bulk'})[P().goal]||'maintain';if(tg.bf&&bf>tg.bf+.5)auto='cut';else if(tg.bf&&bf<tg.bf-.5)auto='bulk';const mode=S.nutMode||auto;
-  const rate={cut:-.007,maintain:0,bulk:({beg:.005,int:.0035,adv:.002})[P().exp]||.0035}[mode];let kcal=tdee+rate*bw*3500/7;if(mode==='cut')kcal=Math.max(kcal,tdee*.75);
+  const tg=S.bodyGoal||{};let auto=({fat:'cut',muscle:'bulk'})[P().goal]||'maintain';const WG=S.weightGoal&&S.weightGoal.date>Date.now()?S.weightGoal:null;if(tg.bf&&bf>tg.bf+.5)auto='cut';else if(tg.bf&&bf<tg.bf-.5)auto='bulk';if(WG){const df=WG.target-(U()==='kg'?bw/2.20462:bw);auto=Math.abs(df)<.5?'maintain':df<0?'cut':'bulk'}const mode=S.nutMode||auto;
+  let rate={cut:-.007,maintain:0,bulk:({beg:.005,int:.0035,adv:.002})[P().exp]||.0035}[mode];if(WG&&mode!=='maintain'){const cur=(U()==='kg'?bw/2.20462:bw),need=(WG.target-cur)/((WG.date-Date.now())/(7*864e5))/cur;if(mode==='cut'&&need<0)rate=Math.max(-.01,Math.min(-.0025,need));if(mode==='bulk'&&need>0)rate=Math.min(({beg:.0075,int:.005,adv:.004})[P().exp]||.005,Math.max(.001,need))}let kcal=tdee+rate*bw*3500/7;if(mode==='cut')kcal=Math.max(kcal,tdee*.75);
   /* trends */const adj=[];let d=0;const sBW=bodySeries('bw',42),r=linreg(sBW);const wkPct=r?r.sl*7/(sBW[sBW.length-1][1])*100:null;
   const L=bigLifts().slice(0,3).filter(x=>x.e);let sTr=null;{const now=[],old=[];L.forEach(x=>{const s2=liftSeries(x.n,56);if(s2.length>=3){const rr=linreg(s2);if(rr)now.push(rr.sl*28/s2[s2.length-1][1]*100)}});if(now.length)sTr=sum(now)/now.length}
   const sL=S.body.filter(b=>b.bw&&b.bf&&b.date>Date.now()-42*864e5).sort((a,b)=>a.date-b.date).map(b=>[dayN(b.date),toLb(b.bw)*(1-b.bf/100)]),rl=linreg(sL),lbmWk=rl?rl.sl*7:null;
@@ -880,6 +892,54 @@ function nutritionCard(raw){const xs=[...S.body].sort((a,b)=>b.date-a.date);cons
   <div class="macros"><div><i style="background:var(--pk)"></i><b>${pro}g</b><span>Protein</span></div><div><i style="background:var(--cy)"></i><b>${carb}g</b><span>Carbs</span></div><div><i style="background:#ffb547"></i><b>${fat}g</b><span>Fat</span></div></div>
   <div class="recap" style="margin:12px 0 0">${adj.map(([k,t])=>`<div class="${k}"><i></i>${t}</div>`).join('')}</div>
   <p class="xs mute" style="margin:10px 0 0">Based on your lean mass (${fmt(Math.round(fromLb(lbm)))} ${U()}${bfAssumed?', assuming '+bf+'% body fat until you log it':''}), ~${Math.round(wk*10)/10} workout${Math.round(wk*10)/10===1?'':'s'} a week and your recent trends. These are estimates, so adjust by how your weight actually moves. If you have a medical condition, check with a doctor or dietitian.</p></div>`}
+/* ===== weight goal assistant ===== */
+function curBW(){const x=[...S.body].sort((a,b)=>b.date-a.date).find(b=>b.bw);return x?x.bw:null}
+function curBF(){const x=[...S.body].sort((a,b)=>b.date-a.date).find(b=>b.bf);return x?x.bf:null}
+function wgAnalyze(target,dateMs){const bw=curBW();if(!bw||!target||!dateMs)return null;const p=P(),wks=(dateMs-Date.now())/(7*864e5);if(wks<1)return {err:'Pick a date at least a week away.'};
+  const diff=target-bw,dir=Math.abs(diff)<.5?'maintain':diff<0?'cut':'bulk',perWk=diff/wks,pct=perWk/bw*100;
+  const safe=dir==='cut'?{lo:-1,hi:-.25,max:-1.25}:{lo:.1,hi:({beg:.5,int:.35,adv:.25})[p.exp]||.35,max:({beg:.75,int:.5,adv:.4})[p.exp]||.5};
+  let level='ok',note='';
+  if(dir==='cut'){if(pct<safe.max){level='bad';note='That pace is faster than is safe or sustainable, and you would likely lose muscle.'}else if(pct<safe.lo){level='warn';note='Aggressive. Doable short-term, but expect hunger and some strength loss.'}else if(pct>safe.hi){level='easy';note='Comfortable pace. Great for keeping strength while you lean out.'}else note='Solid, sustainable pace.'}
+  else if(dir==='bulk'){if(pct>safe.max){level='bad';note='Gaining this fast would be mostly fat, not muscle.'}else if(pct>safe.hi){level='warn';note='On the fast side, so expect some extra fat gain.'}else note='Good lean-bulk pace for your experience level.'}
+  else note='Hold steady and recomp: build muscle while staying the same weight.';
+  const realRate=dir==='cut'?Math.max(pct,safe.lo):dir==='bulk'?Math.min(pct,safe.hi):0;
+  const realWks=dir==='maintain'||!realRate?wks:Math.abs(diff)/(Math.abs(realRate)/100*bw);const realDate=Date.now()+realWks*7*864e5;
+  const atDate=bw+(realRate/100*bw)*wks;
+  const n=nutritionCard(true)||{};const tdeeLb=n.tdee||null;const useRate=level==='bad'?realRate:pct;
+  const lbW=U()==='kg'?bw*2.20462:bw,kcal=tdeeLb?Math.round((tdeeLb+(useRate/100*lbW)*3500/7)/25)*25:null;
+  const floor=S.sex==='f'?1300:1600,kcalSafe=kcal&&dir==='cut'?Math.max(kcal,Math.round(tdeeLb*.75/25)*25,floor):kcal;
+  const bf=curBF();let bfAt=null;if(bf){const lbm=bw*(1-bf/100),fatChange=dir==='cut'?diff*.8:diff*.5,lbmChange=diff-fatChange;bfAt=Math.max(4,(bw*bf/100+fatChange)/(target)*100);bfAt=Math.round(bfAt*10)/10}
+  const pro=Math.round(Math.min((dir==='cut'?1.05:.9)*(U()==='kg'?bw*2.20462:bw),(bf?1.3*(U()==='kg'?bw*2.20462:bw)*(1-bf/100):9e9))/5)*5;
+  const [vl,vh]=volTarget();
+  return {bw,target,diff,dir,wks,perWk,pct,level,note,realDate,atDate,kcal:kcalSafe,kcalRaw:kcal,tdee:tdeeLb,pro,bfAt,vl,vh,
+    cardio:dir==='cut'?(level==='warn'?200:150):dir==='bulk'?90:120,
+    miles:[.25,.5,.75].map(f=>({d:Date.now()+wks*f*7*864e5,w:bw+diff*f}))}}
+function wgHtml(){const g=S.weightGoal||{},t=V.wgT??g.target??'',d=V.wgD??(g.date?new Date(g.date).toISOString().slice(0,10):''),a=wgAnalyze(+t,d?new Date(d+'T12:00').getTime():0),bw=curBW();
+  const U_=U(),dl=x=>new Date(x).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+  let out='';if(!bw)out=`<div class="empty sm">Log your current bodyweight first.</div><button class="pkb" data-a="bodylog">Log Bodyweight</button>`;
+  else if(a&&a.err)out=`<div class="empty sm">${a.err}</div>`;
+  else if(a){const lv={ok:['#5fe39a','Realistic'],easy:['#5fe39a','Very doable'],warn:['#ffb547','Ambitious'],bad:['#ff7a7a','Not realistic']}[a.level];
+    out=`<div class="wga"><div class="wgv" style="border-color:${lv[0]}"><b style="color:${lv[0]}">${lv[1]}</b><span>${fmt(Math.abs(Math.round(a.diff*10)/10))} ${U_} ${a.dir==='cut'?'to lose':a.dir==='bulk'?'to gain':'change'} in ${Math.round(a.wks)} weeks · ${a.perWk>0?'+':''}${fmt(Math.round(a.perWk*100)/100)} ${U_}/week (${a.pct>0?'+':''}${a.pct.toFixed(2)}%)</span><em>${a.note}</em></div>
+    ${a.level==='bad'?`<div class="wgfix">At a safe pace you'd reach <b>${fmt(Math.round(a.target))} ${U_}</b> around <b>${dl(a.realDate)}</b>, or be at about <b>${fmt(Math.round(a.atDate))} ${U_}</b> by your date. <button class="lnk sm" data-a="wgfixdate" data-x="${new Date(a.realDate).toISOString().slice(0,10)}">USE SAFER DATE</button></div>`:''}
+    <div class="secl" style="margin:12px -20px 0">What it takes</div>
+    <div class="wgrows">${a.kcal?`<div><span>Calories</span><b>${a.kcal.toLocaleString()}/day</b><em>${a.tdee?`maintenance ≈ ${Math.round(a.tdee/25)*25}`:''}${a.kcalRaw&&a.kcal>a.kcalRaw?' · raised to a safe minimum':''}</em></div>`:''}
+    <div><span>Protein</span><b>${a.pro} g/day</b><em>${a.dir==='cut'?'High, to protect muscle':'Supports muscle growth'}</em></div>
+    <div><span>Lifting</span><b>${a.dir==='cut'?a.vh:Math.round((a.vl+a.vh)/2)} sets/muscle/wk</b><em>${a.dir==='cut'?'Keep volume up so your body holds onto muscle':'Your recommended range is '+a.vl+'–'+a.vh}</em></div>
+    <div><span>Cardio</span><b>~${a.cardio} min/week</b><em>${a.dir==='cut'?'Plus 8–10k steps a day helps the deficit':a.dir==='bulk'?'Light, for heart health without eating into the surplus':'For health and recovery'}</em></div>
+    <div><span>Weigh-ins</span><b>3–4×/week</b><em>Morning, after the bathroom. The plan adapts to your trend</em></div>
+    ${a.bfAt?`<div><span>Est. body fat at goal</span><b>~${a.bfAt}%</b><em>Assumes ${a.dir==='cut'?'~80% of loss is fat':'~50% of gain is muscle'} with good training and protein</em></div>`:''}</div>
+    ${a.dir!=='maintain'?`<div class="secl" style="margin:12px -20px 0">Checkpoints</div><div class="wgrows">${a.miles.map((m,i)=>`<div><span>${['25%','Halfway','75%'][i]}</span><b>${fmt(Math.round(m.w*10)/10)} ${U_}</b><em>by ${dl(m.d)}</em></div>`).join('')}</div>`:''}`}
+  return `<div class="sh-t">Weight Goal<div class="xs mute" style="font-weight:400;margin-top:2px">${bw?`Currently ${fmt(bw)} ${U_}. Set a target and a date, and see what it takes.`:'Set a target weight and date'}</div></div>
+  <div class="shp bgrid"><label><span>Target weight (${U_})</span><input class="inp" id="wgT" type="number" inputmode="decimal" data-in="wgT" value="${t}" placeholder="${bw?Math.round(bw*.95):''}"></label><label><span>By date</span><input class="inp" id="wgD" type="date" data-in="wgD" value="${d}" min="${new Date(Date.now()+7*864e5).toISOString().slice(0,10)}"></label></div>
+  <div class="shp" id="wgout" style="margin-top:12px">${out||'<div class="xs mute">Enter both to see your plan.</div>'}</div>
+  ${a&&!a.err?`<button class="pkb" data-a="wgsave">${S.weightGoal?'Update Goal':'Set This Goal'}</button>`:''}${S.weightGoal?`<button class="dng" data-a="wgclear">Remove weight goal</button>`:''}`}
+function wgCard(){const g=S.weightGoal,bw=curBW();if(!g||!bw)return `<button class="cyl" data-a="wgopen" style="border:0">${ic('target')} Set a target weight &amp; date</button>`;
+  const tot=g.target-g.start,done=bw-g.start,pct=tot?Math.max(0,Math.min(100,done/tot*100)):100,wks=(g.date-Date.now())/(7*864e5);
+  const exp=g.start+tot*Math.min(1,Math.max(0,(Date.now()-g.startDate)/(g.date-g.startDate))),behind=tot<0?bw-exp:exp-bw,u=U();
+  const st=wks<0?(Math.abs(bw-g.target)<1?['#5fe39a','Goal reached 🎉']:['#ffb547','Date passed']):Math.abs(behind)<=Math.max(.5,Math.abs(tot)*.05)?['#5fe39a','On track']:behind>0?['#ffb547',`${fmt(Math.round(behind*10)/10)} ${u} behind`]:['#5fe39a',`${fmt(Math.round(-behind*10)/10)} ${u} ahead`];
+  return `<div class="wcard" data-a="wgopen" style="cursor:pointer"><div class="row" style="display:flex;justify-content:space-between"><div class="xs mute" style="letter-spacing:.08em">WEIGHT GOAL · ${fmt(g.target)} ${u} BY ${new Date(g.date).toLocaleDateString(undefined,{month:'short',day:'numeric'}).toUpperCase()}</div><b class="xs" style="color:${st[0]}">${st[1]}</b></div>
+  <div class="wgbar"><i style="width:${pct}%"></i></div><div class="xs" style="display:flex;justify-content:space-between;margin-top:6px;color:var(--mute)"><span>${fmt(g.start)} ${u}</span><span style="color:var(--soft)">Now ${fmt(bw)} · ${Math.round(pct)}%</span><span>${fmt(g.target)} ${u}</span></div>
+  <div class="xs mute" style="margin-top:6px">${wks>0?`${Math.ceil(wks)} weeks left · tap for your plan`:'Tap to set a new goal'}</div></div>`}
 function bodySection(){S.body.sort((a,b)=>b.date-a.date);
   let h=`<div class="h2">Body<span style="display:flex;gap:16px">${S.body.length?`<button class="lnk sm" data-a="bodyhist">HISTORY</button>`:''}<button class="lnk sm" data-a="bodylog">+ LOG</button></span></div>`;
   const latest=k=>{const x=S.body.find(b=>b[k]);if(!x)return null;const y=S.body.find(b=>b[k]&&b.date<x.date);return {v:x[k],d:y?Math.round((x[k]-y[k])*10)/10:null,date:x.date}};
@@ -891,6 +951,7 @@ function bodySection(){S.body.sort((a,b)=>b.date-a.date);
     const bwp=S.body.filter(b=>b.bw).slice(0,20).reverse().map(b=>b.bw);
     h+=`<div class="wcard"><div class="bcomp"><div><span>Bodyweight</span><b>${bw?fmt(Math.round(bw.v*10)/10):'–'}<small> ${U()}</small></b>${bw?dl(bw.d):''}</div><div><span>Body fat</span><b>${bf?fmt(Math.round(bf.v*10)/10):'–'}<small>%</small></b>${bf?dl(bf.d,true):''}</div><div><span>Lean mass</span><b>${lbm??'–'}<small> ${U()}</small></b>${lbm&&lbmPrev?dl(Math.round((lbm-lbmPrev)*10)/10):''}</div></div>${spark(bwp)}
     <div class="ws" style="flex-wrap:wrap">${[['waist','Waist',mu()],['chest','Chest',mu()],['arm','Arms',mu()],['thigh','Thighs',mu()]].map(([k,l,u])=>{const x=latest(k);return x?`<div style="min-width:25%;margin-top:8px"><b>${x.v}<small style="font-size:11px;color:var(--mute)"> ${u}</small></b><span>${l}</span> ${dl(x.d)}</div>`:''}).join('')}</div></div>`;}
+  h+=wgCard();
   h+=progChart();
   /* strength vs body */
   const L=bigLifts(),tot=L[0].b.e+L[1].b.e+L[2].b.e;
@@ -1083,7 +1144,7 @@ document.addEventListener('touchend',()=>{if(!SW)return;const s=SW;SW=null;if(!s
   s.el.style.transition='transform .24s cubic-bezier(.2,.8,.2,1)';s.bg.style.transition='width .24s cubic-bezier(.2,.8,.2,1)';
   if(open){s.el.style.transform=`translateX(${-SWW}px)`;s.bg.style.width=SWW+'px';SWO={el:s.el,bg:s.bg};SWEAT=true}else{s.el.style.transform='';s.bg.style.width='0px';setTimeout(()=>s.bg.remove(),250)}});
 document.addEventListener('click',e=>{if(SWEAT&&!e.target.closest('.swbg')){SWEAT=false;e.stopPropagation();e.preventDefault()}else SWEAT=false},true);
-addEventListener('scroll',()=>{if(SWO)swClose()},{passive:true});
+document.addEventListener('scroll',()=>{if(SWO)swClose()},{passive:true,capture:true});
 
 /* actions */
 let lastTap={p:null,t:0};
@@ -1091,7 +1152,11 @@ const setW=st=>{st.w=bar()+2*sum(st.p||[])};
 const RS=()=>{save();render()};
 const ACT={
   noop:()=>{},
-  plangoal:()=>{const p=P(),g=S.planGoal||{};if(p.goal==='fat'){ACT.tab('goals');return}if(p.goal==='muscle')numSheet(`Lean muscle to gain (${U()})`,g.lean||(U()==='kg'?2.5:5),v=>{S.planGoal=Object.assign({},g,{lean:v>0?v:undefined})});else numSheet('Strength increase goal (%)',g.str||(p.goal==='strength'?10:5),v=>{S.planGoal=Object.assign({},g,{str:v>0?v:undefined})})},
+  wgopen:()=>{V.wgT=undefined;V.wgD=undefined;openSheet(wgHtml())},
+  wgfixdate:x=>{V.wgT=$('#wgT').value;V.wgD=x;refreshSheet(wgHtml())},
+  wgsave:()=>{const t=parseFloat($('#wgT').value),d=$('#wgD').value;if(!t||!d)return;const bw=curBW();S.weightGoal={target:t,date:new Date(d+'T12:00').getTime(),start:(S.weightGoal&&S.weightGoal.target===t)?S.weightGoal.start:bw,startDate:(S.weightGoal&&S.weightGoal.target===t)?S.weightGoal.startDate:Date.now()};S.nutMode=undefined;save();closeSheet();render();toast('Weight goal set. Your nutrition plan now follows it')},
+  wgclear:()=>{S.weightGoal=undefined;save();closeSheet();render();toast('Weight goal removed')},
+  plangoal:()=>{if(S.weightGoal){ACT.wgopen();return}const p=P(),g=S.planGoal||{};if(p.goal==='fat'){ACT.tab('goals');return}if(p.goal==='muscle')numSheet(`Lean muscle to gain (${U()})`,g.lean||(U()==='kg'?2.5:5),v=>{S.planGoal=Object.assign({},g,{lean:v>0?v:undefined})});else numSheet('Strength increase goal (%)',g.str||(p.goal==='strength'?10:5),v=>{S.planGoal=Object.assign({},g,{str:v>0?v:undefined})})},
   pfset:x=>{const [k,v]=x.split('|');S.profile=Object.assign(P(),{[k]:v});save();render()},
   swdel:()=>{const o=SWO;if(!o)return;SWO=null;SWEAT=false;o.el.style.transition='transform .2s ease,opacity .2s';o.el.style.transform=`translateX(${-o.el.offsetWidth}px)`;o.el.style.opacity='0';o.bg.style.transition='width .2s ease';o.bg.style.width=o.el.offsetWidth+'px';setTimeout(()=>{o.bg.remove();swDo(o.el.dataset.sw)},190)},
   dropset:()=>{const s=S.session,it=s.items[s.i],st=cur(),e=ex(it.exId);let w=st.w>0?Math.max(e.type==='barbell'?bar():0,rnd(st.w*.8)):0;if(st.w>0&&w>=st.w)w=Math.max(0,st.w-incFor(e.type));const ns={w,r:st.r,done:false,ds:true};it.sets.push(ns);if(!st.done)st.done=true;s.s=it.sets.length-1;save();render();toast(st.w>0?`Drop set: ${fmt(w)} ${U()} (−${Math.round((1-w/st.w)*100)}%). Go to failure`:'Drop set added. Go to failure')},
@@ -1167,10 +1232,10 @@ const ACT={
   bkhide:()=>{V.bkHide=true;render()},
   bkfile:()=>backupFile(),
   close:()=>closeSheetAnim(),
-  tab:x=>{V.tool=null;V.bm=null;const same=V.tab===x&&!V.sub&&!V.inSession;V.inSession=false;V.ov=false;V.restOpen=false;V.tab=x;V.sub=null;V.stack=[];if(!same)V.anim='fade';render();scrollTo(0,0)},
-  sub:x=>{V.stack.push(V.sub);V.sub=x;V.rEdit=false;V.anim='push';render();scrollTo(0,0)},
+  tab:x=>{V.tool=null;V.bm=null;const same=V.tab===x&&!V.sub&&!V.inSession;V.inSession=false;V.ov=false;V.restOpen=false;V.tab=x;V.sub=null;V.stack=[];if(!same)V.anim='fade';render();scr0()},
+  sub:x=>{V.stack.push(V.sub);V.sub=x;V.rEdit=false;V.anim='push';render();scr0()},
   back:()=>{V.sub=V.stack.pop()||null;V.rEdit=false;V.anim='pop';render()},
-  resume:()=>{V.inSession=true;V.ov=false;V.animIn=true;render();V.animIn=false;scrollTo(0,0)},
+  resume:()=>{V.inSession=true;V.ov=false;V.animIn=true;render();V.animIn=false;scr0()},
   start:()=>startWorkout(null,null),
   dowk:()=>{if(S.session){closeSheet();ACT.resume();toast('Workout already in progress');return}
     const rs=S.routines.filter(r=>r.days.length).sort((a,b)=>(b.active?1:0)-(a.active?1:0));
@@ -1279,6 +1344,7 @@ document.addEventListener('input',e=>{const el=e.target,k=el.dataset.in;if(!k)re
   else if(k==='dnotes'){const [ri,di]=x.split('|');D(ri,di).notes=el.value;save()}
   else if(k==='snote'){S.session.note=el.value;save()}
   else if(k==='name'){S.name=el.value.trim();save()}
+  else if(k==='wgT'||k==='wgD'){V.wgT=$('#wgT').value;V.wgD=$('#wgD').value;const o=document.createElement('div');o.innerHTML=wgHtml();const no=o.querySelector('#wgout'),cur=$('#wgout');if(no&&cur)cur.innerHTML=no.innerHTML;const btns=[...o.querySelectorAll('.pkb,.dng')];const sh=$('#shc');if(sh){sh.querySelectorAll('.pkb,.dng').forEach(b=>b.remove());btns.forEach(b=>sh.appendChild(b))}}
   else if(k==='pfage'){const v=parseInt(el.value);S.profile=Object.assign(P(),{age:v>=13&&v<=100?v:null});save()}
   else if(k==='pfft'||k==='pfin'){const ft=parseInt($('#pfft').value)||0,inch=parseFloat($('#pfin').value)||0,t=ft*12+inch;S.profile=Object.assign(P(),{height:t>=36&&t<=96?t:null});save()}
   else if(k==='pfht'){const v=parseFloat(el.value);S.profile=Object.assign(P(),{height:v>0?v:null});save()}
