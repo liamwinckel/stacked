@@ -239,7 +239,7 @@ em{font-style:normal;font-size:12px;font-weight:600;color:var(--mute)}em.up{colo
 .bmwrap{position:relative}.bmflip{position:absolute;right:6px;top:4px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.06);color:var(--mute);display:flex;align-items:center;justify-content:center}
 .bmz{cursor:pointer;transition:fill .25s,stroke .2s}.bmz:active{opacity:.75}
 .bmleg{display:flex;justify-content:center;gap:14px;margin-top:8px;font-size:11px;color:var(--mute)}.bmleg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
-.mbar{position:relative;height:8px;border-radius:4px;background:rgba(255,255,255,.08)}.mbar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--pk)}.mbar u{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--text);opacity:.4}
+.mbar{position:relative;height:8px;border-radius:4px;background:rgba(255,255,255,.08)}.mbar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--pk)}.mbar u{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--text);opacity:.45}
 .vchips{display:flex;flex-wrap:wrap;gap:6px}.vchips span{font-size:11px;text-transform:capitalize;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.06);color:var(--soft)}.vchips b{color:var(--pk);margin-left:2px}
 .rrl{font-size:12px;letter-spacing:.1em;color:var(--mute);margin-top:4px}
 .dnum{width:34px;height:34px;flex:none;border-radius:10px;background:rgba(var(--pkr),.15);color:var(--pk);font-weight:800;display:flex;align-items:center;justify-content:center;font-size:16px}
@@ -575,6 +575,12 @@ function calcRows(){const w=+V.calc.w||0,r=+V.calc.r||0,m=w&&r?e1(w,r):0;return 
 function renderMore(){
   return hd('More')+`<main class="pg">
   <div class="h2">Profile</div><div class="li" style="cursor:default"><div class="g sm mute">Your name</div><input class="inp" style="width:55%;padding:8px 10px" data-in="name" value="${esc(S.name||'')}" placeholder="Name"></div>
+  <div class="li" style="cursor:default"><div class="g sm mute">Age</div><input class="inp" style="width:55%;padding:8px 10px" type="number" inputmode="numeric" data-in="pfage" value="${P().age||''}" placeholder="Years"></div>
+  <div class="li" style="cursor:default"><div class="g sm mute">Height</div><input class="inp" style="width:55%;padding:8px 10px" type="number" inputmode="decimal" data-in="pfht" value="${P().height||''}" placeholder="${U()==='kg'?'cm':'inches (e.g. 70)'}"></div>
+  <div class="li" style="cursor:default"><div class="g sm mute">Sex</div><div class="seg" style="width:55%">${[['m','Male'],['f','Female']].map(([k,l])=>`<button class="${(S.sex||'m')===k?'on':''}" data-a="ssex" data-x="${k}">${l}</button>`).join('')}</div></div>
+  <div class="li" style="cursor:default;flex-direction:column;align-items:stretch;gap:8px"><div class="sm mute">Training experience</div><div class="seg">${Object.entries(EXPL).map(([k,l])=>`<button class="${P().exp===k?'on':''}" data-a="pfset" data-x="exp|${k}">${l}</button>`).join('')}</div><div class="xs mute">${{beg:'Under ~1 year of consistent lifting',int:'1–4 years, still progressing month to month',adv:'4+ years, progress takes months'}[P().exp]}</div></div>
+  <div class="li" style="cursor:default;flex-direction:column;align-items:stretch;gap:8px"><div class="sm mute">Main goal</div><div class="seg">${Object.entries(GOALL).map(([k,l])=>`<button class="${P().goal===k?'on':''}" data-a="pfset" data-x="goal|${k}" style="font-size:12px">${l}</button>`).join('')}</div></div>
+  <div class="li" style="cursor:default"><div class="xs mute">Personalizes your weekly set target (now <b style="color:var(--pk)">${volTarget().join('–')}</b> per muscle), how fast projections assume you can progress (up to ~${Math.round(liftCap()*10)/10}%/week on lifts), your calorie estimate and protein, and whether the nutrition plan defaults to a cut, maintenance or bulk.</div></div>
   <div class="h2">Settings</div>
   <div class="li" data-a="stackinfo"><div class="g"><div class="tt">Daily Stack &amp; cardio goals</div><div class="sb">${G().sets} sets · ${G().move} min move · ${G().cardio} min cardio · ${G().weekCardio} min/week</div></div><span class="chev">${ic('chev')}</span></div>
   <div class="li" style="cursor:default"><div class="g">Units</div><div class="seg" style="width:150px">${['lb','kg'].map(u=>`<button class="${U()===u?'on':''}" data-a="units" data-x="${u}">${u.toUpperCase()}</button>`).join('')}</div></div>
@@ -697,7 +703,7 @@ function finishNow(){
   if(best&&best.p>.5)recap.push(['up',`Biggest gain: ${esc(best.n)} +${best.p.toFixed(1)}% est. 1RM`]);
   S.history.unshift(h);
   const cmin=sum(entries.filter(e=>isCardio(e.exId)).map(e=>sum(dn(e).map(x=>(x.dur||0)/60))));if(cmin>=1){const wk=cardioMinSince(weekStart(Date.now()),Infinity);recap.push(['up',`Cardio: ${Math.round(cmin)} min today · ${Math.round(wk)}/${G().weekCardio} min this week`])}
-  const today={};entries.forEach(e=>{const m=ex(e.exId).mg;if(m&&m!=='cardio')today[m]=(today[m]||0)+dn(e).length});const top=Object.entries(today).sort((a,b)=>b[1]-a[1])[0];if(top){const w=weekSets()[top[0]]||0;recap.push(['',`${top[0].replace(/^./,c=>c.toUpperCase())} is at ${w} sets this week${w>=10&&w<=20?' (right in the sweet spot)':w<10?` (${10-w} more to reach 10)`:''}`])}
+  const today={};entries.forEach(e=>{const m=ex(e.exId).mg;if(m&&m!=='cardio')today[m]=(today[m]||0)+dn(e).length});const top=Object.entries(today).sort((a,b)=>b[1]-a[1])[0];if(top){const w=weekSets()[top[0]]||0,[vl,vh]=volTarget();recap.push(['',`${top[0].replace(/^./,c=>c.toUpperCase())} is at ${w} sets this week${w>=vl&&w<=vh?' (right in your target range)':w<vl?` (${vl-w} more to reach your ${vl}–${vh} target)`:` (above your ${vl}–${vh} target)`}`])}
   const dec=entries.map(e=>ex(e.exId)).filter(e=>isDeclining(e.id));if(dec.length)recap.push(['dn',`${esc(dec[0].name)} has dropped 3 sessions running. Consider a lighter week`]);
   S.session=null;V.inSession=false;V.ov=false;V.restOpen=false;V.tab='home';V.sub=null;
   const tk=new Date().toDateString();const nowFull=closedCount(dayStats(dayStart(Date.now())))===5;if(nowFull&&S.stackDay!==tk){S.stackDay=tk;setTimeout(()=>prPop('Today\'s Stack','All five bars closed. Stacked!'),700)}
@@ -751,6 +757,15 @@ function stackInfoHtml(){const g=G();const row=(k,l,v,u)=>`<div class="li" style
   <div class="secl">Your Goals</div>${row('sets','Lift','<b>'+g.sets+'</b>','sets')}${row('move','Move','<b>'+g.move+'</b>','min')}${row('cardio','Cardio','<b>'+g.cardio+'</b>','min')}${row('weekCardio','Weekly cardio','<b>'+g.weekCardio+'</b>','min')}
   <p class="xs mute center" style="padding:10px 20px 0">Rest days are part of training. You don't need to close it every day.</p>`}
 
+/* ===== personal profile ===== */
+function P(){return Object.assign({age:null,height:null,exp:'int',goal:'muscle'},S.profile||{})}
+const EXPL={beg:'Beginner',int:'Intermediate',adv:'Advanced'},GOALL={strength:'Strength',muscle:'Build muscle',fat:'Lose fat',general:'General fitness'};
+function volTarget(){const p=P();let [lo,hi]={beg:[8,12],int:[10,16],adv:[12,20]}[p.exp]||[10,16];
+  const g={strength:[-2,-2],muscle:[0,2],fat:[-2,0],general:[-2,-4]}[p.goal]||[0,0];lo+=g[0];hi+=g[1];
+  if(p.age>=60){lo-=2;hi-=4}else if(p.age>=50){hi-=2}lo=Math.max(6,lo);hi=Math.max(lo+4,hi);return [lo,hi]}
+function volWhy(){const p=P();return `${EXPL[p.exp]} · ${GOALL[p.goal].toLowerCase()}${p.age?` · age ${p.age}`:''}`}
+function liftCap(){const p=P();let c={beg:2,int:1,adv:.5}[p.exp]||1;if(p.age>=60)c*=.55;else if(p.age>=50)c*=.7;else if(p.age>=40)c*=.85;return c}
+
 /* ===== coach ===== */
 function exTrend(id,n){const out=[];for(const h of S.history){const en=h.entries.find(x=>x.exId===id);if(!en||!dn(en).length)continue;out.push(Math.max(...dn(en).map(x=>x.w>0?e1(x.w,x.r):x.r)));if(out.length===n)break}return out}
 function isDeclining(id){const t=exTrend(id,3);return t.length===3&&t[0]<t[1]&&t[1]<t[2]&&t[0]<t[2]*.985}
@@ -783,7 +798,7 @@ function calendar(){const off=V.calM||0,now=new Date(),m=new Date(now.getFullYea
 function weekVolume(){const ws=weekStart(Date.now()),lw=ws-7*864e5;const a={},b={};S.history.forEach(h=>{const t=h.date>=ws?a:(h.date>=lw&&h.date<ws?b:null);if(!t)return;h.entries.forEach(e=>{const m=ex(e.exId).mg;if(!m||m==='cardio')return;t[m]=(t[m]||0)+dn(e).length})});
   const ms=MGS.filter(m=>a[m]||b[m]);let h=`<div class="h2">This Week<small>SETS PER MUSCLE</small></div>`;if(!ms.length)return h+'<div class="empty sm">Finish a workout to see your weekly sets by muscle group.</div>';
   const mx=Math.max(...ms.map(m=>Math.max(a[m]||0,b[m]||0)),10);ms.sort((x,y)=>(a[y]||0)-(a[x]||0));
-  return h+`<div class="vol">${ms.map(m=>`<div class="vr"><span>${m}</span><div class="vt"><i style="width:${(a[m]||0)/mx*100}%"></i>${b[m]?`<u style="left:${b[m]/mx*100}%"></u>`:''}</div><b>${a[m]||0}</b></div>`).join('')}<div class="xs mute" style="margin-top:8px">Bars = this week · tick = last week. Most lifters aim for roughly 10–20 hard sets per muscle per week.</div></div>`}
+  return h+`<div class="vol">${ms.map(m=>`<div class="vr"><span>${m}</span><div class="vt"><i style="width:${(a[m]||0)/mx*100}%"></i>${b[m]?`<u style="left:${b[m]/mx*100}%"></u>`:''}</div><b>${a[m]||0}</b></div>`).join('')}<div class="xs mute" style="margin-top:8px">Bars = this week · tick = last week. Your target: <b style="color:var(--pk)">${volTarget().join('–')} hard sets per muscle per week</b> (${volWhy()}). Change it in More → Profile.</div></div>`}
 function prSection(){const list=S.exercises.map(e=>{const tl=prTimeline(e.id);return tl.length?{e,last:tl[tl.length-1],n:tl.length}:null}).filter(Boolean).sort((x,y)=>y.last.date-x.last.date);
   let h=`<div class="h2">Personal Records${list.length>5?`<button class="lnk sm" data-a="prall">${V.prAll?'LESS':'SEE ALL'}</button>`:''}</div>`;if(!list.length)return h+'<div class="empty sm">Your PRs will show up here as you train.</div>';
   return h+(V.prAll?list:list.slice(0,5)).map(x=>`<div class="li" data-a="prhist" data-x="${x.e.id}"><span style="color:var(--pk);display:flex">${ic('trophy')}</span><div class="g"><div class="tt">${esc(x.e.name)}</div><div class="sb">${x.last.w>0?`${fmt(x.last.w)} ${U()} × ${x.last.r} · e1RM ${fmt(Math.round(x.last.v))}`:`${x.last.r} reps`} · ${dlong(x.last.date)}</div></div><span class="chev">${ic('chev')}</span></div>`).join('')}
@@ -795,7 +810,7 @@ function project(ser,weeks,capPct){const r=linreg(ser);if(!r)return null;let sl=
 function progSeries(k){const all=3650;if(k==='bw')return bodySeries('bw',all);if(k==='bf')return bodySeries('bf',all);if(k==='lbm')return S.body.filter(b=>b.bw&&b.bf).sort((a,b)=>a.date-b.date).map(b=>[dayN(b.date),b.bw*(1-b.bf/100)]);
   const n={bench:'Barbell Bench Press',squat:'Barbell Back Squat',deadlift:'Deadlift',ohp:'Overhead Press'}[k];return liftSeries(n,all)}
 const PM=[['bw','Bodyweight'],['bf','Body fat %'],['lbm','Lean mass'],['bench','Bench'],['squat','Squat'],['deadlift','Deadlift'],['ohp','OHP']];
-function progChart(){const avail=PM.filter(([k])=>progSeries(k).length>=2);if(!avail.length)return '';let k=V.pm&&avail.find(a=>a[0]===V.pm)?V.pm:avail[0][0];const ser=progSeries(k),cap=k==='bf'||k==='lbm'?1:k==='bw'?1.5:1;
+function progChart(){const avail=PM.filter(([k])=>progSeries(k).length>=2);if(!avail.length)return '';let k=V.pm&&avail.find(a=>a[0]===V.pm)?V.pm:avail[0][0];const ser=progSeries(k),cap=k==='bf'||k==='lbm'?1:k==='bw'?1.5:liftCap();
   const recent=ser.filter(p=>p[0]>=dayN(Date.now())-84),pj=recent.length>=3&&linreg(recent)?[4,8,12].map(w=>[dayN(Date.now())+w*7,project(recent,w,cap)]):[];
   const pts=ser.concat(pj),x0=ser[0][0],x1=Math.max(dayN(Date.now()),pj.length?pj[2][0]:ser[ser.length-1][0]);let y0=Math.min(...pts.map(p=>p[1])),y1=Math.max(...pts.map(p=>p[1]));const pad=(y1-y0||1)*.12;y0-=pad;y1+=pad;
   const Wd=340,H=170,L=38,R=10,T=12,B=26,X=x=>L+(x-x0)/(x1-x0||1)*(Wd-L-R),Y=y=>T+(1-(y-y0)/(y1-y0))*(H-T-B);
@@ -815,9 +830,9 @@ function nutritionCard(){const xs=[...S.body].sort((a,b)=>b.date-a.date);const b
   const toLb=v=>U()==='kg'?v*2.20462:v,fromLb=v=>U()==='kg'?v/2.20462:v;
   const bw=toLb(bwE.bw),bfE=xs.find(b=>b.bf),bfAssumed=!bfE,bf=bfE?bfE.bf:(S.sex==='f'?28:20),lbm=bw*(1-bf/100);
   const wk=S.history.filter(h=>h.date>Date.now()-28*864e5).length/4;const af=wk>=5?1.725:wk>=3?1.55:wk>=1?1.45:1.375;
-  const bmr=370+21.6*(lbm/2.20462),tdee=bmr*af;
-  const tg=S.bodyGoal||{};let auto='maintain';if(tg.bf&&bf>tg.bf+.5)auto='cut';else if(tg.bf&&bf<tg.bf-.5)auto='bulk';const mode=S.nutMode||auto;
-  const rate={cut:-.007,maintain:0,bulk:.0035}[mode];let kcal=tdee+rate*bw*3500/7;if(mode==='cut')kcal=Math.max(kcal,tdee*.75);
+  const pf=P(),hcm=pf.height?(U()==='kg'?pf.height:pf.height*2.54):0;const bmr=(bfAssumed&&pf.age&&hcm)?10*(bw/2.20462)+6.25*hcm-5*pf.age+(S.sex==='f'?-161:5):370+21.6*(lbm/2.20462),tdee=bmr*af;
+  const tg=S.bodyGoal||{};let auto=({fat:'cut',muscle:'bulk'})[P().goal]||'maintain';if(tg.bf&&bf>tg.bf+.5)auto='cut';else if(tg.bf&&bf<tg.bf-.5)auto='bulk';const mode=S.nutMode||auto;
+  const rate={cut:-.007,maintain:0,bulk:({beg:.005,int:.0035,adv:.002})[P().exp]||.0035}[mode];let kcal=tdee+rate*bw*3500/7;if(mode==='cut')kcal=Math.max(kcal,tdee*.75);
   /* trends */const adj=[];let d=0;const sBW=bodySeries('bw',42),r=linreg(sBW);const wkPct=r?r.sl*7/(sBW[sBW.length-1][1])*100:null;
   const L=bigLifts().slice(0,3).filter(x=>x.e);let sTr=null;{const now=[],old=[];L.forEach(x=>{const s2=liftSeries(x.n,56);if(s2.length>=3){const rr=linreg(s2);if(rr)now.push(rr.sl*28/s2[s2.length-1][1]*100)}});if(now.length)sTr=sum(now)/now.length}
   const sL=S.body.filter(b=>b.bw&&b.bf&&b.date>Date.now()-42*864e5).sort((a,b)=>a.date-b.date).map(b=>[dayN(b.date),toLb(b.bw)*(1-b.bf/100)]),rl=linreg(sL),lbmWk=rl?rl.sl*7:null;
@@ -831,7 +846,7 @@ function nutritionCard(){const xs=[...S.body].sort((a,b)=>b.date-a.date);const b
   else{if(wkPct!=null&&Math.abs(wkPct)>.4){d+=wkPct>0?-150:150;adj.push(['',`Weight is drifting ${wkPct>0?'up':'down'} ${Math.abs(wkPct).toFixed(1)}%/week. Nudging toward true maintenance.`])}}
   if(!adj.length&&r)adj.push(['up','Your trends are on track. Keep it here and re-check in 2 weeks.']);if(!r)adj.push(['','Log your bodyweight 2–3× a week. After 2 weeks these targets adjust to your real results.']);
   kcal+=d;if(mode==='cut')kcal=Math.max(kcal,tdee*.75);if(mode==='bulk')kcal=Math.min(kcal,tdee*1.15);kcal=Math.round(kcal/25)*25;
-  const pro=Math.round(Math.min(mode==='cut'?1.0*bw:.85*bw,1.3*lbm)/5)*5,fat=Math.round(Math.max(.3*bw,kcal*(mode==='cut'?.25:.28)/9)/5)*5,carb=Math.max(0,Math.round((kcal-pro*4-fat*9)/4/5)*5);
+  const pro=Math.round(Math.min(mode==='cut'||P().goal==='muscle'||P().goal==='strength'||(P().age>=50)?1.0*bw:.85*bw,1.3*lbm)/5)*5,fat=Math.round(Math.max(.3*bw,kcal*(mode==='cut'?.25:.28)/9)/5)*5,carb=Math.max(0,Math.round((kcal-pro*4-fat*9)/4/5)*5);
   const pc=[pro*4,carb*4,fat*9].map(v=>v/kcal*100);const rateTxt=rate?`${rate<0?'−':'+'}${fmt(Math.round(Math.abs(fromLb(rate*bw))*10)/10)} ${U()}/week`:'hold steady';
   return `<div class="wcard nut"><div class="row" style="justify-content:space-between;align-items:center"><div class="xs mute" style="letter-spacing:.08em">NUTRITION PLAN</div><div class="seg mini2" style="width:190px">${[['cut','Cut'],['maintain','Maintain'],['bulk','Lean bulk']].map(([k,l])=>`<button class="${mode===k?'on':''}" data-a="nutmode" data-x="${k}">${l}</button>`).join('')}</div></div>
   <div class="nk"><b>${kcal.toLocaleString()}</b><span>calories / day</span><em>Maintenance ≈ ${Math.round(tdee/25)*25} · aim ${rateTxt}</em></div>
@@ -863,7 +878,7 @@ function bodySection(){S.body.sort((a,b)=>b.date-a.date);
   if(sBW.length>=3&&linreg(sBW))rows.push(['Bodyweight',U(),bw.v,W.map(w=>project(sBW,w,1.5))]);
   if(sBF.length>=3&&linreg(sBF))rows.push(['Body fat','%',Math.round(bf.v*10)/10,W.map(w=>project(sBF,w,1))]);
   if(sBW.length>=3&&sBF.length>=3&&lbm){const sL=S.body.filter(b=>b.bw&&b.bf&&b.date>Date.now()-84*864e5).sort((a,b)=>a.date-b.date).map(b=>[dayN(b.date),b.bw*(1-b.bf/100)]);if(sL.length>=3&&linreg(sL))rows.push(['Lean mass',U(),lbm,W.map(w=>project(sL,w,1))])}
-  lifts.forEach(x=>{if(linreg(x.s))rows.push([x.k+' 1RM',U(),Math.round(Math.max(...x.s.map(p=>p[1]))),W.map(w=>{const v=project(x.s,w,1);return v==null?null:Math.max(v,Math.max(...x.s.map(p=>p[1]))*0.9)})])});
+  lifts.forEach(x=>{if(linreg(x.s))rows.push([x.k+' 1RM',U(),Math.round(Math.max(...x.s.map(p=>p[1]))),W.map(w=>{const v=project(x.s,w,liftCap());return v==null?null:Math.max(v,Math.max(...x.s.map(p=>p[1]))*0.9)})])});
   h+=`<div class="h2" style="font-size:17px">Projections<small>IF CURRENT TRENDS HOLD</small></div>`;
   if(!rows.length)h+=`<div class="empty sm">Log body stats and train your main lifts for 2+ weeks (3+ entries each) to see projections.</div>`;
   else h+=`<div class="proj"><div class="pr0"><span></span><span>Now</span>${W.map(w=>`<span>${w} wk</span>`).join('')}</div>${rows.map(([n,u,now,vals])=>`<div><span>${n}</span><b>${fmt(Math.round(now*10)/10)}<small>${u==='%'?'%':''}</small></b>${vals.map(v=>{if(v==null)return '<b>–</b>';const r=Math.round(v*10)/10,d=r-now;return `<b class="${Math.abs(d)<.05?'':d>0?(n==='Body fat'?'neg':'pos'):(n==='Body fat'?'pos':(n==='Bodyweight'?'':'neg'))}">${fmt(u==='%'?r:Math.round(r))}</b>`}).join('')}</div>`).join('')}</div>`;
@@ -941,8 +956,8 @@ function muscleHtml(mg){const n=weekSets()[mg]||0;const cap=mg.replace(/\b\w/g,c
   const prs=S.exercises.filter(e=>e.mg===mg).map(e=>{const tl=prTimeline(e.id);return tl.length?{e,b:tl.reduce((a,x)=>x.v>a.v?x:a)}:null}).filter(Boolean).sort((a,b)=>b.b.v-a.b.v).slice(0,3);
   const days=[];S.routines.forEach(r=>r.days.forEach(d=>{const c=d.items.filter(it=>ex(it.exId).mg===mg).length;if(c)days.push({r,d,c})}));days.sort((a,b)=>(b.r.active-a.r.active)||(b.c-a.c));
   const sug=muscleSuggest(mg,6);
-  return `<div class="sh-t">${esc(cap)}<div class="xs mute" style="font-weight:400;margin-top:2px">${n} set${n===1?'':'s'} this week${n<10?' · most lifters aim for roughly 10–20':n>20?' · that’s a lot, so watch your recovery':' · right in the sweet spot'}</div></div>
-  <div class="shp"><div class="mbar"><i style="width:${Math.min(100,n/20*100)}%"></i><u style="left:50%"></u></div></div>
+  return `<div class="sh-t">${esc(cap)}<div class="xs mute" style="font-weight:400;margin-top:2px">${n} set${n===1?'':'s'} this week${(()=>{const [vl,vh]=volTarget();return n<vl?` · your target is ${vl}–${vh}`:n>vh?` · above your ${vl}–${vh} target, so watch recovery`:' · right in your target range'})()}</div></div>
+  <div class="shp">${(()=>{const [vl,vh]=volTarget(),mx=vh*1.25;return `<div class="mbar"><i style="width:${Math.min(100,n/mx*100)}%"></i><u style="left:${vl/mx*100}%"></u><u style="left:${vh/mx*100}%"></u></div>`})()}</div>
   <button class="pkb" data-a="bmstart" data-x="${mg}" style="margin-top:14px">Start a ${esc(cap)} Workout</button>
   ${(()=>{const st=mgStrength(mg);return st?`<div class="secl">Strength · Last Session vs. Previous</div><div class="setrow"><span>AVERAGE CHANGE</span><span style="font-weight:700;color:${st.pct>=0?'#5fe39a':'#ff7a7a'}">${st.pct>0?'+':''}${st.pct.toFixed(1)}%</span></div>${st.list.slice(0,4).map(x=>`<div class="setrow"><span style="font-size:14px;color:var(--text);letter-spacing:0">${esc(x.e.name)}</span><span class="sm">${fmt(Math.round(x.prev))} → ${fmt(Math.round(x.now))} <b style="color:${x.pct>=0?'#5fe39a':'#ff7a7a'}">${x.pct>0?'+':''}${x.pct.toFixed(1)}%</b></span></div>`).join('')}`:''})()}
   ${(()=>{const mine=S.routines.map(r=>{let n=0;r.days.forEach(d=>d.items.forEach(it=>{if(ex(it.exId).mg===mg)n+=it.sets}));return {r,n}}).filter(x=>x.n).sort((a,b)=>b.n-a.n);const tp=TPL.map(t=>({t,n:tplVolume(t)[mg]||0})).filter(x=>x.n).sort((a,b)=>b.n-a.n);
@@ -1050,6 +1065,7 @@ const setW=st=>{st.w=bar()+2*sum(st.p||[])};
 const RS=()=>{save();render()};
 const ACT={
   noop:()=>{},
+  pfset:x=>{const [k,v]=x.split('|');S.profile=Object.assign(P(),{[k]:v});save();render()},
   swdel:()=>{const o=SWO;if(!o)return;SWO=null;SWEAT=false;o.el.style.transition='transform .2s ease,opacity .2s';o.el.style.transform=`translateX(${-o.el.offsetWidth}px)`;o.el.style.opacity='0';o.bg.style.transition='width .2s ease';o.bg.style.width=o.el.offsetWidth+'px';setTimeout(()=>{o.bg.remove();swDo(o.el.dataset.sw)},190)},
   dropset:()=>{const s=S.session,it=s.items[s.i],st=cur(),e=ex(it.exId);let w=st.w>0?Math.max(e.type==='barbell'?bar():0,rnd(st.w*.8)):0;if(st.w>0&&w>=st.w)w=Math.max(0,st.w-incFor(e.type));const ns={w,r:st.r,done:false,ds:true};it.sets.push(ns);if(!st.done)st.done=true;s.s=it.sets.length-1;save();render();toast(st.w>0?`Drop set: ${fmt(w)} ${U()} (−${Math.round((1-w/st.w)*100)}%). Go to failure`:'Drop set added. Go to failure')},
   nutmode:x=>{S.nutMode=x;save();render()},
@@ -1236,6 +1252,8 @@ document.addEventListener('input',e=>{const el=e.target,k=el.dataset.in;if(!k)re
   else if(k==='dnotes'){const [ri,di]=x.split('|');D(ri,di).notes=el.value;save()}
   else if(k==='snote'){S.session.note=el.value;save()}
   else if(k==='name'){S.name=el.value.trim();save()}
+  else if(k==='pfage'){const v=parseInt(el.value);S.profile=Object.assign(P(),{age:v>=13&&v<=100?v:null});save()}
+  else if(k==='pfht'){const v=parseFloat(el.value);S.profile=Object.assign(P(),{height:v>0?v:null});save()}
   else if(k==='pcorm'){V.pc.orm=el.value;const t=$('#pctab');if(t)t.innerHTML=pctTable()}
   else if(k==='rpcalc'){const w=+$('#rpw').value,r=+$('#rpr').value,e=+$('#rpe').value||8,o=$('#rpout');if(w&&r&&o){const m=w/(rpePct(r,e)/100);o.innerHTML=`Estimated 1RM <b style="color:var(--pk);font-size:18px">${fmt(Math.round(m))} ${U()}</b> <button class="lnk sm" data-a="pcfill" data-x="${Math.round(m)}">USE</button>`}}
   else if(k==='cvlb'){const o=$('#cvkg');if(o)o.value=el.value?Math.round(el.value/2.20462*100)/100:''}
@@ -1253,7 +1271,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()});
 
 (function(){try{if(document.querySelector('link[rel=apple-touch-icon]'))return;const c=document.createElement('canvas');c.width=c.height=180;const g=c.getContext('2d');const gr=g.createLinearGradient(0,0,0,180);gr.addColorStop(0,'#14297a');gr.addColorStop(1,'#060920');g.fillStyle=gr;g.fillRect(0,0,180,180);g.fillStyle='#ec3a6e';[[34,114,112],[48,82,84],[62,50,56]].forEach(([x,y,w])=>{g.beginPath();if(g.roundRect)g.roundRect(x,y,w,24,5);else g.rect(x,y,w,24);g.fill()});const u=c.toDataURL();const l=document.createElement('link');l.rel='apple-touch-icon';l.href=u;document.head.appendChild(l);const i=document.createElement('link');i.rel='icon';i.href=u;document.head.appendChild(i)}catch(e){}})();
 applyTheme();render();
-try{if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
+try{if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{document.addEventListener('visibilitychange',()=>{if(!document.hidden)r.update().catch(()=>{})})}).catch(()=>{});navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had&&!window._rl){window._rl=1;save();location.reload()}})}}catch(e){}
 </script>
 </body>
 </html>
