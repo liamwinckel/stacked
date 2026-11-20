@@ -54,7 +54,7 @@ html,body{height:var(--fh,100%);overflow:hidden;overscroll-behavior:none}body{po
 .tabs{position:absolute;left:0;right:0;bottom:0;z-index:7;max-width:520px;margin:0 auto;display:flex;align-items:flex-end;background:var(--tabbg);border-top:1px solid var(--line);padding:6px 0 calc(6px + var(--sab))}
 .tabs>button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;letter-spacing:-.01em;color:var(--mute);padding:4px 0}
 .tabs>button.on{color:#fff}
-.tabs .fab{width:52px;height:52px;flex:none;margin:0 4px 2px;border-radius:50%;background:var(--pk);color:var(--on-pk);box-shadow:0 2px 6px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center}
+.tabs .fab{width:52px;height:52px;flex:none;margin:0 10px 2px;border-radius:50%;background:var(--pk);color:var(--on-pk);box-shadow:0 2px 6px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center}
 .tabs .fab .i{width:28px;height:28px}
 .fablogo{width:34px;height:34px;margin-left:4px}
 .inp{width:100%;background:rgba(var(--deepr),.55);border:1px solid var(--line);color:#fff;border-radius:6px;padding:12px;font-size:16px;outline:none}
@@ -311,6 +311,8 @@ em{font-style:normal;font-size:12px;font-weight:600;color:var(--mute)}em.up{colo
 input[type=date].inp{color-scheme:dark;min-height:44px}
 .hgs{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.hgs:last-of-type{border:0}.hgs>b{flex:none;width:26px;height:26px;border-radius:13px;background:var(--pk);color:#000;display:flex;align-items:center;justify-content:center;font-size:13px}.hgs .tt{font-weight:600;font-size:15px}.hgs .sb{font-size:13px;color:var(--soft);margin-top:2px;line-height:1.4}.hgs .sb b{color:var(--text)}
 .stbars{position:relative;display:flex;gap:8px;height:84px;margin-top:14px;padding-bottom:18px}.stbars>div{flex:1;position:relative;display:flex;align-items:flex-end}.stbars i{display:block;width:100%;background:rgba(255,255,255,.28);border-radius:4px 4px 2px 2px}.stbars span{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:11px;color:var(--mute)}.stbars em{position:absolute;left:0;right:0;border-top:1px dashed rgba(255,214,10,.45)}
+.pseg{padding:14px 16px 4px}.pseg .seg{width:100%}
+.gearb{position:absolute;right:12px;bottom:4px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:var(--soft);border-radius:20px}.gearb .i{width:24px;height:24px}button.av{border:0;font-family:inherit;cursor:pointer;padding:0}
 .toast{position:fixed;left:50%;top:calc(var(--sat) + 64px);transform:translateX(-50%);background:#fff;color:var(--toastc);padding:10px 16px;border-radius:999px;font-weight:600;font-size:14px;z-index:99;transition:opacity .3s;white-space:nowrap}
 .prbox{margin:14px 20px 0;padding:10px;border:1px solid var(--pk);color:var(--pklt);border-radius:6px;font-weight:600;text-align:center}
 </style>
@@ -402,6 +404,7 @@ function volOf(h){return h.entries.reduce((a,e)=>{const t=ex(e.exId).type;return
 const IP={
  home:'<path d="M4 10.5 12 4l8 6.5V20h-5v-5.5H9V20H4z"/>',
  log:'<rect x="5" y="4" width="14" height="16" rx="1.5"/><path d="M8.5 9h7M8.5 12.5h7M8.5 16h4"/>',
+ gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/><circle cx="12" cy="12" r="6.5"/>',
  prog:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
  tools:'<path d="M15.5 3.5a5 5 0 0 0-4.8 6.6L3.8 17a2.2 2.2 0 0 0 3.2 3.2l6.9-6.9a5 5 0 0 0 6.6-4.8l-3 1.6-2.6-.9-.9-2.6z"/>',
  goals:'<path d="M8 3h8l-2.5 5.5h-3z"/><circle cx="12" cy="14.5" r="5.5"/><circle cx="12" cy="14.5" r="2"/>',
@@ -509,12 +512,12 @@ function newExHtml(){return `<div class="sh-t">Custom Exercise</div><div class="
 const hd=(t,l='',r='',st='')=>`<header class="hd"><div class="hl">${l}</div><h1>${t}${st?`<span class="st">${st}</span>`:''}</h1><div class="hr">${r}</div></header>`;
 const back=()=>`<button class="lnk" data-a="back" style="display:flex">${ic('back',2)}</button>`;
 function statsGrid(a,b,c,d){return `<div class="stats"><div>${ic('dumb')}<div><b>${a}</b><span>Exercises</span></div></div><div>${ic('log')}<div><b>${b}</b><span>Sets</span></div></div><div>${ic('rep')}<div><b>${c}</b><span>Reps</span></div></div><div>${ic('target')}<div><b>${d}<small> ${U()}</small></b><span>Weight lifted</span></div></div></div>`}
-function renderTabs(){const b=(k,l)=>`<button class="${V.tab===k&&!V.sub?'on':''}" data-a="tab" data-x="${k}">${ic(k)}<span>${l}</span></button>`;return `<nav class="tabs">${b('home','Home')}${b('log','Log')}${b('goals','Goals')}<button class="fab" data-a="plus" aria-label="Quick actions"><svg viewBox="0 0 100 100" class="fablogo">${[16,32,48,32,16].map((w,k)=>`<rect x="${26+(48-w)/2*0}" y="${22+k*12}" width="${w}" height="8" rx="3" fill="currentColor" ${k===2?'opacity=".55"':''}/>`).join('')}</svg></button>${b('prog','Progress')}${b('tools','Tools')}${b('more','More')}</nav>`}
+function renderTabs(){const b=(k,l)=>`<button class="${V.tab===k&&!V.sub?'on':''}" data-a="tab" data-x="${k}">${ic(k)}<span>${l}</span></button>`;return `<nav class="tabs">${b('home','Home')}${b('goals','Goals')}<button class="fab" data-a="plus" aria-label="Quick actions"><svg viewBox="0 0 100 100" class="fablogo">${[16,32,48,32,16].map((w,k)=>`<rect x="${26+(48-w)/2*0}" y="${22+k*12}" width="${w}" height="8" rx="3" fill="currentColor" ${k===2?'opacity=".55"':''}/>`).join('')}</svg></button>${b('prog','Progress')}${b('tools','Tools')}</nav>`}
 
 /* home */
 function renderHome(){
   const bkDue=S.history.length>0&&(!S.lastBackup||Date.now()-S.lastBackup>7*864e5);
-  let h=`<div class="greet">${true?`<button class="bkic ${bkDue?'due':''}" data-a="bkfile" aria-label="Back up to iCloud">${ic('cloud')}${bkDue?`<span>${S.lastBackup?'Back up · '+Math.floor((Date.now()-S.lastBackup)/864e5)+'d':'Back up'}</span>`:''}</button>`:''}<div class="av">${esc((S.name||'?')[0].toUpperCase())}</div>Hi${S.name?', '+esc(S.name):''}</div>`;
+  let h=`<div class="greet">${true?`<button class="bkic ${bkDue?'due':''}" data-a="bkfile" aria-label="Back up to iCloud">${ic('cloud')}${bkDue?`<span>${S.lastBackup?'Back up · '+Math.floor((Date.now()-S.lastBackup)/864e5)+'d':'Back up'}</span>`:''}</button>`:''}<button class="av" data-a="tab" data-x="more" aria-label="Settings">${esc((S.name||'?')[0].toUpperCase())}</button>Hi${S.name?', '+esc(S.name):''}<button class="gearb" data-a="tab" data-x="more" aria-label="Settings">${ic('gear')}</button></div>`;
   if(S.session)h+=`<div class="resume" data-a="resume"><div style="flex:1"><b>WORKOUT IN PROGRESS</b><div class="sm">${esc(S.session.name)} · <span id="el2">${mmss((Date.now()-S.session.start)/1000)}</span></div></div><span class="lnk sm">RESUME</span></div>`;
   h+=stackCard();
   if(S.history.length)h+=streakStrip();
@@ -594,8 +597,10 @@ function renderGoals(){
   <div class="li" data-a="stackinfo"><div class="g"><div class="tt">Daily Stack &amp; cardio goals</div><div class="sb">${G().sets} sets · ${G().move} min move · ${G().cardio} min cardio</div></div><span class="chev">${ic('chev')}</span></div>`;
   return hd('Goals')+`<main class="pg">${h}</main>`;
 }
-function renderProgress(){
-  let h=prSection()+bodySection('prog')+`<div class="h2">Workout Progress</div>`+(S.widgets.map(widget).join('')||'<div class="empty sm">Add a widget to track an exercise over time.</div>');
+function renderProgress(){const ps=V.ps||'stats';
+  const sw=`<div class="pseg"><div class="seg">${[['stats','Stats'],['history','History']].map(([k,l])=>`<button class="${ps===k?'on':''}" data-a="pseg" data-x="${k}">${l}</button>`).join('')}</div></div>`;
+  if(ps==='history')return hd('Progress')+`<main class="pg">${sw}${streakStrip()}${calendar()}<div class="h2">History</div>${S.history.map(histRow).join('')||`<div class="empty">No finished workouts yet.<br><span class="sm">Complete a workout and it'll show up here.</span></div>`}</main>`;
+  let h=sw+prSection()+bodySection('prog')+`<div class="h2">Workout Progress</div>`+(S.widgets.map(widget).join('')||'<div class="empty sm">Add a widget to track an exercise over time.</div>');
   h+=`<button class="cyl" data-a="addwid" style="border:0;margin-top:6px">${ic('plusc')} Add a Widget</button>`;
   return hd('Progress')+`<main class="pg">${h}</main>`;
 }
@@ -603,7 +608,8 @@ function renderToolsTab(){
   return hd('Tools')+`<main class="pg"><div class="h2">Calculators &amp; Timers</div>${TOOLS.map(([k,n,d,icn])=>`<div class="li" data-a="tool" data-x="${k}"><span style="color:var(--cy);display:flex">${ic(icn)}</span><div class="g"><div class="tt">${n}</div><div class="sb">${d}</div></div><span class="chev">${ic('chev')}</span></div>`).join('')}
   <div class="h2">Library</div>
   <div class="li" data-a="sub" data-x="routines"><span style="color:var(--cy);display:flex">${ic('cal')}</span><div class="g"><div class="tt">Routines</div><div class="sb">${S.routines?S.routines.length+' saved':'Your programs and samples'}</div></div><span class="chev">${ic('chev')}</span></div>
-  <div class="li" data-a="sub" data-x="exercises"><span style="color:var(--cy);display:flex">${ic('dumb')}</span><div class="g"><div class="tt">Exercises</div><div class="sb">${S.exercises.length} exercises</div></div><span class="chev">${ic('chev')}</span></div></main>`;
+  <div class="li" data-a="sub" data-x="exercises"><span style="color:var(--cy);display:flex">${ic('dumb')}</span><div class="g"><div class="tt">Exercises</div><div class="sb">${S.exercises.length} exercises</div></div><span class="chev">${ic('chev')}</span></div>
+  <div class="h2">App</div><div class="li" data-a="tab" data-x="more"><span style="color:var(--cy);display:flex">${ic('gear')}</span><div class="g"><div class="tt">Settings</div><div class="sb">Profile, units, Apple Health, iCloud backup</div></div><span class="chev">${ic('chev')}</span></div></main>`;
 }
 function renderCalc(){
   const c=V.calc;return `<div class="calcscr"><div class="bgfx"></div><header class="hd" style="background:none"><div class="hl"><button data-a="calcx" style="display:flex">${ic('x',2)}</button></div><h1>One-Rep Max Calculator</h1><div class="hr"></div></header>
@@ -614,7 +620,7 @@ function calcRows(){const w=+V.calc.w||0,r=+V.calc.r||0,m=w&&r?e1(w,r):0;return 
 
 /* more */
 function renderMore(){
-  return hd('More')+`<main class="pg">
+  return hd('Settings',`<button class="lnk" data-a="tab" data-x="home" style="display:flex" aria-label="Back">${ic('back',2)}</button>`)+`<main class="pg">
   <div class="h2">Profile</div><div class="li" style="cursor:default"><div class="g sm mute">Your name</div><input class="inp" style="width:55%;padding:8px 10px" data-in="name" value="${esc(S.name||'')}" placeholder="Name"></div>
   <div class="li" style="cursor:default"><div class="g sm mute">Age</div><input class="inp" style="width:55%;padding:8px 10px" type="number" inputmode="numeric" data-in="pfage" value="${P().age||''}" placeholder="Years"></div>
   <div class="li" style="cursor:default"><div class="g sm mute">Height</div>${U()==='kg'?`<input class="inp" style="width:55%;padding:8px 10px" type="number" inputmode="decimal" data-in="pfht" value="${P().height||''}" placeholder="cm">`:`<div style="width:55%;display:flex;gap:8px"><label class="ftin"><input class="inp" type="number" inputmode="numeric" data-in="pfft" id="pfft" value="${P().height?Math.floor(P().height/12):''}" placeholder="5"><span>ft</span></label><label class="ftin"><input class="inp" type="number" inputmode="numeric" data-in="pfin" id="pfin" value="${P().height?Math.round(P().height%12):''}" placeholder="10"><span>in</span></label></div>`}</div>
@@ -1227,6 +1233,7 @@ const setW=st=>{st.w=bar()+2*sum(st.p||[])};
 const RS=()=>{save();render()};
 const ACT={
   noop:()=>{},
+  pseg:x=>{V.ps=x;render();scr0()},
   hsync:()=>{closeSheet();if(!S.hsGuided){S.hsGuided=1;save();openSheet(hGuide());return}try{localStorage.setItem('stk-hpend',Date.now())}catch(e){}location.href='shortcuts://run-shortcut?name='+encodeURIComponent(HSC)},
   hguide:()=>{S.hsGuided=1;save();closeSheet();openSheet(hGuide())},
   himport:()=>{closeSheet();openSheet(hImportSheet())},
@@ -1312,7 +1319,7 @@ const ACT={
   bkhide:()=>{V.bkHide=true;render()},
   bkfile:()=>backupFile(),
   close:()=>closeSheetAnim(),
-  tab:x=>{V.tool=null;V.bm=null;const same=V.tab===x&&!V.sub&&!V.inSession;V.inSession=false;V.ov=false;V.restOpen=false;V.tab=x;V.sub=null;V.stack=[];if(!same)V.anim='fade';render();scr0()},
+  tab:x=>{if(x==='log'){x='prog';V.ps='history'}else if(x==='prog'&&V.tab!=='prog'&&!V._keepPs){}V.tool=null;V.bm=null;const same=V.tab===x&&!V.sub&&!V.inSession;V.inSession=false;V.ov=false;V.restOpen=false;V.tab=x;V.sub=null;V.stack=[];if(!same)V.anim='fade';render();scr0()},
   sub:x=>{V.stack.push(V.sub);V.sub=x;V.rEdit=false;V.anim='push';render();scr0()},
   back:()=>{V.sub=V.stack.pop()||null;V.rEdit=false;V.anim='pop';render()},
   resume:()=>{V.inSession=true;V.ov=false;V.animIn=true;render();V.animIn=false;scr0()},
