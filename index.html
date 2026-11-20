@@ -313,6 +313,8 @@ input[type=date].inp{color-scheme:dark;min-height:44px}
 .stbars{position:relative;display:flex;gap:8px;height:84px;margin-top:14px;padding-bottom:18px}.stbars>div{flex:1;position:relative;display:flex;align-items:flex-end}.stbars i{display:block;width:100%;background:rgba(255,255,255,.28);border-radius:4px 4px 2px 2px}.stbars span{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:11px;color:var(--mute)}.stbars em{position:absolute;left:0;right:0;border-top:1px dashed rgba(255,214,10,.45)}
 .pseg{padding:14px 16px 4px}.pseg .seg{width:100%}
 .gearb{position:absolute;right:12px;bottom:4px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:var(--soft);border-radius:20px}.gearb .i{width:24px;height:24px}button.av{border:0;font-family:inherit;cursor:pointer;padding:0}
+.sgc{border:1px solid rgba(255,214,10,.35);background:rgba(255,214,10,.05);border-radius:12px;padding:12px 14px;margin-top:4px}.sgh{display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:.08em;color:var(--pk);font-weight:600}.sgh span{display:flex;align-items:center;gap:6px}.sgh .i{width:16px;height:16px}
+.sgr{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}.sgr:last-of-type{border:0}.sgr b{font-size:14px;font-weight:600;display:block}.sgr em{font-style:normal;font-size:11.5px;color:var(--mute);display:block;margin-top:2px;line-height:1.35}.sgr>span{flex:none;font-size:15px;font-weight:600;text-align:right;white-space:nowrap}.sgr>span.chg{color:var(--pk)}.sgr s{color:var(--mute);font-weight:400}.sgr small{font-size:11px;color:var(--mute);font-weight:400}
 .toast{position:fixed;left:50%;top:calc(var(--sat) + 64px);transform:translateX(-50%);background:#fff;color:var(--toastc);padding:10px 16px;border-radius:999px;font-weight:600;font-size:14px;z-index:99;transition:opacity .3s;white-space:nowrap}
 .prbox{margin:14px 20px 0;padding:10px;border:1px solid var(--pk);color:var(--pklt);border-radius:6px;font-weight:600;text-align:center}
 </style>
@@ -592,9 +594,9 @@ function renderGoals(){
   h+=planCard();
   h+=`<div class="h2">Body Targets</div>`+bodySection('goal');
   h+=weekVolume();
-  h+=`<div class="h2">Habits</div>
+  h+=`<div class="h2">Habits</div>${sugNudge()}
   <div class="li" style="cursor:default"><div class="g">Weekly workout goal</div><div class="stp w"><button data-a="wgoal" data-x="-1">${ic('minusc')}</button><span>${S.weekGoal} / wk</span><button data-a="wgoal" data-x="1">${ic('plusc')}</button></div></div>
-  <div class="li" data-a="stackinfo"><div class="g"><div class="tt">Daily Stack &amp; cardio goals</div><div class="sb">${G().sets} sets · ${G().move} min move · ${G().cardio} min cardio</div></div><span class="chev">${ic('chev')}</span></div>`;
+  <div class="li" data-a="stackinfo"><div class="g"><div class="tt">Daily Stack &amp; cardio goals</div><div class="sb">${G().sets} sets · ${G().move} min move · ${G().cardio} min cardio · ${G().weekCardio} min/wk</div></div><span class="chev">${ic('chev')}</span></div>`;
   return hd('Goals')+`<main class="pg">${h}</main>`;
 }
 function renderProgress(){const ps=V.ps||'stats';
@@ -795,10 +797,37 @@ function stackCard(){const t0=dayStart(Date.now()),st=dayStats(t0),n=closedCount
   return `<div class="stk" data-a="stackinfo"><div class="stkh"><b>Today's Stack</b><span class="${n===5?'full':''}">${n===5?'STACKED ✓':n+'/5 closed'}</span></div>
   <div class="stkb">${stackSvg(st,true)}<div class="stkl">${SBARS.map(([k,l],i)=>`<div class="${st[k]>=1?'ok':''}"><i style="background:${i===2?'var(--cy)':'var(--pk)'}"></i><b>${l}</b><span>${val[k]}</span></div>`).join('')}</div></div>
   <div class="wk">${wk}</div></div>`}
+/* ===== suggested stack ===== */
+function suggestStack(){const p=P(),bw=curBW(),bf=curBF(),r5=x=>Math.round(x/5)*5,why={};
+  const [vl,vh]=volTarget(),mid=Math.round((vl+vh)/2),tot=mid*5.5;let wk=Math.max(2,Math.min(6,Math.ceil(tot/20)));if(p.age>=60)wk=Math.min(wk,4);
+  why.week=`${mid} sets per muscle a week (${EXPL[p.exp].toLowerCase()}, ${GOALL[p.goal].toLowerCase()}) fits best in ${wk} sessions`;
+  const sets=Math.max(10,Math.min(25,Math.round(tot/wk)));why.sets=`${Math.round(tot)} working sets a week ÷ ${wk} sessions`;
+  const move=Math.max(30,Math.min(90,r5(sets*2.5+10)));why.move=`About 2½ min per set plus warm-up`;
+  const WG=S.weightGoal&&S.weightGoal.date>Date.now()?S.weightGoal:null;let dir=p.goal==='fat'?'cut':p.goal==='muscle'?'bulk':'maint',pace=0;
+  if(WG&&bw){const d=WG.target-bw;dir=Math.abs(d)<.5?'maint':d<0?'cut':'bulk';pace=Math.abs(d/((WG.date-Date.now())/(7*864e5))/bw*100)}
+  let wc={cut:180,bulk:90,maint:p.goal==='general'?150:120}[dir];const bits=[{cut:'Losing fat',bulk:'Building muscle',maint:p.goal==='general'?'General fitness':'Maintaining'}[dir]+` → ${wc} min base`];
+  if(dir==='cut'&&pace>.75){wc+=40;bits.push('+40 for your goal pace')}
+  if(p.age>=50){wc+=30;bits.push('+30 for heart health at '+p.age)}
+  if(bf&&bf>(S.sex==='f'?32:25)&&dir!=='bulk'){wc+=20;bits.push('+20 for body fat')}
+  const sa=stepAvg();if(sa&&sa>=10000){wc-=30;bits.push('−30, you already walk '+Math.round(sa/1000)+'k steps')}else if(sa&&sa<5000){wc+=20;bits.push('+20, steps are low')}
+  wc=Math.max(75,Math.min(300,r5(wc)));why.weekCardio=bits.join(' · ');
+  const cdays=Math.min(6,Math.max(dir==='cut'?5:wk<=3?3:4,Math.ceil(wc/40))),cardio=Math.max(10,Math.min(60,r5(wc/cdays)));why.cardio=`${wc} min a week over ~${cdays} days`;
+  const miss=[!p.age&&'age',!bw&&'bodyweight',!p.height&&'height'].filter(Boolean);
+  return {g:{sets,move,cardio,weekCardio:wc},week:wk,why,miss}}
+function sugSig(s){return [s.g.sets,s.g.move,s.g.cardio,s.g.weekCardio,s.week].join('|')}
+function sugDiff(s){const g=G();return g.sets!==s.g.sets||g.move!==s.g.move||g.cardio!==s.g.cardio||g.weekCardio!==s.g.weekCardio||S.weekGoal!==s.week}
+function sugBlock(){const s=suggestStack(),g=G(),df=sugDiff(s);const row=(l,cur,nv,u,w)=>`<div class="sgr"><div><b>${l}</b><em>${w}</em></div><span class="${cur!==nv?'chg':''}">${cur!==nv?`<s>${cur}</s> → `:''}${nv} <small>${u}</small></span></div>`;
+  return `<div class="sgc"><div class="sgh"><span>${ic('target')} SUGGESTED FOR YOU</span>${df?'':'<b class="xs" style="color:#5fe39a">Applied ✓</b>'}</div>
+  ${row('Workouts',S.weekGoal,s.week,'/ week',s.why.week)}${row('Lift',g.sets,s.g.sets,'sets / day',s.why.sets)}${row('Move',g.move,s.g.move,'min / day',s.why.move)}${row('Cardio',g.cardio,s.g.cardio,'min / day',s.why.cardio)}${row('Weekly cardio',g.weekCardio,s.g.weekCardio,'min',s.why.weekCardio)}
+  ${s.miss.length?`<div class="xs" style="color:var(--soft);margin-top:8px">Add your ${s.miss.join(', ')} in Settings and Goals for a sharper suggestion.</div>`:''}
+  ${df?`<button class="pkb" data-a="sugapply" style="margin:12px 0 0;width:100%">Apply Suggestion</button>`:''}</div>`}
+function sugNudge(){const s=suggestStack();if(!sugDiff(s)||S.sugDismiss===sugSig(s))return '';
+  return `<div class="li" data-a="stackinfo" style="background:rgba(255,214,10,.06)"><span style="color:var(--pk);display:flex">${ic('target')}</span><div class="g"><div class="tt">New suggested Stack</div><div class="sb">${s.week} workouts/wk · ${s.g.sets} sets · ${s.g.move} min move · ${s.g.weekCardio} min cardio/wk</div></div><button class="lnk sm" data-a="sugdismiss" style="padding:6px">${ic('x')}</button></div>`}
 function stackInfoHtml(){const g=G();const row=(k,l,v,u)=>`<div class="li" style="cursor:default"><div class="g">${l}</div><div class="stp w"><button data-a="gstep" data-x="${k}|-1">${ic('minusc')}</button><span>${v} ${u}</span><button data-a="gstep" data-x="${k}|1">${ic('plusc')}</button></div></div>`;
   return `<div class="sh-t">Close your Stack<div class="xs mute" style="font-weight:400;margin-top:2px">Five bars, one day. Fill all five and the day is Stacked.</div></div>
   <div class="shp"><div class="stkexp">${SBARS.map(([k,l],i)=>`<div><i style="background:${i===2?'var(--cy)':'var(--pk)'}"></i><b>${l}</b><span>${{show:'Log any workout today',lift:'Working sets today',move:'Total minutes training today',cardio:'Cardio minutes today',beat:'Finish a workout with a PR or more volume than last time'}[k]}</span></div>`).join('')}</div></div>
-  <div class="secl">Your Goals</div>${row('sets','Lift','<b>'+g.sets+'</b>','sets')}${row('move','Move','<b>'+g.move+'</b>','min')}${row('cardio','Cardio','<b>'+g.cardio+'</b>','min')}${row('weekCardio','Weekly cardio','<b>'+g.weekCardio+'</b>','min')}
+  <div class="shp">${sugBlock()}</div>
+  <div class="secl">Your Goals</div>${row('workouts','Workouts','<b>'+S.weekGoal+'</b>','/ wk')}${row('sets','Lift','<b>'+g.sets+'</b>','sets')}${row('move','Move','<b>'+g.move+'</b>','min')}${row('cardio','Cardio','<b>'+g.cardio+'</b>','min')}${row('weekCardio','Weekly cardio','<b>'+g.weekCardio+'</b>','min')}
   <p class="xs mute center" style="padding:10px 20px 0">Rest days are part of training. You don't need to close it every day.</p>`}
 
 /* ===== personal profile ===== */
@@ -1233,6 +1262,8 @@ const setW=st=>{st.w=bar()+2*sum(st.p||[])};
 const RS=()=>{save();render()};
 const ACT={
   noop:()=>{},
+  sugapply:()=>{const s=suggestStack();S.goals=Object.assign(G(),s.g);S.weekGoal=s.week;S.sugDismiss=undefined;save();refreshSheet(stackInfoHtml());render();toast('Stack updated. Home and your rings now use it')},
+  sugdismiss:()=>{S.sugDismiss=sugSig(suggestStack());save();render()},
   pseg:x=>{V.ps=x;render();scr0()},
   hsync:()=>{closeSheet();if(!S.hsGuided){S.hsGuided=1;save();openSheet(hGuide());return}try{localStorage.setItem('stk-hpend',Date.now())}catch(e){}location.href='shortcuts://run-shortcut?name='+encodeURIComponent(HSC)},
   hguide:()=>{S.hsGuided=1;save();closeSheet();openSheet(hGuide())},
@@ -1256,7 +1287,7 @@ const ACT={
   cstep:x=>{const [k,d]=x.split('|'),st=cur(),stp={dist:.1,cal:10,lvl:k==='lvl'?.5:1}[k];st[k]=Math.max(0,Math.round(((st[k]||0)+ +d*stp)*100)/100);RS()},
   ctype:x=>{const st=cur();if(x==='dur'){if(st.run){st.dur=cEl(st);st.run=null}numSheet('Duration (minutes)',Math.round(cEl(st)/6)/10,v=>{st.dur=Math.max(0,v*60)})}else numSheet({dist:'Distance ('+du()+')',cal:'Calories',lvl:'Level / incline'}[x],st[x]||0,v=>{st[x]=Math.max(0,v)})},
   stackinfo:()=>openSheet(stackInfoHtml()),
-  gstep:x=>{const [k,d]=x.split('|'),g=G(),st={sets:1,move:5,cardio:5,weekCardio:10}[k],mn={sets:1,move:10,cardio:5,weekCardio:30}[k];g[k]=Math.max(mn,g[k]+ +d*st);S.goals=g;save();refreshSheet(stackInfoHtml());render()},
+  gstep:x=>{const [k,d]=x.split('|'),g=G();if(k==='workouts'){S.weekGoal=Math.max(1,Math.min(7,S.weekGoal+ +d));save();refreshSheet(stackInfoHtml());render();return}const st={sets:1,move:5,cardio:5,weekCardio:10}[k],mn={sets:1,move:10,cardio:5,weekCardio:30}[k];g[k]=Math.max(mn,g[k]+ +d*st);S.goals=g;save();refreshSheet(stackInfoHtml());render()},
   backoff:()=>{const s=S.session,it=s.items[s.i];it.sets.forEach(x=>{if(!x.wu&&!x.done){x.w=rnd(x.w*.9);delete x.p}});it.coachDone=true;RS();toast('Backed off 10% for today')},
   plat:()=>{const s=S.session,it=s.items[s.i],e=ex(it.exId),v=variationFor(e),t=exTrend(it.exId,5),hi=it.rr?parseInt(String(it.rr).split('-').pop()):cur().r;const alt=hi<=8?'10-12':'5-7';
     openSheet(`<div class="sh-t">${esc(e.name)} has stalled<div class="xs mute" style="font-weight:400;margin-top:2px">No new best in 3 sessions · best est. 1RM ${fmt(Math.round(Math.max(...t)))} ${U()}. Pick a fix:</div></div><div style="border-top:1px solid var(--line)">
