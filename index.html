@@ -457,7 +457,7 @@ function startWorkout0(rid,did){
   closeSheet();
   if(S.session){toast('Finish or discard your current workout first');return}
   let name='Workout',items=[];
-  if(did){const d=D(rid,did);name=d.name;items=d.items.map(it=>{const m=mkItem(it.exId,it.sets,it.sn,it.rr,it.tw,it.tr);if(!it.tw)applyProg(m);return m})}
+  if(did){const d=D(rid,did);name=d.name;items=d.items.map(it=>mkItem(it.exId,it.sets,it.sn,it.rr,it.tw,it.tr))}
   let dl=false;if(S.deloadNext&&items.length){dl=true;S.deloadNext=false;items.forEach(it=>{if(ex(it.exId).type!=='bodyweight')it.sets.forEach(x=>{x.w=rnd(x.w*.6);delete x.p})})}
   S.session={id:uid(),rid:rid||null,did:did||null,name:dl?name+' (Deload)':name,start:Date.now(),items,i:0,s:0,rest:null,deload:dl};if(dl)setTimeout(()=>toast('Deload: weights set to 60% today'),400);
   V.inSession=true;V.ov=!items.length;V.animIn=true;save();render();V.animIn=false;scr0();
@@ -470,11 +470,12 @@ const isLast=()=>seqIdx()===seqList().length-1;
 const inSS=i=>{const its=S.session.items;return !!(its[i]&&(its[i].sn||(i>0&&its[i-1].sn)))};
 function setLabel(it,j){const st=it.sets[j];if(st.wu){const w=it.sets.filter(x=>x.wu);return `WARM-UP ${w.indexOf(st)+1}/${w.length}`}if(st.ds){const d=it.sets.filter(x=>x.ds);return d.length>1?`DROP SET ${d.indexOf(st)+1}`:'DROP SET'}const w=it.sets.filter(x=>!x.wu&&!x.ds);return `SET ${w.indexOf(st)+1}/${w.length}`}
 function incFor(t){return t==='dumbbell'&&U()==='kg'?2:step()}
-function overload(it){const e=ex(it.exId);if(e.type==='cardio')return null;if(it.hintDone)return null;const last=lastFor(it.exId);if(!last)return null;const w=last.sets.filter(x=>!x.wu);if(w.length<1||w.some(x=>x.skip))return null;
-  const top=Math.max(...w.map(x=>x.w));if(w.some(x=>x.w!==top))return null;if(it.rr&&!it.tw){const hi=parseInt(String(it.rr).split('-').pop());if(w.some(x=>x.r<hi))return null}else if(it.tw)return null;else if(w[w.length-1].r<w[0].r-1)return null;
-  const work=it.sets.filter(x=>!x.wu&&!x.done);if(!work.length||work.some(x=>x.w!==top))return null;
-  if(top===0)return {bw:true,txt:`Hit all ${w.length}×${w[0].r} last time. Go for +1 rep`};
-  const inc=incFor(e.type);return {top,inc,txt:`+${fmt(inc)} ${U()}? You hit ${w.length}×${w[0].r} at ${fmt(top)} last time`}}
+function overload(it){const e=ex(it.exId);if(e.type==='cardio'||it.hintDone||it.tw||S.autoProg===false)return null;const last=lastFor(it.exId);if(!last)return null;
+  const w=last.sets.filter(x=>!x.wu&&!x.ds&&!x.skip);if(!w.length)return null;const top=Math.max(...w.map(x=>x.w)),atTop=w.filter(x=>x.w===top),minR=Math.min(...atTop.map(x=>x.r));
+  let lo,hi;if(it.rr){const p=String(it.rr).split('-').map(Number);lo=p[0]||8;hi=p[1]||lo}else{S.rrMem=S.rrMem||{};let m=S.rrMem[it.exId];if(!m){m=S.rrMem[it.exId]=[minR,minR+(minR<=5?2:minR<=10?4:5)];save()}[lo,hi]=m}
+  const work=it.sets.filter(x=>!x.wu&&!x.ds&&!x.done);if(!work.length||work.some(x=>x.w!==top))return null;
+  if(atTop.every(x=>x.r>=hi)){if(top===0||e.type==='bodyweight'&&!top)return {k:'r',r:hi+1,txt:`You hit ${hi} on every set. Go for ${hi+1} reps`};const inc=incFor(e.type);return {k:'w',w:Math.round((top+inc)*100)/100,r:lo,txt:`+${fmt(inc)} ${U()} and back to ${lo} reps. You hit ${hi} on every set`}}
+  const nr=Math.min(hi,Math.max(lo,minR+1));if(work.every(x=>x.r>=nr))return null;return {k:'r',r:nr,txt:`Go for ${nr} reps. At ${hi} on every set, add weight`}}
 function wuPlan(w,t){const b=t==='barbell'?bar():0,inc=t==='barbell'?(U()==='lb'?5:2.5):incFor(t);const r=x=>Math.max(b,Math.round(x/inc)*inc);const out=[];if(t==='barbell'&&w>b)out.push({w:b,r:10});
   const heavy=U()==='lb'?225:100,mid=U()==='lb'?135:60;const pct=w>=heavy?[[.4,8],[.6,5],[.75,3],[.85,1]]:w>=mid?[[.5,6],[.7,3],[.85,1]]:[[.5,8],[.75,4]];
   for(const [p,rp] of pct){const x=r(w*p);if(x>0&&x<w&&x>(out.length?out[out.length-1].w:0))out.push({w:x,r:rp})}return out}
@@ -646,7 +647,7 @@ function renderMore(){
   <div class="li" style="cursor:default"><div class="g">Units</div><div class="seg" style="width:150px">${['lb','kg'].map(u=>`<button class="${U()===u?'on':''}" data-a="units" data-x="${u}">${u.toUpperCase()}</button>`).join('')}</div></div>
   <div class="li" style="cursor:default"><div class="g">Rest timer</div><div class="stp w"><button data-a="rest" data-x="-15">${ic('minusc')}</button><span>${mmss(S.rest)}</span><button data-a="rest" data-x="15">${ic('plusc')}</button></div></div>
   <div class="li" style="cursor:default"><div class="g">Auto-start rest timer after each set</div><button class="tog ${S.autoRest?'on':''}" data-a="auto"></button></div>
-  <div class="li" style="cursor:default"><div class="g"><div class="tt">Auto-progression</div><div class="sb">Pre-fills each set with what to try today</div></div><button class="tog ${S.autoProg!==false?'on':''}" data-a="autoprog"></button></div>
+  <div class="li" style="cursor:default"><div class="g"><div class="tt">Progression suggestions</div><div class="sb">Suggests +1 rep, then more weight at the top of your range</div></div><button class="tog ${S.autoProg!==false?'on':''}" data-a="autoprog"></button></div>
   <div class="li" style="cursor:default"><div class="g"><div class="tt">Readiness check-in</div><div class="sb">Quick sleep, soreness and energy check before workouts</div></div><button class="tog ${S.readyAsk!==false?'on':''}" data-a="readyask"></button></div>
   <div class="li" style="cursor:default"><div class="g">Barbell weight</div><div class="stp w"><button data-a="barw" data-x="-1">${ic('minusc')}</button><span>${fmt(bar())} ${U()}</span><button data-a="barw" data-x="1">${ic('plusc')}</button></div></div>
   <div class="li" style="cursor:default"><div class="g">Dumbbell weight</div><div class="seg" style="width:180px">${[['per','Per DB'],['total','Total']].map(([k,l])=>`<button class="${S.dbMode===k?'on':''}" data-a="dbm" data-x="${k}">${l}</button>`).join('')}</div></div>
@@ -696,7 +697,7 @@ function renderSet(){
   const rtb=rs?`<button class="rtb run" data-a="ropen"><span id="rt2">${mmss(Math.ceil((rs.end-Date.now())/1000))}</span><span style="font-size:10px;letter-spacing:.06em;color:var(--mute)">RESTING</span></button>`:`<button class="rtb" data-a="ropen">${ic('watch')}REST TIMER</button>`;
   return `<div class="setscr">
   <div class="setmain"><div><div class="grab2"></div><div class="topbar">${e.type!=='bodyweight'&&!it.sets.some(x=>x.wu)?`<button class="wub" data-a="warmup">WARM-UP</button>`:`<button style="visibility:hidden">${ic('calc')}</button>`}<button data-a="ovopen">${ic('down',2)}</button><div class="tbr"><button data-a="exnote" class="${e.note?'has':''}" aria-label="Exercise note">${ic('note')}</button><button data-a="calc">${ic('calc')}</button></div></div>
-  <div class="exn">${esc(e.name)}</div><div class="setl">${setLabel(it,s.s)}${!st.wu&&s.s===it.sets.length-1?`<button class="dsplus" data-a="dropset" aria-label="Add a drop set">${ic('plus',2.6)}</button>`:''}</div>${it.rr&&!st.wu?`<div class="rrl">TARGET ${esc(String(it.rr)).replace('-','–')}${/\d$/.test(it.rr)?' REPS':''}</div>`:''}${inSS(s.i)?`<div class="sstag">SUPERSET${(()=>{const L=seqList(),k=seqIdx(),nx=L[k+1];return nx&&nx[0]!==s.i&&inSS(nx[0])&&grp(nx[0])[0]===grp(s.i)[0]?' · NEXT: '+esc(ex(s.items[nx[0]].exId).name).toUpperCase():''})()}</div>`:''}${(it.sets.some(x=>x.done&&!x.wu)?'':progPill(it,st))+coachPill(it,st)+exNoteHtml(e)}</div>
+  <div class="exn">${esc(e.name)}</div><div class="setl">${setLabel(it,s.s)}${!st.wu&&s.s===it.sets.length-1?`<button class="dsplus" data-a="dropset" aria-label="Add a drop set">${ic('plus',2.6)}</button>`:''}</div>${it.rr&&!st.wu?`<div class="rrl">TARGET ${esc(String(it.rr)).replace('-','–')}${/\d$/.test(it.rr)?' REPS':''}</div>`:''}${inSS(s.i)?`<div class="sstag">SUPERSET${(()=>{const L=seqList(),k=seqIdx(),nx=L[k+1];return nx&&nx[0]!==s.i&&inSS(nx[0])&&grp(nx[0])[0]===grp(s.i)[0]?' · NEXT: '+esc(ex(s.items[nx[0]].exId).name).toUpperCase():''})()}</div>`:''}${coachPill(it,st)+exNoteHtml(e)}</div>
   <div class="mid"><div class="wblock">${wv}</div>
   <div class="repsrow"><button class="cbtn" data-a="r" data-x="-1">${ic('minus',2)}</button><div><div class="rnum" data-a="typer">${st.r}</div><div class="wunit">REPS</div></div><button class="cbtn" data-a="r" data-x="1">${ic('plus',2)}</button></div></div>
   <div class="navrow"><button class="dbl" data-a="prevs">${ic('dl',2.2)}</button>${rtb}<button class="dbl" data-a="nexts">${ic('dr',2.2)}</button></div></div>
@@ -883,7 +884,7 @@ function lastSetFor(it,j){const last=lastFor(it.exId);if(!last)return null;const
 function coachPill(it,st){if(st.wu||it.coachDone)return '';
   if(isDeclining(it.exId))return `<button class="hintp warn" data-a="backoff">${ic('trend',2.2)}<span>Down 3 sessions in a row. Back off 10% today?</span><b>LIGHTER</b></button>`;
   if(isStalled(it.exId))return `<button class="hintp warn" data-a="plat">${ic('flame',2)}<span>Stalled for 3 sessions. Try a plateau fix?</span><b>FIXES</b></button>`;
-  const o=overload(it);return o?`<button class="hintp" data-a="applyhint">${ic('up',2.4)}<span>${esc(o.txt)}</span><b>${o.bw?'OK':'APPLY'}</b></button>`:''}
+  if(it.sets.some(x=>x.done&&!x.wu))return '';const o=overload(it);return o?`<button class="hintp" data-a="applyhint">${ic('up',2.4)}<span>${esc(o.txt)}</span><b>APPLY</b></button>`:''}
 function dayItemFor(exId){const s=S.session;if(!s||!s.rid||!s.did||!R(s.rid))return null;const d=R(s.rid).days.find(x=>x.id===s.did);return d?d.items.find(x=>x.exId===exId):null}
 function deloadCard(){const l=decliningRecent();if(!l.length||V.dlHide)return '';const names=l.slice(0,3).map(e=>esc(e.name));
   return `<div class="dlc"><div style="display:flex;align-items:flex-start;gap:10px"><span style="color:#ffb547;display:flex;margin-top:2px">${ic('trend',2)}</span><div style="flex:1"><b>Recovery check</b><div class="sm" style="color:var(--soft);margin-top:2px">${names.join(', ')}${l.length>3?` +${l.length-3} more`:''} ${l.length>1?'have':'has'} dropped 3 sessions in a row. A lighter workout often fixes this.</div></div><button class="ico" data-a="dlhide" style="width:26px;height:26px">${ic('x')}</button></div>
@@ -1162,7 +1163,7 @@ function achSection(){const c=achCtx(),got=S.ach||{},defs=achDefs();const n=defs
   return `<div class="h2">Trophy Case<small>${n}/${defs.length}</small></div><div class="achg">${(all?items:items.slice(0,9)).map(a=>`<div class="ach ${a.done?'on':''}"><span>${ic('trophy',1.8)}</span><b>${esc(a.nm)}</b><em>${esc(a.d)}</em>${a.done?'':`<i><u style="width:${Math.min(100,a.v/a.t*100)}%"></u></i>`}</div>`).join('')}</div>${defs.length>9?`<button class="lnk sm" data-a="achall" style="display:block;margin:10px auto 0">${all?'SHOW LESS':'SEE ALL '+defs.length}</button>`:''}`}
 
 setTimeout(()=>{try{if(!S.ach){S.ach={};achCheck(true)}}catch(e){}},0);
-function readyAdjust(){const r=readyToday(),s=S.session;if(!s||!r||r.score==null||s.rdAdj)return;s.rdAdj=1;if(r.score<=2.4){s.items.forEach(it=>{if(ex(it.exId).type==='cardio'||ex(it.exId).type==='bodyweight')return;it.sets.forEach(x=>{if(!x.wu&&!x.done){x.w=rnd(x.w*.9);delete x.p}});if(it.prog)it.prog={k:'hold',m:'Easy day: weights are down 10% to match how you feel'}});save();render();setTimeout(()=>toast('Easy day: weights −10%, lighter goals'),400)}}
+function readyAdjust(){const r=readyToday(),s=S.session;if(!s||!r||r.score==null||s.rdAdj)return;s.rdAdj=1;if(r.score<=2.4){s.items.forEach(it=>{if(ex(it.exId).type==='cardio'||ex(it.exId).type==='bodyweight')return;it.sets.forEach(x=>{if(!x.wu&&!x.done){x.w=rnd(x.w*.9);delete x.p}});it.hintDone=true});save();render();setTimeout(()=>toast('Easy day: weights −10%, lighter goals'),400)}}
 function readyCard(){const R=S.ready||{},days=[...Array(14)].map((_,i)=>{const t=Date.now()-(13-i)*864e5;return {t,r:R[ymd(t)]}});if(!days.some(d=>d.r&&d.r.score))return '';
   const lo=[],hi=[];S.history.forEach(h=>{const r=R[ymd(h.date)];if(!r||!r.score)return;(r.score<=2.6?lo:hi).push(volOf(h))});const avg=a=>a.reduce((x,y)=>x+y,0)/a.length;const diff=lo.length>=2&&hi.length>=2?Math.round((1-avg(lo)/avg(hi))*100):null;
   return `<div class="h2">Readiness<small>LAST 14 DAYS</small></div><div class="wcard"><div class="stbars" style="height:70px">${days.map(d=>`<div><i style="height:${d.r&&d.r.score?d.r.score/5*100:0}%;background:${d.r&&d.r.score?(d.r.score<=2.4?'#ff7a7a':d.r.score<=3.4?'#ffb547':'var(--pk)'):'transparent'}"></i><span>${'SMTWTFS'[new Date(d.t).getDay()]}</span></div>`).join('')}</div>
@@ -1516,7 +1517,7 @@ const ACT={
   pbgo:()=>{const r=build531();if(!r)return;S.routines.push(r);save();V.tool=null;V.tab='more';V.sub='routine:'+r.id;V.stack=[null,'routines'];render();toast('5/3/1 routine created. Activate it when ready')},
 
   theme:x=>{S.theme=x;save();applyTheme();render()},
-  applyhint:()=>{const s=S.session,it=s.items[s.i],o=overload(it);if(!o)return;if(!o.bw)it.sets.forEach(x=>{if(!x.wu&&!x.done){x.w=Math.round((x.w+o.inc)*100)/100;delete x.p}});else it.sets.forEach(x=>{if(!x.wu&&!x.done)x.r+=1});it.hintDone=true;RS()},
+  applyhint:()=>{const s=S.session,it=s.items[s.i],o=overload(it);if(!o)return;it.sets.forEach(x=>{if(x.wu||x.ds||x.done)return;if(o.k==='w'){x.w=o.w;delete x.p}x.r=o.r});it.hintDone=true;RS()},
   warmup:()=>{const s=S.session,it=s.items[s.i],e=ex(it.exId),w0=(it.sets.find(x=>!x.wu)||{}).w||0;const plan=wuPlan(w0,e.type);if(!w0||!plan.length){toast('Set your working weight first');return}V.wplan=plan;
     openSheet(`<div class="sh-t">Warm-up for ${fmt(w0)} ${U()}<div class="xs mute" style="font-weight:400;margin-top:2px">${esc(e.name)}</div></div><div style="border-top:1px solid var(--line)">${plan.map((x,j)=>`<div class="setrow"><span>WARM-UP ${j+1}</span><span>${e.type==='barbell'&&x.w===bar()?'Empty bar':fmt(x.w)+' '+U()} × ${x.r}${e.type==='barbell'&&x.w>bar()?` <span class="xs mute">· ${greedy((x.w-bar())/2).map(fmt).join('+')} /side</span>`:''}</span></div>`).join('')}</div><button class="pkb" data-a="addwu">Add Warm-up Sets</button><button class="olb" data-a="close">Not today</button>`)},
   addwu:()=>{const s=S.session,it=s.items[s.i];it.sets.unshift(...V.wplan.map(x=>({w:x.w,r:x.r,done:false,wu:true})));s.s=0;closeSheet();RS()},
