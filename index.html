@@ -1639,7 +1639,8 @@ const ACT={
   reset:()=>confirmSheet('Reset everything? All workouts, routines and settings will be erased.',()=>{S=seed();V={tab:'home',sub:null,stack:[],inSession:false,ov:false,restOpen:false,calc:null};RS()},'Reset'),
 };
 
-document.addEventListener('click',e=>{unlockAudio();const el=e.target.closest('[data-a]');if(!el)return;const f=ACT[el.dataset.a];if(f){e.preventDefault();e.stopPropagation();f(el.dataset.x,el)}});
+document.addEventListener('click',e=>{unlockAudio();const el=e.target.closest('[data-a]');if(!el)return;const f=ACT[el.dataset.a];if(f){e.preventDefault();e.stopPropagation();const ss=S.session,it0=ss&&ss.items[ss.i],st0=it0&&it0.sets[ss.s],w0=st0?st0.w:null;f(el.dataset.x,el);if(st0&&S.session===ss&&st0.w!==w0&&!st0.wu)carryW(it0,st0,w0)}});
+function carryW(it,st,old){const j=it.sets.indexOf(st);let n=0;it.sets.forEach((x,k)=>{if(k>j&&!x.done&&!x.wu&&!x.ds&&(x.w===old||!x.w)){x.w=st.w;delete x.p;n++}});if(n){save();if(V.inSession)render()}}
 document.addEventListener('input',e=>{const el=e.target,k=el.dataset.in;if(!k)return;const x=el.dataset.x;
   if(k==='rname'){R(x).name=el.value;save()}
   else if(k==='dname'){const [ri,di]=x.split('|');D(ri,di).name=el.value;save()}
