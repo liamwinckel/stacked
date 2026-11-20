@@ -1,6 +1,6 @@
 {
-  "name": "Stacked",
-  "short_name": "Stacked",
+  "name": "Bars",
+  "short_name": "Bars",
   "description": "Workout tracker",
   "start_url": "./",
   "scope": "./",
@@ -10,12 +10,12 @@
   "theme_color": "#151517",
   "icons": [
     {
-      "src": "icon-volt-192.png",
+      "src": "icon-bars-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icon-volt-512.png",
+      "src": "icon-bars-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

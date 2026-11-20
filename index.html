@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Stacked">
+<meta name="apple-mobile-web-app-title" content="Bars">
 <meta name="theme-color" content="#151517">
-<title>Stacked</title>
+<title>Bars</title>
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-volt-180.png">
-<link rel="icon" href="icon-volt-192.png">
+<link rel="apple-touch-icon" href="icon-bars-180.png">
+<link rel="icon" href="icon-bars-192.png">
 <style>
 :root{--top:#14297a;--mid:#0c1750;--bot:#060920;--cy:#5fd0f3;--pk:#ec3a6e;--text:#fff;--mute:#8e9ac6;--line:rgba(255,255,255,.09);--panel:rgba(var(--deepr),.45);--cyr:95,208,243;--pkr:236,58,110;--deepr:5,9,35;--hdr:var(--hdr);--on-pk:#fff;--on-cy:var(--on-cy);--num:var(--num);--soft:var(--soft);--tabbg:var(--tabbg);--sh1:#17307f;--sh2:#0c1648;--bar2:var(--bar2);--tc1:var(--tc1);--tc2:var(--tc2);--octbg:var(--octbg);--tog:var(--tog);--track:var(--track);--cy2:var(--cy2);--pk2:var(--pk2);--av2:var(--av2);--toastc:#0c1648;--pklt:var(--pklt);--pkup:var(--pkup);--pkfade:var(--pkfade);--modal:var(--modal);--shbg:var(--shbg)}
 html[data-theme="volt"]{--top:#161618;--mid:#0d0d0f;--bot:#060607;--cy:#f4f4f5;--pk:#ffd60a;--text:#fff;--mute:#8e8e96;--line:rgba(255,255,255,.08);--panel:rgba(255,255,255,.035);--cyr:244,244,245;--pkr:255,214,10;--deepr:0,0,0;--hdr:rgba(34,34,38,.86);--on-pk:#121212;--on-cy:#121212;--num:#fff;--soft:#e4e4e7;--tabbg:#0b0b0c;--sh1:#28282c;--sh2:#161618;--bar2:#1f1f22;--tc1:#2c2c31;--tc2:#18181b;--octbg:rgba(22,22,24,.92);--tog:#3a3a40;--track:#46464e;--cy2:#a1a1aa;--pk2:#ff9f0a;--av2:#ff9f0a;--toastc:#121212;--pklt:#ffe066;--pkup:#ffe066;--pkfade:#ffe680;--modal:rgba(0,0,0,.72);--shbg:rgba(0,0,0,.7)}
@@ -315,6 +315,7 @@ input[type=date].inp{color-scheme:dark;min-height:44px}
 .gearb{position:absolute;right:12px;bottom:4px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:var(--soft);border-radius:20px}.gearb .i{width:24px;height:24px}button.av{border:0;font-family:inherit;cursor:pointer;padding:0}
 .sgc{border:1px solid rgba(255,214,10,.35);background:rgba(255,214,10,.05);border-radius:12px;padding:12px 14px;margin-top:4px}.sgh{display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:.08em;color:var(--pk);font-weight:600}.sgh span{display:flex;align-items:center;gap:6px}.sgh .i{width:16px;height:16px}
 .sgr{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}.sgr:last-of-type{border:0}.sgr b{font-size:14px;font-weight:600;display:block}.sgr em{font-style:normal;font-size:11.5px;color:var(--mute);display:block;margin-top:2px;line-height:1.35}.sgr>span{flex:none;font-size:15px;font-weight:600;text-align:right;white-space:nowrap}.sgr>span.chg{color:var(--pk)}.sgr s{color:var(--mute);font-weight:400}.sgr small{font-size:11px;color:var(--mute);font-weight:400}
+.qbrand{display:flex;align-items:center;gap:10px}.qlogo{width:30px;height:30px;flex:none}
 .toast{position:fixed;left:50%;top:calc(var(--sat) + 64px);transform:translateX(-50%);background:#fff;color:var(--toastc);padding:10px 16px;border-radius:999px;font-weight:600;font-size:14px;z-index:99;transition:opacity .3s;white-space:nowrap}
 .prbox{margin:14px 20px 0;padding:10px;border:1px solid var(--pk);color:var(--pklt);border-radius:6px;font-weight:600;text-align:center}
 </style>
@@ -376,7 +377,7 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 const DEFAULT_THEME='volt';
 const THEMES={navy:{name:'Navy & Pink',meta:'#10215f',bg:'#10215f',a:'#ec3a6e',b:'#5fd0f3',sw:['#14297a','#ec3a6e','#5fd0f3']},volt:{name:'Black & Yellow',meta:'#151517',bg:'#151517',a:'#ffd60a',b:'#f4f4f5',sw:['#26262a','#ffd60a','#f4f4f5']}};
 function appIcon(t,px){const T=THEMES[t];return `<svg width="${px}" height="${px}" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="${T.bg}"/>${[16,32,48,32,16].map((w,k)=>`<rect x="26" y="${22+k*12}" width="${w}" height="8" rx="2" fill="${k===2?T.b:T.a}"/>`).join('')}</svg>`}
-function applyTheme(){const t='volt';try{document.documentElement.dataset.theme=t==='navy'?'':t;const m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content',THEMES[t].meta);const l=document.querySelector('link[rel=apple-touch-icon]');if(l)l.setAttribute('href',t==='navy'?'icon-180.png':'icon-'+t+'-180.png')}catch(e){}}
+function applyTheme(){const t='volt';try{document.documentElement.dataset.theme=t==='navy'?'':t;const m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content',THEMES[t].meta);const l=document.querySelector('link[rel=apple-touch-icon]');if(l)l.setAttribute('href','icon-bars-180.png')}catch(e){}}
 let S=load()||seed();
 if(!S.m1){S.autoRest=false;S.m1=1}
 if(S.libv!==LIBV){mergeLib();save()}
@@ -514,7 +515,7 @@ function newExHtml(){return `<div class="sh-t">Custom Exercise</div><div class="
 const hd=(t,l='',r='',st='')=>`<header class="hd"><div class="hl">${l}</div><h1>${t}${st?`<span class="st">${st}</span>`:''}</h1><div class="hr">${r}</div></header>`;
 const back=()=>`<button class="lnk" data-a="back" style="display:flex">${ic('back',2)}</button>`;
 function statsGrid(a,b,c,d){return `<div class="stats"><div>${ic('dumb')}<div><b>${a}</b><span>Exercises</span></div></div><div>${ic('log')}<div><b>${b}</b><span>Sets</span></div></div><div>${ic('rep')}<div><b>${c}</b><span>Reps</span></div></div><div>${ic('target')}<div><b>${d}<small> ${U()}</small></b><span>Weight lifted</span></div></div></div>`}
-function renderTabs(){const b=(k,l)=>`<button class="${V.tab===k&&!V.sub?'on':''}" data-a="tab" data-x="${k}">${ic(k)}<span>${l}</span></button>`;return `<nav class="tabs">${b('home','Home')}${b('goals','Goals')}<button class="fab" data-a="plus" aria-label="Quick actions"><svg viewBox="0 0 100 100" class="fablogo">${[16,32,48,32,16].map((w,k)=>`<rect x="${26+(48-w)/2*0}" y="${22+k*12}" width="${w}" height="8" rx="3" fill="currentColor" ${k===2?'opacity=".55"':''}/>`).join('')}</svg></button>${b('prog','Progress')}${b('tools','Tools')}</nav>`}
+function renderTabs(){const b=(k,l)=>`<button class="${V.tab===k&&!V.sub?'on':''}" data-a="tab" data-x="${k}">${ic(k)}<span>${l}</span></button>`;return `<nav class="tabs">${b('home','Home')}${b('goals','Goals')}<button class="fab" data-a="plus" aria-label="Quick actions"><svg viewBox="0 0 100 100" class="fablogo">${[36,46,33,48,37].map((w,k)=>`<rect x="26" y="${22+k*12}" width="${w}" height="8" rx="4" fill="currentColor" ${k===2?'opacity=".55"':''}/>`).join('')}</svg></button>${b('prog','Progress')}${b('tools','Tools')}</nav>`}
 
 /* home */
 function renderHome(){
@@ -596,7 +597,7 @@ function renderGoals(){
   h+=weekVolume();
   h+=`<div class="h2">Habits</div>${sugNudge()}
   <div class="li" style="cursor:default"><div class="g">Weekly workout goal</div><div class="stp w"><button data-a="wgoal" data-x="-1">${ic('minusc')}</button><span>${S.weekGoal} / wk</span><button data-a="wgoal" data-x="1">${ic('plusc')}</button></div></div>
-  <div class="li" data-a="stackinfo"><div class="g"><div class="tt">Daily Stack &amp; cardio goals</div><div class="sb">${G().sets} sets · ${G().move} min move · ${G().cardio} min cardio · ${G().weekCardio} min/wk</div></div><span class="chev">${ic('chev')}</span></div>`;
+  <div class="li" data-a="stackinfo"><div class="g"><div class="tt">Daily Bars &amp; cardio goals</div><div class="sb">${G().sets} sets · ${G().move} min move · ${G().cardio} min cardio · ${G().weekCardio} min/wk</div></div><span class="chev">${ic('chev')}</span></div>`;
   return hd('Goals')+`<main class="pg">${h}</main>`;
 }
 function renderProgress(){const ps=V.ps||'stats';
@@ -643,7 +644,7 @@ function renderMore(){
   <div class="li" data-a="export"><div class="g"><div class="tt">Copy backup as text</div><div class="sb">Fallback if file saving isn't available</div></div><span class="chev">${ic('chev')}</span></div>
   <div class="li" data-a="import"><div class="g">Restore from pasted text</div><span class="chev">${ic('chev')}</span></div>
   <div class="h2">Install</div><div class="li sm mute" style="cursor:default">In Safari, tap Share → Add to Home Screen to launch this like a regular app.</div>
-  <button class="dng" data-a="reset">Reset all data</button><p class="xs mute center">Stacked · your personal build</p></main>`;
+  <button class="dng" data-a="reset">Reset all data</button><p class="xs mute center">Bars · your personal build</p></main>`;
 }
 
 /* session */
@@ -752,7 +753,7 @@ function finishNow(){
   const today={};entries.forEach(e=>{const m=ex(e.exId).mg;if(m&&m!=='cardio')today[m]=(today[m]||0)+dn(e).length});const top=Object.entries(today).sort((a,b)=>b[1]-a[1])[0];if(top){const w=weekSets()[top[0]]||0,[vl,vh]=volTarget();recap.push(['',`${top[0].replace(/^./,c=>c.toUpperCase())} is at ${w} sets this week${w>=vl&&w<=vh?' (right in your target range)':w<vl?` (${vl-w} more to reach your ${vl}–${vh} target)`:` (above your ${vl}–${vh} target)`}`])}
   const dec=entries.map(e=>ex(e.exId)).filter(e=>isDeclining(e.id));if(dec.length)recap.push(['dn',`${esc(dec[0].name)} has dropped 3 sessions running. Consider a lighter week`]);
   S.session=null;V.inSession=false;V.ov=false;V.restOpen=false;V.tab='home';V.sub=null;
-  const tk=new Date().toDateString();const nowFull=closedCount(dayStats(dayStart(Date.now())))===5;if(nowFull&&S.stackDay!==tk){S.stackDay=tk;setTimeout(()=>prPop('Today\'s Stack','All five bars closed. Stacked!'),700)}
+  const tk=new Date().toDateString();const nowFull=closedCount(dayStats(dayStart(Date.now())))===5;if(nowFull&&S.stackDay!==tk){S.stackDay=tk;setTimeout(()=>prPop('Today\'s Bars','All five bars closed. That\'s a full set!'),700)}
   save();render();scr0();
   const reps=sum(entries.map(e=>sum(dn(e).map(x=>x.r))));
   openSheet(`<div class="sh-t center">Workout Complete 🏆<div class="xs mute" style="font-weight:400">${esc(h.name)} · ${mmss(h.dur)}</div></div>${statsGrid(entries.length,sum(entries.map(e=>dn(e).length)),reps,fmt(Math.round(volOf(h))))}${prs.length?`<div class="prbox">New PR${prs.length>1?'s':''}: ${prs.map(esc).join(', ')}</div>`:''}${recap.length?`<div class="recap">${recap.map(([k,t])=>`<div class="${k}"><i></i>${t}</div>`).join('')}</div>`:''}<button class="pkb" data-a="close">Nice</button>`);
@@ -794,7 +795,7 @@ function stackSvg(st,big){const W=[32,64,96,64,32],h=big?9:6,gap=big?13:9;return
 function stackCard(){const t0=dayStart(Date.now()),st=dayStats(t0),n=closedCount(st),g=G(),r=st.raw;
   const val={show:st.show?'Done ✓':'Log anything',lift:`${r.sets}/${g.sets} sets`,move:`${Math.round(r.move)}/${g.move} min`,cardio:`${Math.round(r.cardio)}/${g.cardio} min`,beat:st.beat?'Done ✓':'Beat last time'};
   const ws=weekStart(Date.now());const wk=[...Array(7)].map((_,k)=>{const d=ws+k*864e5,fut=d>t0,s2=fut?null:dayStats(d);return `<div class="wkd ${d===t0?'td':''} ${s2&&closedCount(s2)===5?'full':''}">${stackSvg(s2,false)}<span>${'MTWTFSS'[k]}</span></div>`}).join('');
-  return `<div class="stk" data-a="stackinfo"><div class="stkh"><b>Today's Stack</b><span class="${n===5?'full':''}">${n===5?'STACKED ✓':n+'/5 closed'}</span></div>
+  return `<div class="stk" data-a="stackinfo"><div class="stkh"><b>Today's Bars</b><span class="${n===5?'full':''}">${n===5?'ALL CLOSED ✓':n+'/5 closed'}</span></div>
   <div class="stkb">${stackSvg(st,true)}<div class="stkl">${SBARS.map(([k,l],i)=>`<div class="${st[k]>=1?'ok':''}"><i style="background:${i===2?'var(--cy)':'var(--pk)'}"></i><b>${l}</b><span>${val[k]}</span></div>`).join('')}</div></div>
   <div class="wk">${wk}</div></div>`}
 /* ===== suggested stack ===== */
@@ -822,9 +823,9 @@ function sugBlock(){const s=suggestStack(),g=G(),df=sugDiff(s);const row=(l,cur,
   ${s.miss.length?`<div class="xs" style="color:var(--soft);margin-top:8px">Add your ${s.miss.join(', ')} in Settings and Goals for a sharper suggestion.</div>`:''}
   ${df?`<button class="pkb" data-a="sugapply" style="margin:12px 0 0;width:100%">Apply Suggestion</button>`:''}</div>`}
 function sugNudge(){const s=suggestStack();if(!sugDiff(s)||S.sugDismiss===sugSig(s))return '';
-  return `<div class="li" data-a="stackinfo" style="background:rgba(255,214,10,.06)"><span style="color:var(--pk);display:flex">${ic('target')}</span><div class="g"><div class="tt">New suggested Stack</div><div class="sb">${s.week} workouts/wk · ${s.g.sets} sets · ${s.g.move} min move · ${s.g.weekCardio} min cardio/wk</div></div><button class="lnk sm" data-a="sugdismiss" style="padding:6px">${ic('x')}</button></div>`}
+  return `<div class="li" data-a="stackinfo" style="background:rgba(255,214,10,.06)"><span style="color:var(--pk);display:flex">${ic('target')}</span><div class="g"><div class="tt">New suggested Bars</div><div class="sb">${s.week} workouts/wk · ${s.g.sets} sets · ${s.g.move} min move · ${s.g.weekCardio} min cardio/wk</div></div><button class="lnk sm" data-a="sugdismiss" style="padding:6px">${ic('x')}</button></div>`}
 function stackInfoHtml(){const g=G();const row=(k,l,v,u)=>`<div class="li" style="cursor:default"><div class="g">${l}</div><div class="stp w"><button data-a="gstep" data-x="${k}|-1">${ic('minusc')}</button><span>${v} ${u}</span><button data-a="gstep" data-x="${k}|1">${ic('plusc')}</button></div></div>`;
-  return `<div class="sh-t">Close your Stack<div class="xs mute" style="font-weight:400;margin-top:2px">Five bars, one day. Fill all five and the day is Stacked.</div></div>
+  return `<div class="sh-t">Close your Bars<div class="xs mute" style="font-weight:400;margin-top:2px">Five bars, one day. Close all five and it’s a full set.</div></div>
   <div class="shp"><div class="stkexp">${SBARS.map(([k,l],i)=>`<div><i style="background:${i===2?'var(--cy)':'var(--pk)'}"></i><b>${l}</b><span>${{show:'Log any workout today',lift:'Working sets today',move:'Total minutes training today',cardio:'Cardio minutes today',beat:'Finish a workout with a PR or more volume than last time'}[k]}</span></div>`).join('')}</div></div>
   <div class="shp">${sugBlock()}</div>
   <div class="secl">Your Goals</div>${row('workouts','Workouts','<b>'+S.weekGoal+'</b>','/ wk')}${row('sets','Lift','<b>'+g.sets+'</b>','sets')}${row('move','Move','<b>'+g.move+'</b>','min')}${row('cardio','Cardio','<b>'+g.cardio+'</b>','min')}${row('weekCardio','Weekly cardio','<b>'+g.weekCardio+'</b>','min')}
@@ -947,7 +948,7 @@ function nutritionCard(raw){const xs=[...S.body].sort((a,b)=>b.date-a.date);cons
   <div class="recap" style="margin:12px 0 0">${adj.map(([k,t])=>`<div class="${k}"><i></i>${t}</div>`).join('')}</div>
   <p class="xs mute" style="margin:10px 0 0">Based on your lean mass (${fmt(Math.round(fromLb(lbm)))} ${U()}${bfAssumed?', assuming '+bf+'% body fat until you log it':''}), ~${Math.round(wk*10)/10} workout${Math.round(wk*10)/10===1?'':'s'} a week and your recent trends. These are estimates, so adjust by how your weight actually moves. If you have a medical condition, check with a doctor or dietitian.</p></div>`}
 /* ===== Apple Health via Shortcuts ===== */
-const HSC='Stacked Sync';
+const HSC='Bars Sync';
 const ymd=t=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 function hDate(str){str=String(str).trim().replace(/ | /g,' ').replace(/ at /i,' ').replace(/,/g,' ').replace(/\s+/g,' ');
   let t=Date.parse(str);if(!isNaN(t)&&/^\d{4}-\d\d-\d\dT/.test(str))return t;
@@ -961,7 +962,7 @@ function hDate(str){str=String(str).trim().replace(/ | /g,' ').replace(/ at /
   if(tm){hh=+tm[1];mm=+tm[2];if(tm[3]){const pm=/p/i.test(tm[3]);if(pm&&hh<12)hh+=12;if(!pm&&hh===12)hh=0}}
   return new Date(y,mo,d,hh,mm).getTime()}
 function hNum(v){const m=String(v).replace(/,(\d)/,'.$1').match(/-?\d+(\.\d+)?/);return m?parseFloat(m[0]):NaN}
-function hParse(txt){if(!txt||!/stacked/i.test(txt.slice(0,40)))return null;const out={w:[],b:[],s:[]};
+function hParse(txt){if(!txt||!/stacked|bars/i.test(txt.slice(0,40)))return null;const out={w:[],b:[],s:[]};
   txt.split(/\r?\n/).forEach(l=>{const p=l.split(/\s*[;|\t]\s*/);if(p.length<3)return;const k=p[0].trim().toUpperCase()[0],t=hDate(p[1]);let v=hNum(p[2]);if(!t||isNaN(v))return;const unit=(p[3]||p[2]).toLowerCase();
     if(k==='W'){let lb=/kg/.test(unit)?v*2.20462:v;if(!/kg|lb/.test(unit)&&U()==='kg')lb=v*2.20462;if(lb<60||lb>700)return;out.w.push({t,v:U()==='kg'?Math.round(lb/2.20462*10)/10:Math.round(lb*10)/10})}
     else if(k==='B'){if(v<1)v*=100;if(v<2||v>70)return;out.b.push({t,v:Math.round(v*10)/10})}
@@ -983,18 +984,18 @@ function stepsCard(){const st=S.steps||{};if(!Object.keys(st).length)return '';c
   <div class="stbars">${days.map(d=>`<div><i style="height:${d.v?Math.max(4,d.v/mx*100):0}%;${d.v>=10000?'background:var(--pk)':''}"></i><span>${'SMTWTFS'[new Date(d.t).getDay()]}</span></div>`).join('')}<em style="bottom:calc(18px + (100% - 18px)*${(10000/mx).toFixed(3)})"></em></div></div>`}
 function hGuide(){const step=(n,t,d)=>`<div class="hgs"><b>${n}</b><div><div class="tt">${t}</div><div class="sb">${d}</div></div></div>`;
   return `<div class="sh-t">Set up Apple Health sync<div class="xs mute" style="font-weight:400;margin-top:2px">One-time setup in the Shortcuts app, about 5 minutes</div></div><div class="shp">
-  ${step(1,'New shortcut','Open <b>Shortcuts</b> → <b>+</b>. Name it exactly <b>Stacked Sync</b>.')}
+  ${step(1,'New shortcut','Open <b>Shortcuts</b> → <b>+</b>. Name it exactly <b>Bars Sync</b>.')}
   ${step(2,'Weight','Add <b>Find Health Samples</b>: Type <b>Weight</b>, Start Date <b>is in the last 30 days</b>.')}
   ${step(3,'Turn each into a line','Add <b>Repeat with Each</b>. Inside it add a <b>Text</b> action: type <b>W;</b> then insert <b>Repeat Item</b> → tap it → <b>Start Date</b>, type <b>;</b>, insert Repeat Item → <b>Value</b>, type <b>;</b>, insert Repeat Item → <b>Unit</b>.')}
   ${step(4,'Body fat (optional)','Repeat steps 2–3 with Type <b>Body Fat Percentage</b> and the line starting <b>B;</b> instead of W;.')}
   ${step(5,'Steps','Add Find Health Samples: Type <b>Steps</b>, last <b>14 days</b>, <b>Group By: Day</b>. Repeat with Each → Text <b>S;</b>Start Date<b>;</b>Value.')}
-  ${step(6,'Combine and copy','Add a <b>Text</b> action at the end: first line <b>STACKED</b>, then on new lines insert each <b>Repeat Results</b>. Then add <b>Copy to Clipboard</b>.')}
-  ${step(7,'Sync','Back here, tap <b>Sync from Apple Health</b>. When the shortcut finishes, tap <b>◀ Stacked</b> at the top-left, then <b>Import</b>.')}
+  ${step(6,'Combine and copy','Add a <b>Text</b> action at the end: first line <b>BARS</b>, then on new lines insert each <b>Repeat Results</b>. Then add <b>Copy to Clipboard</b>.')}
+  ${step(7,'Sync','Back here, tap <b>Sync from Apple Health</b>. When the shortcut finishes, tap <b>◀ Bars</b> at the top-left, then <b>Import</b>.')}
   <div class="xs mute" style="margin-top:10px">The first run asks permission to read Health, tap Allow. Your manual entries always win over Health readings for the same day.</div></div>
-  <button class="pkb" data-a="hsync">Run Stacked Sync</button>`}
+  <button class="pkb" data-a="hsync">Run Bars Sync</button>`}
 function hImportSheet(){return `<div class="sh-t">Import from Apple Health<div class="xs mute" style="font-weight:400;margin-top:2px">Tap Import, then tap <b>Paste</b> if iPhone asks</div></div>
   <button class="pkb" data-a="hpaste" style="margin-top:4px">${ic('heart')} Import</button>
-  <div class="shp" style="margin-top:14px"><div class="xs mute" style="margin-bottom:6px">Or paste it here yourself</div><textarea class="inp" id="hta" rows="3" placeholder="STACKED…" style="width:100%;resize:none;font-size:13px"></textarea><button class="lnk sm" data-a="hpastebox" style="margin-top:8px">IMPORT PASTED TEXT</button></div>
+  <div class="shp" style="margin-top:14px"><div class="xs mute" style="margin-bottom:6px">Or paste it here yourself</div><textarea class="inp" id="hta" rows="3" placeholder="BARS…" style="width:100%;resize:none;font-size:13px"></textarea><button class="lnk sm" data-a="hpastebox" style="margin-top:8px">IMPORT PASTED TEXT</button></div>
   <button class="lnk sm" data-a="hguide" style="display:block;margin:10px auto 0">Shortcut not set up? See how</button>`}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)return;let p=0;try{p=+localStorage.getItem('stk-hpend')||0}catch(e){}if(p&&Date.now()-p<15*60e3){try{localStorage.removeItem('stk-hpend')}catch(e){}setTimeout(()=>openSheet(hImportSheet()),250)}});
 /* ===== weight goal assistant ===== */
@@ -1082,11 +1083,11 @@ function bodySection(mode){S.body.sort((a,b)=>b.date-a.date);let g='';
   g+=nutritionCard();
   h+=`<p class="xs mute" style="padding:4px 20px 0">Projections use the trend of the last 12 weeks and cap unrealistic rates. Treat them as a rough guide, not a promise.</p>`;
   return mode==='goal'?g:h}
-function backupFile(){const name=`stacked-backup-${new Date().toISOString().slice(0,10)}.json`,txt=JSON.stringify(S);
-  try{const f=new File([txt],name,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:'Stacked backup'}).then(()=>{S.lastBackup=Date.now();V.bkHide=true;save();render();toast('Backup saved')}).catch(()=>{});return}}catch(e){}
+function backupFile(){const name=`bars-backup-${new Date().toISOString().slice(0,10)}.json`,txt=JSON.stringify(S);
+  try{const f=new File([txt],name,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:'Bars backup'}).then(()=>{S.lastBackup=Date.now();V.bkHide=true;save();render();toast('Backup saved')}).catch(()=>{});return}}catch(e){}
   try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();a.remove()}catch(e){}
   toast('File saving not available here, so copy instead');ACT.export()}
-document.addEventListener('change',e=>{if(e.target.id!=='rfile'||!e.target.files||!e.target.files[0])return;const fr=new FileReader();fr.onload=()=>{try{const o=JSON.parse(fr.result);if(!o||!Array.isArray(o.exercises)||!Array.isArray(o.history)||!Array.isArray(o.routines))throw 0;confirmSheet(`Restore backup with ${o.history.length} workouts? This replaces everything currently in the app.`,()=>{S=o;if(!S.body)S.body=[];if(!S.weekGoal)S.weekGoal=3;if(S.libv!==LIBV)mergeLib();save();V={tab:'home',sub:null,stack:[],inSession:!!S.session,ov:false,restOpen:false,calc:null};render();toast('Backup restored')},'Restore',true)}catch(err){toast('That doesn’t look like a Stacked backup')}};fr.readAsText(e.target.files[0]);e.target.value=''});
+document.addEventListener('change',e=>{if(e.target.id!=='rfile'||!e.target.files||!e.target.files[0])return;const fr=new FileReader();fr.onload=()=>{try{const o=JSON.parse(fr.result);if(!o||!Array.isArray(o.exercises)||!Array.isArray(o.history)||!Array.isArray(o.routines))throw 0;confirmSheet(`Restore backup with ${o.history.length} workouts? This replaces everything currently in the app.`,()=>{S=o;if(!S.body)S.body=[];if(!S.weekGoal)S.weekGoal=3;if(S.libv!==LIBV)mergeLib();save();V={tab:'home',sub:null,stack:[],inSession:!!S.session,ov:false,restOpen:false,calc:null};render();toast('Backup restored')},'Restore',true)}catch(err){toast('That doesn’t look like a Bars backup')}};fr.readAsText(e.target.files[0]);e.target.value=''});
 
 /* ===== routine templates ===== */
 const TPL=[
@@ -1262,7 +1263,7 @@ const setW=st=>{st.w=bar()+2*sum(st.p||[])};
 const RS=()=>{save();render()};
 const ACT={
   noop:()=>{},
-  sugapply:()=>{const s=suggestStack();S.goals=Object.assign(G(),s.g);S.weekGoal=s.week;S.sugDismiss=undefined;save();refreshSheet(stackInfoHtml());render();toast('Stack updated. Home and your rings now use it')},
+  sugapply:()=>{const s=suggestStack();S.goals=Object.assign(G(),s.g);S.weekGoal=s.week;S.sugDismiss=undefined;save();refreshSheet(stackInfoHtml());render();toast('Bars updated. Home and your rings now use them')},
   sugdismiss:()=>{S.sugDismiss=sugSig(suggestStack());save();render()},
   pseg:x=>{V.ps=x;render();scr0()},
   hsync:()=>{closeSheet();if(!S.hsGuided){S.hsGuided=1;save();openSheet(hGuide());return}try{localStorage.setItem('stk-hpend',Date.now())}catch(e){}location.href='shortcuts://run-shortcut?name='+encodeURIComponent(HSC)},
@@ -1365,11 +1366,11 @@ const ACT={
   startd:x=>{const [ri,di]=x.split('|');startWorkout(ri,di)},
   plus:()=>{const r=S.routines.find(x=>x.active),nx=r&&r.days.length?D(r.id,nextDay(r)):null,last=S.history[0];
     const tile=(a,x,icn,l,sub)=>`<button class="qtile" data-a="${a}" ${x!=null?`data-x="${x}"`:''}><span>${ic(icn)}</span><b>${l}</b>${sub?`<small>${sub}</small>`:''}</button>`;
-    let h=`<div class="sh-t">Quick Actions</div>`;
+    let h=`<div class="sh-t qbrand"><svg viewBox="0 0 150 150" class="qlogo"><rect width="150" height="150" rx="34" fill="#151517"/>${[58,74,54,78,60].map((w,k)=>`<rect x="36" y="${28+k*20}" width="${w}" height="14" rx="7" fill="${k===2?'#fff':'#FFD60A'}"/>`).join('')}</svg>Quick Actions</div>`;
     if(S.session)h+=`<button class="qhero res" data-a="shres"><span>${ic('play')}</span><div><small>WORKOUT IN PROGRESS</small><b>Resume ${esc(S.session.name)}</b><em id="el3">${mmss((Date.now()-S.session.start)/1000)} elapsed</em></div>${ic('chev')}</button>`;
     else if(nx)h+=`<button class="qhero" data-a="startd" data-x="${r.id}|${nx.id}"><span>${ic('play')}</span><div><small>UP NEXT · ${esc(r.name).toUpperCase()}</small><b>Start ${esc(nx.name)}</b><em>${nx.items.length} exercises · ${nx.items.slice(0,3).map(it=>esc(ex(it.exId).name)).join(', ')}${nx.items.length>3?'…':''}</em></div>${ic('chev')}</button>`;
     else h+=`<button class="qhero" data-a="shsub" data-x="routines"><span>${ic('log')}</span><div><small>NO ACTIVE ROUTINE</small><b>Pick a routine</b><em>Choose a template or build your own</em></div>${ic('chev')}</button>`;
-    h+=`<div class="qgrid">`+(r?tile('rpick',r.id+'|',`log`,'Choose Workout',esc(r.name)):tile('shsub','routines','log','Routines','Templates & yours'))+tile('start','','plusc','Start Fresh','Empty workout')+(last?tile('repeat',last.id,'rep','Repeat Last',esc(last.name)):tile('dowk',null,'play','Do Workout','All workouts'))+tile('qtools',null,'calc','Tools','Plates, timer & more')+tile('qcardio',null,'heart','Cardio',`${Math.round(cardioMinSince(weekStart(Date.now()),Infinity))}/${G().weekCardio} min this week`)+tile('bodylog',null,'scale','Log Body','Weight & measures')+`</div>`;
+    h+=`<div class="qgrid">`+(r?tile('rpick',r.id+'|',`log`,'Choose Workout',esc(r.name)):tile('shsub','routines','log','Routines','Templates & yours'))+tile('start','','plusc','Start Fresh','Empty workout')+(last?tile('repeat',last.id,'rep','Repeat Last',esc(last.name)):tile('dowk',null,'play','Do Workout','All workouts'))+tile('stackinfo',null,'target','Today\'s Bars',`${closedCount(dayStats(dayStart(Date.now())))}/5 closed`)+tile('qcardio',null,'heart','Cardio',`${Math.round(cardioMinSince(weekStart(Date.now()),Infinity))}/${G().weekCardio} min this week`)+tile('bodylog',null,'scale','Log Body','Weight & measures')+`</div>`;
     openSheet(h)},
   repeat:x=>{const h=S.history.find(z=>z.id===x);if(!h)return;if(S.session){closeSheet();ACT.resume();toast('Workout already in progress');return}closeSheet();S.session={id:uid(),rid:h.rid||null,did:h.did||null,name:h.name,start:Date.now(),items:h.entries.map(e=>mkItem(e.exId,Math.max(1,e.sets.filter(z=>!z.wu).length))),i:0,s:0,rest:null};V.inSession=true;V.ov=false;V.animIn=true;save();render();V.animIn=false},
   qtools:()=>openSheet(`<div class="sh-t">Tools</div><div class="qgrid">${TOOLS.map(([k,n,d,icn])=>`<button class="qtile" data-a="qtool" data-x="${k}"><span>${ic(icn)}</span><b>${n}</b></button>`).join('')}</div>`),
