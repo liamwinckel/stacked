@@ -52,9 +52,9 @@ html,body{height:var(--fh,100%);overflow:hidden;overscroll-behavior:none}body{po
 .resume{display:flex;align-items:center;gap:12px;margin:14px 16px 0;padding:14px 16px;background:rgba(var(--pkr),.16);border:1px solid rgba(var(--pkr),.5);border-radius:8px;cursor:pointer}
 .resume b{color:var(--pk);font-size:13px;letter-spacing:.06em}
 .tabs{position:absolute;left:0;right:0;bottom:0;z-index:7;max-width:520px;margin:0 auto;display:flex;align-items:flex-end;background:var(--tabbg);border-top:1px solid var(--line);padding:6px 0 calc(6px + var(--sab))}
-.tabs>button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--mute);padding:4px 0}
+.tabs>button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;letter-spacing:-.01em;color:var(--mute);padding:4px 0}
 .tabs>button.on{color:#fff}
-.tabs .fab{width:52px;height:52px;flex:none;margin:0 6px 2px;border-radius:50%;background:var(--pk);color:var(--on-pk);box-shadow:0 2px 6px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center}
+.tabs .fab{width:52px;height:52px;flex:none;margin:0 4px 2px;border-radius:50%;background:var(--pk);color:var(--on-pk);box-shadow:0 2px 6px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center}
 .tabs .fab .i{width:28px;height:28px}
 .fablogo{width:34px;height:34px;margin-left:4px}
 .inp{width:100%;background:rgba(var(--deepr),.55);border:1px solid var(--line);color:#fff;border-radius:6px;padding:12px;font-size:16px;outline:none}
@@ -402,6 +402,8 @@ function volOf(h){return h.entries.reduce((a,e)=>{const t=ex(e.exId).type;return
 const IP={
  home:'<path d="M4 10.5 12 4l8 6.5V20h-5v-5.5H9V20H4z"/>',
  log:'<rect x="5" y="4" width="14" height="16" rx="1.5"/><path d="M8.5 9h7M8.5 12.5h7M8.5 16h4"/>',
+ prog:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+ tools:'<path d="M15.5 3.5a5 5 0 0 0-4.8 6.6L3.8 17a2.2 2.2 0 0 0 3.2 3.2l6.9-6.9a5 5 0 0 0 6.6-4.8l-3 1.6-2.6-.9-.9-2.6z"/>',
  goals:'<path d="M8 3h8l-2.5 5.5h-3z"/><circle cx="12" cy="14.5" r="5.5"/><circle cx="12" cy="14.5" r="2"/>',
  more:'<circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/>',
  plus:'<path d="M12 5v14M5 12h14"/>',minus:'<path d="M5 12h14"/>',
@@ -507,7 +509,7 @@ function newExHtml(){return `<div class="sh-t">Custom Exercise</div><div class="
 const hd=(t,l='',r='',st='')=>`<header class="hd"><div class="hl">${l}</div><h1>${t}${st?`<span class="st">${st}</span>`:''}</h1><div class="hr">${r}</div></header>`;
 const back=()=>`<button class="lnk" data-a="back" style="display:flex">${ic('back',2)}</button>`;
 function statsGrid(a,b,c,d){return `<div class="stats"><div>${ic('dumb')}<div><b>${a}</b><span>Exercises</span></div></div><div>${ic('log')}<div><b>${b}</b><span>Sets</span></div></div><div>${ic('rep')}<div><b>${c}</b><span>Reps</span></div></div><div>${ic('target')}<div><b>${d}<small> ${U()}</small></b><span>Weight lifted</span></div></div></div>`}
-function renderTabs(){const b=(k,l)=>`<button class="${V.tab===k&&!V.sub?'on':''}" data-a="tab" data-x="${k}">${ic(k)}<span>${l}</span></button>`;return `<nav class="tabs">${b('home','Home')}${b('log','Log')}<button class="fab" data-a="plus" aria-label="Quick actions"><svg viewBox="0 0 100 100" class="fablogo">${[16,32,48,32,16].map((w,k)=>`<rect x="${26+(48-w)/2*0}" y="${22+k*12}" width="${w}" height="8" rx="3" fill="currentColor" ${k===2?'opacity=".55"':''}/>`).join('')}</svg></button>${b('goals','Goals')}${b('more','More')}</nav>`}
+function renderTabs(){const b=(k,l)=>`<button class="${V.tab===k&&!V.sub?'on':''}" data-a="tab" data-x="${k}">${ic(k)}<span>${l}</span></button>`;return `<nav class="tabs">${b('home','Home')}${b('log','Log')}${b('goals','Goals')}<button class="fab" data-a="plus" aria-label="Quick actions"><svg viewBox="0 0 100 100" class="fablogo">${[16,32,48,32,16].map((w,k)=>`<rect x="${26+(48-w)/2*0}" y="${22+k*12}" width="${w}" height="8" rx="3" fill="currentColor" ${k===2?'opacity=".55"':''}/>`).join('')}</svg></button>${b('prog','Progress')}${b('tools','Tools')}${b('more','More')}</nav>`}
 
 /* home */
 function renderHome(){
@@ -580,9 +582,28 @@ function widget(id){
   return `<div class="wcard"><div class="row"><div style="flex:1;font-weight:600">${esc(e.name)}</div><button class="ico" data-a="delwid" data-x="${id}">${ic('x')}</button></div><div class="ws"><div><b>${b.n?(bw?b.reps:fmt(Math.round(b.e))):'–'}</b><span>${bw?'Best reps':'Est. 1RM'}</span></div><div><b>${b.n&&!bw?fmt(b.w)+'×'+b.wr:'–'}</b><span>Heaviest</span></div><div><b>${b.n}</b><span>Sessions</span></div></div>${spark(pts)}</div>`;
 }
 function renderGoals(){
-  let h=weekVolume()+prSection()+bodySection()+`<div class="h2">Workout Progress</div>`+(S.widgets.map(widget).join('')||'<div class="empty sm">Add a widget to track an exercise over time.</div>');
-  h+=`<button class="cyl" data-a="addwid" style="border:0;margin-top:6px">${ic('plusc')} Add a Widget</button>`;
+  let h=`<div class="h2">Your Focus</div>
+  <div class="li" style="cursor:default;flex-direction:column;align-items:stretch;gap:8px"><div class="sm mute">Main goal</div><div class="seg">${Object.entries(GOALL).map(([k,l])=>`<button class="${P().goal===k?'on':''}" data-a="pfset" data-x="goal|${k}" style="font-size:12px">${l}</button>`).join('')}</div></div>
+  <div class="li" style="cursor:default;flex-direction:column;align-items:stretch;gap:8px"><div class="sm mute">Training experience</div><div class="seg">${Object.entries(EXPL).map(([k,l])=>`<button class="${P().exp===k?'on':''}" data-a="pfset" data-x="exp|${k}">${l}</button>`).join('')}</div><div class="xs mute">${{beg:'Under ~1 year of consistent lifting',int:'1–4 years, still progressing month to month',adv:'4+ years, progress takes months'}[P().exp]}</div></div>
+  <div class="li" style="cursor:default"><div class="xs mute">Sets your weekly target of <b style="color:var(--pk)">${volTarget().join('–')}</b> sets per muscle and the plan below.</div></div>`;
+  h+=planCard();
+  h+=`<div class="h2">Body Targets</div>`+bodySection('goal');
+  h+=weekVolume();
+  h+=`<div class="h2">Habits</div>
+  <div class="li" style="cursor:default"><div class="g">Weekly workout goal</div><div class="stp w"><button data-a="wgoal" data-x="-1">${ic('minusc')}</button><span>${S.weekGoal} / wk</span><button data-a="wgoal" data-x="1">${ic('plusc')}</button></div></div>
+  <div class="li" data-a="stackinfo"><div class="g"><div class="tt">Daily Stack &amp; cardio goals</div><div class="sb">${G().sets} sets · ${G().move} min move · ${G().cardio} min cardio</div></div><span class="chev">${ic('chev')}</span></div>`;
   return hd('Goals')+`<main class="pg">${h}</main>`;
+}
+function renderProgress(){
+  let h=prSection()+bodySection('prog')+`<div class="h2">Workout Progress</div>`+(S.widgets.map(widget).join('')||'<div class="empty sm">Add a widget to track an exercise over time.</div>');
+  h+=`<button class="cyl" data-a="addwid" style="border:0;margin-top:6px">${ic('plusc')} Add a Widget</button>`;
+  return hd('Progress')+`<main class="pg">${h}</main>`;
+}
+function renderToolsTab(){
+  return hd('Tools')+`<main class="pg"><div class="h2">Calculators &amp; Timers</div>${TOOLS.map(([k,n,d,icn])=>`<div class="li" data-a="tool" data-x="${k}"><span style="color:var(--cy);display:flex">${ic(icn)}</span><div class="g"><div class="tt">${n}</div><div class="sb">${d}</div></div><span class="chev">${ic('chev')}</span></div>`).join('')}
+  <div class="h2">Library</div>
+  <div class="li" data-a="sub" data-x="routines"><span style="color:var(--cy);display:flex">${ic('cal')}</span><div class="g"><div class="tt">Routines</div><div class="sb">${S.routines?S.routines.length+' saved':'Your programs and samples'}</div></div><span class="chev">${ic('chev')}</span></div>
+  <div class="li" data-a="sub" data-x="exercises"><span style="color:var(--cy);display:flex">${ic('dumb')}</span><div class="g"><div class="tt">Exercises</div><div class="sb">${S.exercises.length} exercises</div></div><span class="chev">${ic('chev')}</span></div></main>`;
 }
 function renderCalc(){
   const c=V.calc;return `<div class="calcscr"><div class="bgfx"></div><header class="hd" style="background:none"><div class="hl"><button data-a="calcx" style="display:flex">${ic('x',2)}</button></div><h1>One-Rep Max Calculator</h1><div class="hr"></div></header>
@@ -598,22 +619,12 @@ function renderMore(){
   <div class="li" style="cursor:default"><div class="g sm mute">Age</div><input class="inp" style="width:55%;padding:8px 10px" type="number" inputmode="numeric" data-in="pfage" value="${P().age||''}" placeholder="Years"></div>
   <div class="li" style="cursor:default"><div class="g sm mute">Height</div>${U()==='kg'?`<input class="inp" style="width:55%;padding:8px 10px" type="number" inputmode="decimal" data-in="pfht" value="${P().height||''}" placeholder="cm">`:`<div style="width:55%;display:flex;gap:8px"><label class="ftin"><input class="inp" type="number" inputmode="numeric" data-in="pfft" id="pfft" value="${P().height?Math.floor(P().height/12):''}" placeholder="5"><span>ft</span></label><label class="ftin"><input class="inp" type="number" inputmode="numeric" data-in="pfin" id="pfin" value="${P().height?Math.round(P().height%12):''}" placeholder="10"><span>in</span></label></div>`}</div>
   <div class="li" style="cursor:default"><div class="g sm mute">Sex</div><div class="seg" style="width:55%">${[['m','Male'],['f','Female']].map(([k,l])=>`<button class="${(S.sex||'m')===k?'on':''}" data-a="ssex" data-x="${k}">${l}</button>`).join('')}</div></div>
-  <div class="li" style="cursor:default;flex-direction:column;align-items:stretch;gap:8px"><div class="sm mute">Training experience</div><div class="seg">${Object.entries(EXPL).map(([k,l])=>`<button class="${P().exp===k?'on':''}" data-a="pfset" data-x="exp|${k}">${l}</button>`).join('')}</div><div class="xs mute">${{beg:'Under ~1 year of consistent lifting',int:'1–4 years, still progressing month to month',adv:'4+ years, progress takes months'}[P().exp]}</div></div>
-  <div class="li" style="cursor:default;flex-direction:column;align-items:stretch;gap:8px"><div class="sm mute">Main goal</div><div class="seg">${Object.entries(GOALL).map(([k,l])=>`<button class="${P().goal===k?'on':''}" data-a="pfset" data-x="goal|${k}" style="font-size:12px">${l}</button>`).join('')}</div></div>
-  <div class="li" style="cursor:default"><div class="xs mute">Personalizes your weekly set target (now <b style="color:var(--pk)">${volTarget().join('–')}</b> per muscle), how fast projections assume you can progress (up to ~${Math.round(liftCap()*10)/10}%/week on lifts), your calorie estimate and protein, and whether the nutrition plan defaults to a cut, maintenance or bulk.</div></div>
-  ${planCard()}
   <div class="h2">Settings</div>
-  <div class="li" data-a="stackinfo"><div class="g"><div class="tt">Daily Stack &amp; cardio goals</div><div class="sb">${G().sets} sets · ${G().move} min move · ${G().cardio} min cardio · ${G().weekCardio} min/week</div></div><span class="chev">${ic('chev')}</span></div>
   <div class="li" style="cursor:default"><div class="g">Units</div><div class="seg" style="width:150px">${['lb','kg'].map(u=>`<button class="${U()===u?'on':''}" data-a="units" data-x="${u}">${u.toUpperCase()}</button>`).join('')}</div></div>
   <div class="li" style="cursor:default"><div class="g">Rest timer</div><div class="stp w"><button data-a="rest" data-x="-15">${ic('minusc')}</button><span>${mmss(S.rest)}</span><button data-a="rest" data-x="15">${ic('plusc')}</button></div></div>
-  <div class="li" style="cursor:default"><div class="g">Weekly workout goal</div><div class="stp w"><button data-a="wgoal" data-x="-1">${ic('minusc')}</button><span>${S.weekGoal} / wk</span><button data-a="wgoal" data-x="1">${ic('plusc')}</button></div></div>
   <div class="li" style="cursor:default"><div class="g">Auto-start rest timer after each set</div><button class="tog ${S.autoRest?'on':''}" data-a="auto"></button></div>
   <div class="li" style="cursor:default"><div class="g">Barbell weight</div><div class="stp w"><button data-a="barw" data-x="-1">${ic('minusc')}</button><span>${fmt(bar())} ${U()}</span><button data-a="barw" data-x="1">${ic('plusc')}</button></div></div>
   <div class="li" style="cursor:default"><div class="g">Dumbbell weight</div><div class="seg" style="width:180px">${[['per','Per DB'],['total','Total']].map(([k,l])=>`<button class="${S.dbMode===k?'on':''}" data-a="dbm" data-x="${k}">${l}</button>`).join('')}</div></div>
-  <div class="h2">Tools</div>${TOOLS.map(([k,n,d,icn])=>`<div class="li" data-a="tool" data-x="${k}"><span style="color:var(--cy);display:flex">${ic(icn)}</span><div class="g"><div class="tt">${n}</div><div class="sb">${d}</div></div><span class="chev">${ic('chev')}</span></div>`).join('')}
-  <div class="h2">Library</div>
-  <div class="li" data-a="sub" data-x="routines"><div class="g">Routines</div><span class="chev">${ic('chev')}</span></div>
-  <div class="li" data-a="sub" data-x="exercises"><div class="g">Exercises</div><span class="chev">${ic('chev')}</span></div>
   <div class="h2">Apple Health</div>
   <div class="li" data-a="hsync"><span style="color:var(--cy);display:flex">${ic('heart')}</span><div class="g"><div class="tt">Sync from Apple Health</div><div class="sb">${S.healthSync?'Last synced '+dlong(S.healthSync):'Weight, body fat and steps via the Shortcuts app'}</div></div><span class="chev">${ic('chev')}</span></div>
   <div class="li" data-a="hguide"><span style="color:var(--cy);display:flex">${ic('note')}</span><div class="g"><div class="tt">Set up the shortcut</div><div class="sb">One-time, about 5 minutes</div></div><span class="chev">${ic('chev')}</span></div>
@@ -700,7 +711,7 @@ function scr0(){const m=document.querySelector('#app main');if(m)m.scrollTop=0}
 function render(){
   const app=$('#app');let out;const pm=document.querySelector('#app main'),pmt=pm?pm.scrollTop:0,vk=[V.tab,V.sub,!!V.inSession,V.ov].join('|'),samev=vk===V._vk;V._vk=vk;
   if(S.session&&V.inSession)out=renderSession();
-  else{if(!S.session)V.inSession=false;out=(V.sub?renderSub():({home:renderHome,log:renderLog,goals:renderGoals,more:renderMore}[V.tab])())+renderTabs()}
+  else{if(!S.session)V.inSession=false;out=(V.sub?renderSub():({home:renderHome,log:renderLog,goals:renderGoals,prog:renderProgress,tools:renderToolsTab,more:renderMore}[V.tab])())+renderTabs()}
   if(V.calc)out+=renderCalc();
   if(V.tool)out+=renderTool();
   if(SWO){SWO.bg.remove();SWO=null}
@@ -842,7 +853,7 @@ function calendar(){const off=V.calM||0,now=new Date(),m=new Date(now.getFullYea
 function weekVolume(){const ws=weekStart(Date.now()),lw=ws-7*864e5;const a={},b={};S.history.forEach(h=>{const t=h.date>=ws?a:(h.date>=lw&&h.date<ws?b:null);if(!t)return;h.entries.forEach(e=>{const m=ex(e.exId).mg;if(!m||m==='cardio')return;t[m]=(t[m]||0)+dn(e).length})});
   const ms=MGS.filter(m=>a[m]||b[m]);let h=`<div class="h2">This Week<small>SETS PER MUSCLE</small></div>`;if(!ms.length)return h+'<div class="empty sm">Finish a workout to see your weekly sets by muscle group.</div>';
   const mx=Math.max(...ms.map(m=>Math.max(a[m]||0,b[m]||0)),10);ms.sort((x,y)=>(a[y]||0)-(a[x]||0));
-  return h+`<div class="vol">${ms.map(m=>`<div class="vr"><span>${m}</span><div class="vt"><i style="width:${(a[m]||0)/mx*100}%"></i>${b[m]?`<u style="left:${b[m]/mx*100}%"></u>`:''}</div><b>${a[m]||0}</b></div>`).join('')}<div class="xs mute" style="margin-top:8px">Bars = this week · tick = last week. Your target: <b style="color:var(--pk)">${volTarget().join('–')} hard sets per muscle per week</b> (${volWhy()}). Change it in More → Profile.</div></div>`}
+  return h+`<div class="vol">${ms.map(m=>`<div class="vr"><span>${m}</span><div class="vt"><i style="width:${(a[m]||0)/mx*100}%"></i>${b[m]?`<u style="left:${b[m]/mx*100}%"></u>`:''}</div><b>${a[m]||0}</b></div>`).join('')}<div class="xs mute" style="margin-top:8px">Bars = this week · tick = last week. Your target: <b style="color:var(--pk)">${volTarget().join('–')} hard sets per muscle per week</b> (${volWhy()}). Change it in Goals → Your Focus.</div></div>`}
 function prSection(){const list=S.exercises.map(e=>{const tl=prTimeline(e.id);return tl.length?{e,last:tl[tl.length-1],n:tl.length}:null}).filter(Boolean).sort((x,y)=>y.last.date-x.last.date);
   let h=`<div class="h2">Personal Records${list.length>5?`<button class="lnk sm" data-a="prall">${V.prAll?'LESS':'SEE ALL'}</button>`:''}</div>`;if(!list.length)return h+'<div class="empty sm">Your PRs will show up here as you train.</div>';
   return h+(V.prAll?list:list.slice(0,5)).map(x=>`<div class="li" data-a="prhist" data-x="${x.e.id}"><span style="color:var(--pk);display:flex">${ic('trophy')}</span><div class="g"><div class="tt">${esc(x.e.name)}</div><div class="sb">${x.last.w>0?`${fmt(x.last.w)} ${U()} × ${x.last.r} · e1RM ${fmt(Math.round(x.last.v))}`:`${x.last.r} reps`} · ${dlong(x.last.date)}</div></div><span class="chev">${ic('chev')}</span></div>`).join('')}
@@ -999,7 +1010,7 @@ function wgCard(){const g=S.weightGoal,bw=curBW();if(!g||!bw)return `<button cla
   return `<div class="wcard" data-a="wgopen" style="cursor:pointer"><div class="row" style="display:flex;justify-content:space-between"><div class="xs mute" style="letter-spacing:.08em">WEIGHT GOAL · ${fmt(g.target)} ${u} BY ${new Date(g.date).toLocaleDateString(undefined,{month:'short',day:'numeric'}).toUpperCase()}</div><b class="xs" style="color:${st[0]}">${st[1]}</b></div>
   <div class="wgbar"><i style="width:${pct}%"></i></div><div class="xs" style="display:flex;justify-content:space-between;margin-top:6px;color:var(--mute)"><span>${fmt(g.start)} ${u}</span><span style="color:var(--soft)">Now ${fmt(bw)} · ${Math.round(pct)}%</span><span>${fmt(g.target)} ${u}</span></div>
   <div class="xs mute" style="margin-top:6px">${wks>0?`${Math.ceil(wks)} weeks left · tap for your plan`:'Tap to set a new goal'}</div></div>`}
-function bodySection(){S.body.sort((a,b)=>b.date-a.date);
+function bodySection(mode){S.body.sort((a,b)=>b.date-a.date);let g='';
   let h=`<div class="h2">Body<span style="display:flex;gap:16px">${S.healthSync?`<button class="lnk sm" data-a="hsync">SYNC</button>`:''}${S.body.length?`<button class="lnk sm" data-a="bodyhist">HISTORY</button>`:''}<button class="lnk sm" data-a="bodylog">+ LOG</button></span></div>`;
   const latest=k=>{const x=S.body.find(b=>b[k]);if(!x)return null;const y=S.body.find(b=>b[k]&&b.date<x.date);return {v:x[k],d:y?Math.round((x[k]-y[k])*10)/10:null,date:x.date}};
   const dl=(d,inv)=>d===null||d===undefined?'':`<em class="${(inv?-d:d)>0?'up':(inv?-d:d)<0?'dn':''}">${d>0?'+':''}${d}</em>`;
@@ -1010,7 +1021,7 @@ function bodySection(){S.body.sort((a,b)=>b.date-a.date);
     const bwp=S.body.filter(b=>b.bw).slice(0,20).reverse().map(b=>b.bw);
     h+=`<div class="wcard"><div class="bcomp"><div><span>Bodyweight</span><b>${bw?fmt(Math.round(bw.v*10)/10):'–'}<small> ${U()}</small></b>${bw?dl(bw.d):''}</div><div><span>Body fat</span><b>${bf?fmt(Math.round(bf.v*10)/10):'–'}<small>%</small></b>${bf?dl(bf.d,true):''}</div><div><span>Lean mass</span><b>${lbm??'–'}<small> ${U()}</small></b>${lbm&&lbmPrev?dl(Math.round((lbm-lbmPrev)*10)/10):''}</div></div>${spark(bwp)}
     <div class="ws" style="flex-wrap:wrap">${[['waist','Waist',mu()],['chest','Chest',mu()],['arm','Arms',mu()],['thigh','Thighs',mu()]].map(([k,l,u])=>{const x=latest(k);return x?`<div style="min-width:25%;margin-top:8px"><b>${x.v}<small style="font-size:11px;color:var(--mute)"> ${u}</small></b><span>${l}</span> ${dl(x.d)}</div>`:''}).join('')}</div></div>`;}
-  h+=wgCard();
+  g+=wgCard();
   h+=stepsCard();
   h+=progChart();
   /* strength vs body */
@@ -1031,11 +1042,11 @@ function bodySection(){S.body.sort((a,b)=>b.date-a.date);
   else h+=`<div class="proj"><div class="pr0"><span></span><span>Now</span>${W.map(w=>`<span>${w} wk</span>`).join('')}</div>${rows.map(([n,u,now,vals])=>`<div><span>${n}</span><b>${fmt(Math.round(now*10)/10)}<small>${u==='%'?'%':''}</small></b>${vals.map(v=>{if(v==null)return '<b>–</b>';const r=Math.round(v*10)/10,d=r-now;return `<b class="${Math.abs(d)<.05?'':d>0?(n==='Body fat'?'neg':'pos'):(n==='Body fat'?'pos':(n==='Bodyweight'?'':'neg'))}">${fmt(u==='%'?r:Math.round(r))}</b>`}).join('')}</div>`).join('')}</div>`;
   /* target */
   const tg=S.bodyGoal||{};if(tg.bf&&lbm){const tw=lbm/(1-tg.bf/100);let eta='';if(sBF.length>=3){const r=linreg(sBF);if(r&&r.sl<0&&bf.v>tg.bf){const days=(bf.v-tg.bf)/(-r.sl);eta=new Date(Date.now()+days*864e5).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}}
-    h+=`<div class="wcard"><div class="xs mute" style="letter-spacing:.08em">TARGET · ${tg.bf}% BODY FAT</div><div class="sm" style="margin-top:6px;color:var(--soft)">Keeping your ${fmt(Math.round(lbm))} ${U()} of lean mass, that's about <b style="color:var(--pk)">${fmt(Math.round(tw))} ${U()}</b> (${fmt(Math.round(bw.v-tw))} ${U()} to lose). ${eta?`At your current rate: <b style="color:var(--pk)">~${eta}</b>.`:bf.v<=tg.bf?'You’re there!':'Not trending toward it yet.'}</div><button class="lnk sm" data-a="bgoal" style="margin-top:6px">CHANGE TARGET</button></div>`}
-  else h+=`<button class="cyl" data-a="bgoal" style="border:0">${ic('target')} Set a body fat target</button>`;
-  h+=nutritionCard();
+    g+=`<div class="wcard"><div class="xs mute" style="letter-spacing:.08em">TARGET · ${tg.bf}% BODY FAT</div><div class="sm" style="margin-top:6px;color:var(--soft)">Keeping your ${fmt(Math.round(lbm))} ${U()} of lean mass, that's about <b style="color:var(--pk)">${fmt(Math.round(tw))} ${U()}</b> (${fmt(Math.round(bw.v-tw))} ${U()} to lose). ${eta?`At your current rate: <b style="color:var(--pk)">~${eta}</b>.`:bf.v<=tg.bf?'You’re there!':'Not trending toward it yet.'}</div><button class="lnk sm" data-a="bgoal" style="margin-top:6px">CHANGE TARGET</button></div>`}
+  else g+=`<button class="cyl" data-a="bgoal" style="border:0">${ic('target')} Set a body fat target</button>`;
+  g+=nutritionCard();
   h+=`<p class="xs mute" style="padding:4px 20px 0">Projections use the trend of the last 12 weeks and cap unrealistic rates. Treat them as a rough guide, not a promise.</p>`;
-  return h}
+  return mode==='goal'?g:h}
 function backupFile(){const name=`stacked-backup-${new Date().toISOString().slice(0,10)}.json`,txt=JSON.stringify(S);
   try{const f=new File([txt],name,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:'Stacked backup'}).then(()=>{S.lastBackup=Date.now();V.bkHide=true;save();render();toast('Backup saved')}).catch(()=>{});return}}catch(e){}
   try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();a.remove()}catch(e){}
