@@ -1,5 +1,5 @@
 // Stacked service worker: works offline; always tries for the newest version first.
-const CACHE='stacked-v10';
+const CACHE='stacked-v11';
 const ASSETS=['./','./index.html','./manifest.json','./icon-180.png','./icon-192.png','./icon-512.png','./icon-volt-180.png','./icon-volt-192.png','./icon-volt-512.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==CACHE).map(x=>caches.delete(x)))));self.clients.claim()});
