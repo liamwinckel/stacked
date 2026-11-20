@@ -364,7 +364,7 @@ function mergeLib(){
 function seed(){
   const ex=LIB.map(l=>Object.assign({id:uid()},l));
   const f=n=>ex.find(e=>e.name===n).id, it=(n,s)=>({exId:f(n),sets:s});
-  return {v:2,name:'Liam',units:'lb',rest:120,autoRest:false,m1:1,bar:{lb:45,kg:20},dbMode:'per',libv:LIBV,body:[],weekGoal:3,exercises:ex,
+  return {v:2,name:'',units:'lb',rest:120,autoRest:false,m1:1,bar:{lb:45,kg:20},dbMode:'per',libv:LIBV,body:[],weekGoal:3,exercises:ex,
     routines:[{id:uid(),name:'Sample 3-Day Split',active:true,days:[
       {id:uid(),name:'Push',items:[it('Barbell Bench Press',3),it('Incline Dumbbell Press',3),it('Overhead Press',3),it('Tricep Pushdown',3)]},
       {id:uid(),name:'Pull',items:[it('Deadlift',3),it('Barbell Row',3),it('Lat Pulldown',3),it('Barbell Curl',3)]},
