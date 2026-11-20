@@ -14,7 +14,7 @@
 <link rel="icon" href="icon-volt-192.png">
 <style>
 :root{--top:#14297a;--mid:#0c1750;--bot:#060920;--cy:#5fd0f3;--pk:#ec3a6e;--text:#fff;--mute:#8e9ac6;--line:rgba(255,255,255,.09);--panel:rgba(var(--deepr),.45);--cyr:95,208,243;--pkr:236,58,110;--deepr:5,9,35;--hdr:var(--hdr);--on-pk:#fff;--on-cy:var(--on-cy);--num:var(--num);--soft:var(--soft);--tabbg:var(--tabbg);--sh1:#17307f;--sh2:#0c1648;--bar2:var(--bar2);--tc1:var(--tc1);--tc2:var(--tc2);--octbg:var(--octbg);--tog:var(--tog);--track:var(--track);--cy2:var(--cy2);--pk2:var(--pk2);--av2:var(--av2);--toastc:#0c1648;--pklt:var(--pklt);--pkup:var(--pkup);--pkfade:var(--pkfade);--modal:var(--modal);--shbg:var(--shbg)}
-html[data-theme="volt"]{--top:#26262a;--mid:#151517;--bot:#060607;--cy:#f4f4f5;--pk:#ffd60a;--text:#fff;--mute:#8e8e96;--line:rgba(255,255,255,.08);--panel:rgba(255,255,255,.035);--cyr:244,244,245;--pkr:255,214,10;--deepr:0,0,0;--hdr:rgba(34,34,38,.86);--on-pk:#121212;--on-cy:#121212;--num:#fff;--soft:#e4e4e7;--tabbg:#0b0b0c;--sh1:#28282c;--sh2:#161618;--bar2:#1f1f22;--tc1:#2c2c31;--tc2:#18181b;--octbg:rgba(22,22,24,.92);--tog:#3a3a40;--track:#46464e;--cy2:#a1a1aa;--pk2:#ff9f0a;--av2:#ff9f0a;--toastc:#121212;--pklt:#ffe066;--pkup:#ffe066;--pkfade:#ffe680;--modal:rgba(0,0,0,.72);--shbg:rgba(0,0,0,.7)}
+html[data-theme="volt"]{--top:#161618;--mid:#0d0d0f;--bot:#060607;--cy:#f4f4f5;--pk:#ffd60a;--text:#fff;--mute:#8e8e96;--line:rgba(255,255,255,.08);--panel:rgba(255,255,255,.035);--cyr:244,244,245;--pkr:255,214,10;--deepr:0,0,0;--hdr:rgba(34,34,38,.86);--on-pk:#121212;--on-cy:#121212;--num:#fff;--soft:#e4e4e7;--tabbg:#0b0b0c;--sh1:#28282c;--sh2:#161618;--bar2:#1f1f22;--tc1:#2c2c31;--tc2:#18181b;--octbg:rgba(22,22,24,.92);--tog:#3a3a40;--track:#46464e;--cy2:#a1a1aa;--pk2:#ff9f0a;--av2:#ff9f0a;--toastc:#121212;--pklt:#ffe066;--pkup:#ffe066;--pkfade:#ffe680;--modal:rgba(0,0,0,.72);--shbg:rgba(0,0,0,.7)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bot);color:var(--text);font:16px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 .bgfx{position:fixed;inset:0;z-index:-1;background:linear-gradient(180deg,var(--top) 0%,var(--mid) 45%,var(--bot) 100%)}
@@ -22,7 +22,8 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-
 input,textarea{font:inherit}
 #app{max-width:520px;margin:0 auto;min-height:100vh;position:relative}
 .i{width:22px;height:22px;flex:none;vertical-align:middle}
-.hd{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;background:var(--hdr);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.hd{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;background:var(--bot);border-bottom:1px solid var(--line)}
+.sbcover{position:fixed;left:0;right:0;top:0;height:env(safe-area-inset-top);background:var(--bot);z-index:30;pointer-events:none}
 .hd h1{flex:1;text-align:center;margin:0;font-size:17px;font-weight:600}
 .hd .st{display:block;font-size:11px;font-weight:600;color:var(--pk);letter-spacing:.06em;margin-top:2px}
 .hl,.hr{min-width:70px;display:flex;align-items:center}.hr{justify-content:flex-end}
@@ -296,7 +297,7 @@ em{font-style:normal;font-size:12px;font-weight:600;color:var(--mute)}em.up{colo
 </head>
 <body>
 <div class="bgfx"></div>
-<div id="app"></div>
+<div class="sbcover"></div><div id="app"></div>
 <script>
 const KEY='stacked-rebuild-v2';
 const $=s=>document.querySelector(s);
@@ -351,7 +352,7 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 const DEFAULT_THEME='volt';
 const THEMES={navy:{name:'Navy & Pink',meta:'#10215f',bg:'#10215f',a:'#ec3a6e',b:'#5fd0f3',sw:['#14297a','#ec3a6e','#5fd0f3']},volt:{name:'Black & Yellow',meta:'#151517',bg:'#151517',a:'#ffd60a',b:'#f4f4f5',sw:['#26262a','#ffd60a','#f4f4f5']}};
 function appIcon(t,px){const T=THEMES[t];return `<svg width="${px}" height="${px}" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="${T.bg}"/>${[16,32,48,32,16].map((w,k)=>`<rect x="26" y="${22+k*12}" width="${w}" height="8" rx="2" fill="${k===2?T.b:T.a}"/>`).join('')}</svg>`}
-function applyTheme(){const t=S.theme||DEFAULT_THEME;try{document.documentElement.dataset.theme=t==='navy'?'':t;const m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content',THEMES[t].meta);const l=document.querySelector('link[rel=apple-touch-icon]');if(l)l.setAttribute('href',t==='navy'?'icon-180.png':'icon-'+t+'-180.png')}catch(e){}}
+function applyTheme(){const t='volt';try{document.documentElement.dataset.theme=t==='navy'?'':t;const m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content',THEMES[t].meta);const l=document.querySelector('link[rel=apple-touch-icon]');if(l)l.setAttribute('href',t==='navy'?'icon-180.png':'icon-'+t+'-180.png')}catch(e){}}
 let S=load()||seed();
 if(!S.m1){S.autoRest=false;S.m1=1}
 if(S.libv!==LIBV){mergeLib();save()}
@@ -490,8 +491,8 @@ function renderTabs(){const b=(k,l)=>`<button class="${V.tab===k&&!V.sub?'on':''
 
 /* home */
 function renderHome(){
-  const bkDue=S.history.length&&(!S.lastBackup||Date.now()-S.lastBackup>7*864e5);
-  let h=`<div class="greet">${S.history.length?`<button class="bkic ${bkDue?'due':''}" data-a="bkfile" aria-label="Back up to iCloud">${ic('cloud')}${bkDue?`<span>${S.lastBackup?'Back up · '+Math.floor((Date.now()-S.lastBackup)/864e5)+'d':'Back up'}</span>`:''}</button>`:''}<div class="av">${esc((S.name||'?')[0].toUpperCase())}</div>Hi${S.name?', '+esc(S.name):''}</div>`;
+  const bkDue=S.history.length>0&&(!S.lastBackup||Date.now()-S.lastBackup>7*864e5);
+  let h=`<div class="greet">${true?`<button class="bkic ${bkDue?'due':''}" data-a="bkfile" aria-label="Back up to iCloud">${ic('cloud')}${bkDue?`<span>${S.lastBackup?'Back up · '+Math.floor((Date.now()-S.lastBackup)/864e5)+'d':'Back up'}</span>`:''}</button>`:''}<div class="av">${esc((S.name||'?')[0].toUpperCase())}</div>Hi${S.name?', '+esc(S.name):''}</div>`;
   if(S.session)h+=`<div class="resume" data-a="resume"><div style="flex:1"><b>WORKOUT IN PROGRESS</b><div class="sm">${esc(S.session.name)} · <span id="el2">${mmss((Date.now()-S.session.start)/1000)}</span></div></div><span class="lnk sm">RESUME</span></div>`;
   h+=stackCard();
   if(S.history.length)h+=streakStrip();
@@ -574,7 +575,6 @@ function calcRows(){const w=+V.calc.w||0,r=+V.calc.r||0,m=w&&r?e1(w,r):0;return 
 function renderMore(){
   return hd('More')+`<main class="pg">
   <div class="h2">Profile</div><div class="li" style="cursor:default"><div class="g sm mute">Your name</div><input class="inp" style="width:55%;padding:8px 10px" data-in="name" value="${esc(S.name||'')}" placeholder="Name"></div>
-  <div class="h2">Appearance</div><div class="themes">${Object.entries(THEMES).map(([k,T])=>`<button class="thm ${(S.theme||DEFAULT_THEME)===k?'on':''}" data-a="theme" data-x="${k}">${appIcon(k,56)}<div><b>${T.name}</b><div class="sws">${T.sw.map(c=>`<i style="background:${c}"></i>`).join('')}</div></div></button>`).join('')}</div>
   <div class="h2">Settings</div>
   <div class="li" data-a="stackinfo"><div class="g"><div class="tt">Daily Stack &amp; cardio goals</div><div class="sb">${G().sets} sets · ${G().move} min move · ${G().cardio} min cardio · ${G().weekCardio} min/week</div></div><span class="chev">${ic('chev')}</span></div>
   <div class="li" style="cursor:default"><div class="g">Units</div><div class="seg" style="width:150px">${['lb','kg'].map(u=>`<button class="${U()===u?'on':''}" data-a="units" data-x="${u}">${u.toUpperCase()}</button>`).join('')}</div></div>
