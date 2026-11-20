@@ -295,7 +295,7 @@ em{font-style:normal;font-size:12px;font-weight:600;color:var(--mute)}em.up{colo
 .plan .pl1{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:6px}.plan .pl1 div{display:flex;flex-direction:column}.plan .pl1 b{font-size:22px;font-weight:300;color:var(--num)}.plan .pl1 div:first-child b{color:var(--pk);font-weight:400}.plan .pl1 span{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
 .pl2{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line);margin-top:10px;font-size:13px}.pl2 span{color:var(--mute)}.pl2 b{font-weight:600;text-align:right}.pl2 em{font-style:normal;color:var(--pk);margin-left:4px}
 .vopt{margin-top:6px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.vopt>div{display:grid;grid-template-columns:1.55fr .7fr .7fr .95fr 1.15fr;align-items:center;padding:10px 12px;font-size:13px;column-gap:6px}.vopt>div+div{border-top:1px solid var(--line)}
+.vopt>div{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,.7fr) minmax(0,.7fr) minmax(0,.95fr) minmax(0,1.15fr);align-items:center;padding:10px 12px;font-size:13px;column-gap:6px}.vopt>div+div{border-top:1px solid var(--line)}
 .vopt>div>*{text-align:center;justify-self:stretch}.vopt>div>:first-child{text-align:left}
 .vopt .vh{padding-top:8px;padding-bottom:8px}.vopt .vh span{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);white-space:nowrap}
 .vopt b{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}.vopt b small{display:block;font-size:11px;font-weight:500;color:var(--mute)}.vopt .rec{background:rgba(var(--pkr),.08)}.vopt .rec span{color:var(--pk);font-weight:700}
@@ -776,19 +776,19 @@ function volWhy(){const p=P();return `${EXPL[p.exp]} · ${GOALL[p.goal].toLowerC
 function liftCap(){const p=P();let c={beg:2,int:1,adv:.5}[p.exp]||1;if(p.age>=60)c*=.55;else if(p.age>=50)c*=.7;else if(p.age>=40)c*=.85;return c}
 
 function planCard(){const n=nutritionCard(true),p=P(),[vl,vh]=volTarget(),mid=Math.round((vl+vh)/2);
-  const opts=[['Minimum',vl,.75,'Fair'],['Recommended',mid,1,'Good'],['Maximum',vh,1.12,'Best']].map(([l,v,m,keep])=>{const tot=v*5.5,ses=Math.max(2,Math.min(6,Math.ceil(tot/20))),mins=tot*2.5+ses*10;return {l,v,m,keep,ses,hrs:mins/60}});
+  const opts=[['Minimum',vl,.75,'Fair'],['Recommend',mid,1,'Good'],['Maximum',vh,1.12,'Best']].map(([l,v,m,keep])=>{const tot=v*5.5,ses=Math.max(2,Math.min(6,Math.ceil(tot/20))),mins=tot*2.5+ses*10;return {l,v,m,keep,ses,hrs:mins/60}});
   const G0=S.planGoal||{};let gl='',calc=null,col='To goal';const wk=x=>x==null||!isFinite(x)?'–':x<1?'<1 wk':x>104?'2+ yrs':`~${Math.round(x)} wk`;
   if(p.goal==='fat'){const xs=[...S.body].sort((a,b)=>b.date-a.date),bwE=xs.find(b=>b.bw),bfE=xs.find(b=>b.bf),tg=(S.bodyGoal||{}).bf;
     if(bwE&&bfE&&tg&&bfE.bf>tg){const lbm=bwE.bw*(1-bfE.bf/100),tw=lbm/(1-tg/100),w=(bwE.bw-tw)/(.007*bwE.bw);gl=`Reach ${tg}% body fat · ${fmt(Math.round(bwE.bw-tw))} ${U()} to lose`;calc=()=>w;col='Muscle kept'}
     else gl=tg?'Log bodyweight + body fat to estimate':'Set a body fat target in Goals → Body'}
   else if(p.goal==='muscle'){const amt=G0.lean||(U()==='kg'?2.5:5),mo={beg:2,int:1,adv:.5}[p.exp]*(U()==='kg'?.4536:1);gl=`Gain ${amt} ${U()} of lean muscle`;calc=m=>amt/(mo*m)*4.35}
   else{const pct=G0.str||(p.goal==='strength'?10:5),r=liftCap()*.5/100;gl=`+${pct}% on your big lifts`;calc=m=>Math.log(1+pct/100)/Math.log(1+r*m)}
-  const rows=opts.map(o=>`<div class="${o.l==='Recommended'?'rec':''}"><span>${o.l}</span><b>${o.v}</b><b>${o.ses}×</b><b>${o.hrs.toFixed(1)} h</b><b>${calc?(col==='Muscle kept'?`${o.keep}<small>${wk(calc(o.m))}</small>`:wk(calc(o.m))):'–'}</b></div>`).join('');
+  const rows=opts.map(o=>`<div class="${o.l==='Recommend'?'rec':''}"><span>${o.l}</span><b>${o.v}</b><b>${o.ses}×</b><b>${o.hrs.toFixed(1)} h</b><b>${calc?(col==='Muscle kept'?`${o.keep}<small>${wk(calc(o.m))}</small>`:wk(calc(o.m))):'–'}</b></div>`).join('');
   return `<div class="h2">Your Plan<small>AT A GLANCE</small></div><div class="wcard plan">
   ${n?`<div class="pl1"><div><b>${n.kcal.toLocaleString()}</b><span>kcal/day</span></div><div><b>${n.pro}g</b><span>protein</span></div><div><b>${n.carb}g</b><span>carbs</span></div><div><b>${n.fat}g</b><span>fat</span></div></div><div class="xs mute" style="margin-top:4px">${{cut:'Cutting',maintain:'Maintenance',bulk:'Lean bulk'}[n.mode]} · maintenance ≈ ${Math.round(n.tdee/25)*25} kcal</div>`:`<div class="sm" style="color:var(--soft)">Log your bodyweight to get calories and macros.</div><button class="lnk sm" data-a="bodylog" style="margin-top:4px">+ LOG BODYWEIGHT</button>`}
   <div class="pl2"><span>Weekly volume</span><b>${vl}–${vh} sets per muscle</b></div>
   <div class="pl2" data-a="plangoal" style="cursor:pointer"><span>Goal</span><b>${esc(gl)} ${p.goal!=='fat'?'<em>✎</em>':''}</b></div>
-  <div class="vopt"><div class="vh"><span>Option</span><span>Sets</span><span>Days</span><span>Time/wk</span><span>${col}</span></div>${rows}</div>
+  <div class="vopt"><div class="vh"><span>Option</span><span>Sets</span><span>Days</span><span>Time/wk</span><span>${col==='Muscle kept'?'Muscle':col}</span></div>${rows}</div>
   <p class="xs mute" style="margin:10px 0 0">More volume helps, but with diminishing returns, and it only pays off if you recover from it. "Sets" means hard sets per muscle per week. Time to goal is a rough estimate based on your experience${p.age?', age':''} and goal, so expect real progress to vary.</p></div>`}
 
 /* ===== coach ===== */
