@@ -292,6 +292,10 @@ em{font-style:normal;font-size:12px;font-weight:600;color:var(--mute)}em.up{colo
 .setl{display:flex;align-items:center;justify-content:center;gap:8px}.dsplus{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--pk);color:var(--pk);display:inline-flex;align-items:center;justify-content:center}.dsplus .i{width:14px;height:14px}
 .dsbtn{display:inline-flex;align-items:center;gap:8px;margin:14px auto 0;padding:8px 16px;border-radius:999px;border:1.5px dashed rgba(var(--pkr),.6);color:var(--pk);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}.dsbtn .i{width:16px;height:16px}
 .ftin{flex:1;position:relative;display:block}.ftin .inp{padding:8px 30px 8px 10px}.ftin span{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--mute);pointer-events:none}
+.plan .pl1{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:6px}.plan .pl1 div{display:flex;flex-direction:column}.plan .pl1 b{font-size:22px;font-weight:300;color:var(--num)}.plan .pl1 div:first-child b{color:var(--pk);font-weight:400}.plan .pl1 span{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.pl2{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line);margin-top:10px;font-size:13px}.pl2 span{color:var(--mute)}.pl2 b{font-weight:600;text-align:right}.pl2 em{font-style:normal;color:var(--pk);margin-left:4px}
+.vopt{margin-top:6px;border:1px solid var(--line);border-radius:10px;overflow:hidden}.vopt>div{display:grid;grid-template-columns:1.6fr .7fr .7fr 1fr 1.5fr;align-items:center;padding:9px 10px;font-size:12.5px;gap:4px}.vopt>div+div{border-top:1px solid var(--line)}
+.vopt .vh span{font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}.vopt b{font-weight:600;text-align:left}.vopt .rec{background:rgba(var(--pkr),.08)}.vopt .rec span{color:var(--pk);font-weight:700}.vopt i{font-style:normal}
 .toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 64px);transform:translateX(-50%);background:#fff;color:var(--toastc);padding:10px 16px;border-radius:999px;font-weight:600;font-size:14px;z-index:99;transition:opacity .3s;white-space:nowrap}
 .prbox{margin:14px 20px 0;padding:10px;border:1px solid var(--pk);color:var(--pklt);border-radius:6px;font-weight:600;text-align:center}
 </style>
@@ -582,6 +586,7 @@ function renderMore(){
   <div class="li" style="cursor:default;flex-direction:column;align-items:stretch;gap:8px"><div class="sm mute">Training experience</div><div class="seg">${Object.entries(EXPL).map(([k,l])=>`<button class="${P().exp===k?'on':''}" data-a="pfset" data-x="exp|${k}">${l}</button>`).join('')}</div><div class="xs mute">${{beg:'Under ~1 year of consistent lifting',int:'1–4 years, still progressing month to month',adv:'4+ years, progress takes months'}[P().exp]}</div></div>
   <div class="li" style="cursor:default;flex-direction:column;align-items:stretch;gap:8px"><div class="sm mute">Main goal</div><div class="seg">${Object.entries(GOALL).map(([k,l])=>`<button class="${P().goal===k?'on':''}" data-a="pfset" data-x="goal|${k}" style="font-size:12px">${l}</button>`).join('')}</div></div>
   <div class="li" style="cursor:default"><div class="xs mute">Personalizes your weekly set target (now <b style="color:var(--pk)">${volTarget().join('–')}</b> per muscle), how fast projections assume you can progress (up to ~${Math.round(liftCap()*10)/10}%/week on lifts), your calorie estimate and protein, and whether the nutrition plan defaults to a cut, maintenance or bulk.</div></div>
+  ${planCard()}
   <div class="h2">Settings</div>
   <div class="li" data-a="stackinfo"><div class="g"><div class="tt">Daily Stack &amp; cardio goals</div><div class="sb">${G().sets} sets · ${G().move} min move · ${G().cardio} min cardio · ${G().weekCardio} min/week</div></div><span class="chev">${ic('chev')}</span></div>
   <div class="li" style="cursor:default"><div class="g">Units</div><div class="seg" style="width:150px">${['lb','kg'].map(u=>`<button class="${U()===u?'on':''}" data-a="units" data-x="${u}">${u.toUpperCase()}</button>`).join('')}</div></div>
@@ -767,6 +772,22 @@ function volTarget(){const p=P();let [lo,hi]={beg:[8,12],int:[10,16],adv:[12,20]
 function volWhy(){const p=P();return `${EXPL[p.exp]} · ${GOALL[p.goal].toLowerCase()}${p.age?` · age ${p.age}`:''}`}
 function liftCap(){const p=P();let c={beg:2,int:1,adv:.5}[p.exp]||1;if(p.age>=60)c*=.55;else if(p.age>=50)c*=.7;else if(p.age>=40)c*=.85;return c}
 
+function planCard(){const n=nutritionCard(true),p=P(),[vl,vh]=volTarget(),mid=Math.round((vl+vh)/2);
+  const opts=[['Minimum',vl,.75,'Fair'],['Recommended',mid,1,'Good'],['Maximum',vh,1.12,'Best']].map(([l,v,m,keep])=>{const tot=v*5.5,ses=Math.max(2,Math.min(6,Math.ceil(tot/20))),mins=tot*2.5+ses*10;return {l,v,m,keep,ses,hrs:mins/60}});
+  const G0=S.planGoal||{};let gl='',calc=null,col='Time to goal';const wk=x=>x==null||!isFinite(x)?'–':x<1?'<1 wk':x>104?'2+ yrs':`~${Math.round(x)} wk`;
+  if(p.goal==='fat'){const xs=[...S.body].sort((a,b)=>b.date-a.date),bwE=xs.find(b=>b.bw),bfE=xs.find(b=>b.bf),tg=(S.bodyGoal||{}).bf;
+    if(bwE&&bfE&&tg&&bfE.bf>tg){const lbm=bwE.bw*(1-bfE.bf/100),tw=lbm/(1-tg/100),w=(bwE.bw-tw)/(.007*bwE.bw);gl=`Reach ${tg}% body fat · ${fmt(Math.round(bwE.bw-tw))} ${U()} to lose`;calc=()=>w;col='Muscle kept'}
+    else gl=tg?'Log bodyweight + body fat to estimate':'Set a body fat target in Goals → Body'}
+  else if(p.goal==='muscle'){const amt=G0.lean||(U()==='kg'?2.5:5),mo={beg:2,int:1,adv:.5}[p.exp]*(U()==='kg'?.4536:1);gl=`Gain ${amt} ${U()} of lean muscle`;calc=m=>amt/(mo*m)*4.35}
+  else{const pct=G0.str||(p.goal==='strength'?10:5),r=liftCap()*.5/100;gl=`+${pct}% on your big lifts`;calc=m=>Math.log(1+pct/100)/Math.log(1+r*m)}
+  const rows=opts.map(o=>`<div class="${o.l==='Recommended'?'rec':''}"><span>${o.l}</span><b>${o.v}</b><b>${o.ses}×</b><b>${o.hrs.toFixed(1)} h</b><b>${calc?(col==='Muscle kept'?`${o.keep} · ${wk(calc(o.m))}`:wk(calc(o.m))):'–'}</b></div>`).join('');
+  return `<div class="h2">Your Plan<small>AT A GLANCE</small></div><div class="wcard plan">
+  ${n?`<div class="pl1"><div><b>${n.kcal.toLocaleString()}</b><span>kcal/day</span></div><div><b>${n.pro}g</b><span>protein</span></div><div><b>${n.carb}g</b><span>carbs</span></div><div><b>${n.fat}g</b><span>fat</span></div></div><div class="xs mute" style="margin-top:4px">${{cut:'Cutting',maintain:'Maintenance',bulk:'Lean bulk'}[n.mode]} · maintenance ≈ ${Math.round(n.tdee/25)*25} kcal</div>`:`<div class="sm" style="color:var(--soft)">Log your bodyweight to get calories and macros.</div><button class="lnk sm" data-a="bodylog" style="margin-top:4px">+ LOG BODYWEIGHT</button>`}
+  <div class="pl2"><span>Weekly volume</span><b>${vl}–${vh} sets per muscle</b></div>
+  <div class="pl2" data-a="plangoal" style="cursor:pointer"><span>Goal</span><b>${esc(gl)} ${p.goal!=='fat'?'<em>✎</em>':''}</b></div>
+  <div class="vopt"><div class="vh"><span>Volume option</span><span>Sets</span><span>Days</span><span>Time/wk</span><span>${col}</span></div>${rows}</div>
+  <p class="xs mute" style="margin:10px 0 0">More volume helps, but with diminishing returns, and it only pays off if you recover from it. "Sets" means hard sets per muscle per week. Time to goal is a rough estimate based on your experience${p.age?', age':''} and goal, so expect real progress to vary.</p></div>`}
+
 /* ===== coach ===== */
 function exTrend(id,n){const out=[];for(const h of S.history){const en=h.entries.find(x=>x.exId===id);if(!en||!dn(en).length)continue;out.push(Math.max(...dn(en).map(x=>x.w>0?e1(x.w,x.r):x.r)));if(out.length===n)break}return out}
 function isDeclining(id){const t=exTrend(id,3);return t.length===3&&t[0]<t[1]&&t[1]<t[2]&&t[0]<t[2]*.985}
@@ -827,7 +848,7 @@ function progChart(){const avail=PM.filter(([k])=>progSeries(k).length>=2);if(!a
   <svg viewBox="0 0 ${Wd} ${H}" class="pchart">${grid}<line x1="${tx}" x2="${tx}" y1="${T}" y2="${H-B}" stroke="rgba(255,255,255,.18)" stroke-dasharray="2 4"/>${line}${proj}
   <text x="${L}" y="${H-8}" font-size="10" fill="var(--mute)">${dfmt(x0)}</text><text x="${tx}" y="${H-8}" text-anchor="middle" font-size="10" fill="var(--soft)">Today</text>${pj.length?`<text x="${Wd-R}" y="${H-8}" text-anchor="end" font-size="10" fill="var(--cy)">+12 wk</text>`:''}</svg>
   <div class="pleg"><span><i style="background:var(--pk)"></i>Logged</span>${pj.length?'<span><i class="dash"></i>Projected</span>':'<span class="mute">Projection after 3+ entries over 2+ weeks</span>'}</div></div>`}
-function nutritionCard(){const xs=[...S.body].sort((a,b)=>b.date-a.date);const bwE=xs.find(b=>b.bw);if(!bwE)return '';
+function nutritionCard(raw){const xs=[...S.body].sort((a,b)=>b.date-a.date);const bwE=xs.find(b=>b.bw);if(!bwE)return '';
   const toLb=v=>U()==='kg'?v*2.20462:v,fromLb=v=>U()==='kg'?v/2.20462:v;
   const bw=toLb(bwE.bw),bfE=xs.find(b=>b.bf),bfAssumed=!bfE,bf=bfE?bfE.bf:(S.sex==='f'?28:20),lbm=bw*(1-bf/100);
   const wk=S.history.filter(h=>h.date>Date.now()-28*864e5).length/4;const af=wk>=5?1.725:wk>=3?1.55:wk>=1?1.45:1.375;
@@ -848,6 +869,7 @@ function nutritionCard(){const xs=[...S.body].sort((a,b)=>b.date-a.date);const b
   if(!adj.length&&r)adj.push(['up','Your trends are on track. Keep it here and re-check in 2 weeks.']);if(!r)adj.push(['','Log your bodyweight 2–3× a week. After 2 weeks these targets adjust to your real results.']);
   kcal+=d;if(mode==='cut')kcal=Math.max(kcal,tdee*.75);if(mode==='bulk')kcal=Math.min(kcal,tdee*1.15);kcal=Math.round(kcal/25)*25;
   const pro=Math.round(Math.min(mode==='cut'||P().goal==='muscle'||P().goal==='strength'||(P().age>=50)?1.0*bw:.85*bw,1.3*lbm)/5)*5,fat=Math.round(Math.max(.3*bw,kcal*(mode==='cut'?.25:.28)/9)/5)*5,carb=Math.max(0,Math.round((kcal-pro*4-fat*9)/4/5)*5);
+  if(raw)return {kcal,pro,carb,fat,tdee,mode};
   const pc=[pro*4,carb*4,fat*9].map(v=>v/kcal*100);const rateTxt=rate?`${rate<0?'−':'+'}${fmt(Math.round(Math.abs(fromLb(rate*bw))*10)/10)} ${U()}/week`:'hold steady';
   return `<div class="wcard nut"><div class="row" style="justify-content:space-between;align-items:center"><div class="xs mute" style="letter-spacing:.08em">NUTRITION PLAN</div><div class="seg mini2" style="width:190px">${[['cut','Cut'],['maintain','Maintain'],['bulk','Lean bulk']].map(([k,l])=>`<button class="${mode===k?'on':''}" data-a="nutmode" data-x="${k}">${l}</button>`).join('')}</div></div>
   <div class="nk"><b>${kcal.toLocaleString()}</b><span>calories / day</span><em>Maintenance ≈ ${Math.round(tdee/25)*25} · aim ${rateTxt}</em></div>
@@ -1066,6 +1088,7 @@ const setW=st=>{st.w=bar()+2*sum(st.p||[])};
 const RS=()=>{save();render()};
 const ACT={
   noop:()=>{},
+  plangoal:()=>{const p=P(),g=S.planGoal||{};if(p.goal==='fat'){ACT.tab('goals');return}if(p.goal==='muscle')numSheet(`Lean muscle to gain (${U()})`,g.lean||(U()==='kg'?2.5:5),v=>{S.planGoal=Object.assign({},g,{lean:v>0?v:undefined})});else numSheet('Strength increase goal (%)',g.str||(p.goal==='strength'?10:5),v=>{S.planGoal=Object.assign({},g,{str:v>0?v:undefined})})},
   pfset:x=>{const [k,v]=x.split('|');S.profile=Object.assign(P(),{[k]:v});save();render()},
   swdel:()=>{const o=SWO;if(!o)return;SWO=null;SWEAT=false;o.el.style.transition='transform .2s ease,opacity .2s';o.el.style.transform=`translateX(${-o.el.offsetWidth}px)`;o.el.style.opacity='0';o.bg.style.transition='width .2s ease';o.bg.style.width=o.el.offsetWidth+'px';setTimeout(()=>{o.bg.remove();swDo(o.el.dataset.sw)},190)},
   dropset:()=>{const s=S.session,it=s.items[s.i],st=cur(),e=ex(it.exId);let w=st.w>0?Math.max(e.type==='barbell'?bar():0,rnd(st.w*.8)):0;if(st.w>0&&w>=st.w)w=Math.max(0,st.w-incFor(e.type));const ns={w,r:st.r,done:false,ds:true};it.sets.push(ns);if(!st.done)st.done=true;s.s=it.sets.length-1;save();render();toast(st.w>0?`Drop set: ${fmt(w)} ${U()} (−${Math.round((1-w/st.w)*100)}%). Go to failure`:'Drop set added. Go to failure')},
