@@ -358,6 +358,10 @@ input[type=date].inp{color-scheme:dark;min-height:44px}
 .refc{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:12px}.refc button{padding:6px 10px;border-radius:14px;border:1px solid var(--line);font-size:12px;color:var(--soft)}.refc button.on{background:var(--pk);border-color:var(--pk);color:#000;font-weight:600}
 .gychip{display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;padding:6px 12px;border-radius:14px;border:1px solid var(--line);font-size:12px;color:var(--soft)}.gychip .i{width:14px;height:14px}
 .rcwr{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:10px 12px;margin-bottom:6px;border-radius:10px;background:rgba(255,122,122,.08);border:1px solid rgba(255,122,122,.3)}.rcwr b{font-size:15px}.rcwr span{font-size:12px;color:var(--soft);text-align:right}
+.mgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:6px}.mgrid.mh{margin-top:14px}.mgrid.mh span{text-align:center;font-size:10px;color:var(--mute)}
+.mcd{aspect-ratio:1/1.15;border-radius:9px;background:#121214;border:1px solid #1f1f23;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0;color:var(--mute)}.mcd span{font-size:10px}.mcd svg{width:28px}.mcd em{font-style:normal;font-size:7px;letter-spacing:.06em;font-weight:700;color:#5a5a60}.mcd.full{background:rgba(255,214,10,.1);border-color:rgba(255,214,10,.35)}.mcd.td{border-color:var(--pk)}.mcd.td span{color:var(--pk);font-weight:700}.mcd.fut{opacity:.5}
+.mnav{width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:var(--soft);border-radius:17px;background:rgba(255,255,255,.06)}.mnav .i{width:18px;height:18px}
+.vbleg{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px;font-size:12px;color:var(--soft)}.vbleg span{display:flex;align-items:center;gap:6px}.vbleg i{width:10px;height:10px;border-radius:3px;display:inline-block}
 .toast{position:fixed;left:50%;top:calc(var(--sat) + 64px);transform:translateX(-50%);background:#fff;color:var(--toastc);padding:10px 16px;border-radius:999px;font-weight:600;font-size:14px;z-index:99;transition:opacity .3s;white-space:nowrap}
 .prbox{margin:14px 20px 0;padding:10px;border:1px solid var(--pk);color:var(--pklt);border-radius:6px;font-weight:600;text-align:center}
 </style>
@@ -1250,11 +1254,13 @@ function insSummary(k){const bw=curBW();if(k==='str'){if(!bw)return 'Log bodywei
   if(k==='yr'){const n=new Set(S.history.filter(h=>h.date>=Date.now()-365*864e5).map(h=>dayStart(h.date))).size;return n+' active days'}
   if(k==='rd'){const t=readyToday();return t&&t.score?'Today '+t.score+'/5':'No check-in today'}
   if(k==='tr'){const n=Object.keys(S.ach||{}).length;return n+'/'+achDefs().length+' unlocked'}
+  if(k==='mo')return monthSummary();
+  if(k==='vb')return vbSummary();
   if(k==='pr'){const n=S.exercises.filter(e=>prTimeline(e.id).length).length,m=new Date(),c=prsIn(new Date(m.getFullYear(),m.getMonth(),1).getTime(),Infinity).length;return c?c+' this month · '+n+' lifts':n+' lifts tracked'}
   if(k==='ph'){const n=(S.photos||[]).length;return n?n+' photo'+(n>1?'s':''):'None yet'}}
-const INS=[['pr','Personal Records','trophy'],['str','Strength Balance','radar'],['yr','Training Year','cal'],['tr','Trophy Case','target'],['rd','Readiness','heart'],['ph','Progress Photos','camera']];
+const INS=[['mo','Month of Bars','cal'],['vb','Volume Balance','radar'],['pr','Personal Records','trophy'],['str','Strength Balance','dumb'],['yr','Training Year','cal'],['tr','Trophy Case','target'],['rd','Readiness','heart'],['ph','Progress Photos','camera']];
 function insTiles(){return `<div class="h2">Insights</div><div class="insg">${INS.map(([k,l,i])=>`<button class="ins" data-a="insopen" data-x="${k}"><span>${ic(i)}</span><b>${l}</b><em>${insSummary(k)}</em></button>`).join('')}</div>`}
-function insHtml(k){const strip=h=>h.replace(/^<div class="h2">[\s\S]*?<\/div>/,'');const t={pr:'Personal Records',str:'Strength Balance',yr:'Training Year',tr:'Trophy Case',rd:'Readiness',ph:'Progress Photos'}[k];
+function insHtml(k){if(k==='mo')return monthHtml();if(k==='vb')return vbHtml();const strip=h=>h.replace(/^<div class="h2">[\s\S]*?<\/div>/,'');const t={pr:'Personal Records',str:'Strength Balance',yr:'Training Year',tr:'Trophy Case',rd:'Readiness',ph:'Progress Photos'}[k];
   const body={pr:()=>{const a=V.prAll;V.prAll=true;const h=strip(prSection());V.prAll=a;return h},str:()=>strip(radarCard()),yr:()=>strip(heatmap()),tr:()=>achSection().replace(/^<div class="h2">([\s\S]*?)<\/div>/,''),rd:()=>readyCard()?strip(readyCard()):'<div class="empty sm">Use Check In on the Ready screen before a workout to start tracking readiness.</div>',ph:()=>photosSection().replace(/^<div class="h2">[\s\S]*?<\/div>/,(S.photos||[]).length>=2?'<div class="shp"><button class="olb" data-a="phcmp" style="margin:0 0 10px;width:100%">Compare Photos</button></div>':'')}[k]();
   return `<div class="sh-t">${t}</div><div class="insb">${body}</div>`}
 function insRefresh(){if(V.ins&&$('#shc')&&$('.insb')){refreshSheet(insHtml(V.ins));fillPhotos()}}
@@ -1345,6 +1351,41 @@ function prgHtml(t){return `<div class="sh-t">${esc(t.name)}<div class="xs mute"
 function refStart(){const r=S.strRef||{k:'last'},n=new Date();if(r.k==='month')return new Date(n.getFullYear(),n.getMonth(),1).getTime();if(r.k==='ytd')return new Date(n.getFullYear(),0,1).getTime();if(r.k==='custom'&&r.from)return r.from;return S.history[0]?S.history[0].date-1:Date.now()}
 function refLabel(){const r=S.strRef||{k:'last'};return {last:'since last workout',month:'this month',ytd:'this year',custom:r.from?'since '+new Date(r.from).toLocaleDateString(undefined,{month:'short',day:'numeric'}):'custom'}[r.k]}
 function refChips(){const k=(S.strRef||{}).k||'last';return `<div class="refc">${[['last','Last workout'],['month','This month'],['ytd','Year to date'],['custom',k==='custom'&&S.strRef.from?new Date(S.strRef.from).toLocaleDateString(undefined,{month:'short',day:'numeric'})+' →':'Custom']].map(([x,l])=>`<button class="${k===x?'on':''}" data-a="sref" data-x="${x}">${l}</button>`).join('')}</div>`}
+/* ===== Month of Bars ===== */
+function monthHtml(){const off=V.mo||0,n=new Date(),m0=new Date(n.getFullYear(),n.getMonth()+off,1),y=m0.getFullYear(),mo=m0.getMonth(),days=new Date(y,mo+1,0).getDate(),lead=(m0.getDay()+6)%7,t0=dayStart(Date.now());
+  let cells='',full=0,wk=0,rest=0,past=0;const cnt={show:0,lift:0,move:0,cardio:0,beat:0};
+  for(let i=0;i<lead;i++)cells+='<div></div>';
+  for(let d=1;d<=days;d++){const t=new Date(y,mo,d).getTime(),fut=t>t0,o=dayOv(t),isRest=o&&o.skip;let inner='',cls='';
+    if(fut)inner=isRest?'<em>REST</em>':'';
+    else if(isRest){inner='<em>REST</em>';rest++;past++}
+    else{const st=dayStats(t),c=closedCount(st);past++;SBARS.forEach(([k])=>{if(st[k]>=1)cnt[k]++});if(st.show)wk++;if(c===5){full++;cls='full'}
+      inner=`<svg viewBox="0 0 96 74">${[['show',71],['lift',91],['move',66],['cardio',96],['beat',74]].map(([k,w],j)=>`<rect x="0" y="${j*16}" width="${w}" height="10" rx="5" fill="${st[k]>=1?(j===2?'#fff':'#FFD60A'):'#26262a'}"/>`).join('')}</svg>`}
+    cells+=`<button class="mcd ${cls} ${t===t0?'td':''} ${fut?'fut':''}" data-a="mday" data-x="${t}"><span>${d}</span>${inner}</button>`}
+  const ord=SBARS.map(([k,l])=>[l,cnt[k]]).sort((a,b)=>b[1]-a[1]);const nact=past-rest;
+  return `<div class="sh-t" style="display:flex;align-items:center;justify-content:space-between"><span>${m0.toLocaleDateString(undefined,{month:'long',year:'numeric'})}</span><span style="display:flex;gap:4px"><button class="mnav" data-a="mnav" data-x="-1">${ic('back',2)}</button><button class="mnav" data-a="mnav" data-x="1" ${off>=0?'disabled style="opacity:.25"':''}>${ic('chev',2)}</button></span></div>
+  <div class="shp"><div class="xs mute">${full} full set${full===1?'':'s'} · ${wk} workout day${wk===1?'':'s'} · ${rest} rest day${rest===1?'':'s'}</div>
+  <div class="mgrid mh">${'MTWTFSS'.split('').map(x=>`<span>${x}</span>`).join('')}</div><div class="mgrid">${cells}</div>
+  ${nact?`<div class="wcard" style="margin:14px 0 0"><div class="row" style="display:flex;justify-content:space-between"><b class="sm">Most closed</b><span class="sm" style="color:var(--pk);font-weight:700">${ord[0][0]} · ${ord[0][1]}/${nact}</span></div><div style="display:flex;justify-content:space-between;margin-top:8px"><b class="sm">Least closed</b><span class="sm" style="color:var(--soft)">${ord[4][0]} · ${ord[4][1]}/${nact}</span></div><div class="xs mute" style="margin-top:10px">Tap a day to see its bars or mark it as rest.</div></div>`:''}</div>`}
+function monthSummary(){const n=new Date(),m0=new Date(n.getFullYear(),n.getMonth(),1).getTime(),t0=dayStart(Date.now());let full=0;for(let t=m0;t<=t0;t+=864e5){const o=dayOv(t);if(o&&o.skip)continue;if(closedCount(dayStats(t))===5)full++}return full+' full set'+(full===1?'':'s')+' this month'}
+
+/* ===== Volume Balance ===== */
+const VBM=['chest','back','shoulders','biceps','triceps','quads','hamstrings','glutes','calves','abs'],VSM=['biceps','triceps','calves','abs'];
+function vbTarget(m){const [lo,hi]=volTarget();return VSM.includes(m)?[Math.round(lo*.7),Math.round(hi*.75)]:[lo,hi]}
+function vbHtml(){const a=weekSets(),[lo0,hi0]=volTarget(),tot=sum(VBM.map(m=>a[m]||0)),cx=176,cy=176,r0=46,R=150,da=Math.PI*2/VBM.length,mx=Math.max(hi0+4,...VBM.map(m=>a[m]||0));
+  const sc=v=>r0+(R-r0)*Math.min(1,v/mx),P=(a_,r)=>[cx+Math.cos(a_)*r,cy+Math.sin(a_)*r],arc=(a0,a1,r1,r2)=>{const [x1,y1]=P(a0,r1),[x2,y2]=P(a0,r2),[x3,y3]=P(a1,r2),[x4,y4]=P(a1,r1);return `M${x1.toFixed(1)} ${y1.toFixed(1)} L${x2.toFixed(1)} ${y2.toFixed(1)} A${r2} ${r2} 0 0 1 ${x3.toFixed(1)} ${y3.toFixed(1)} L${x4.toFixed(1)} ${y4.toFixed(1)} A${r1} ${r1} 0 0 0 ${x1.toFixed(1)} ${y1.toFixed(1)}Z`};
+  let o='';const under=[];VBM.forEach((m,i)=>{const v=a[m]||0,[lo,hi]=vbTarget(m),a0=-Math.PI/2+i*da+.03,a1=a0+da-.06,c=v<lo?'#5a5a60':v>hi?'#fff':'#FFD60A';if(v<lo)under.push([m,lo-v]);
+    o+=`<path d="${arc(a0,a1,r0,R)}" fill="#141416"/>${v?`<path d="${arc(a0,a1,r0,sc(v))}" fill="${c}"/>`:''}`;const tr=sc(lo),[tx1,ty1]=P(a0,tr),[tx2,ty2]=P(a1,tr);o+=`<path d="M${tx1.toFixed(1)} ${ty1.toFixed(1)} A${tr} ${tr} 0 0 1 ${tx2.toFixed(1)} ${ty2.toFixed(1)}" fill="none" stroke="#FFD60A" stroke-width="1.5" stroke-dasharray="3 3"/>`;
+    const am=(a0+a1)/2,[nx,ny]=P(am,r0+16),[lx,ly]=P(am,R-14);o+=`<text x="${nx.toFixed(1)}" y="${(ny+3).toFixed(1)}" font-size="10" text-anchor="middle" fill="${v&&c!=='#5a5a60'?'#000':'#c7c7cc'}" font-weight="700">${v}</text><text x="${lx.toFixed(1)}" y="${(ly+3).toFixed(1)}" font-size="9" text-anchor="middle" fill="#8a8a93">${m==='hamstrings'?'hams':m}</text>`});
+  o+=`<circle cx="${cx}" cy="${cy}" r="${r0-6}" fill="var(--bg,#0a0a0b)"/><text x="${cx}" y="${cy-2}" font-size="22" text-anchor="middle" fill="#fff" font-weight="300">${tot}</text><text x="${cx}" y="${cy+14}" font-size="9" text-anchor="middle" fill="#8a8a93">sets</text>`;
+  under.sort((x,y)=>y[1]-x[1]);let tip='';const r=S.routines.find(x=>x.active);
+  if(under.length){const top=under.slice(0,2),need=sum(top.map(x=>x[1]));let day=null;if(r){const doneIds=new Set(S.history.filter(h=>h.date>=weekStart(Date.now())).map(h=>h.did));day=r.days.find(d=>!doneIds.has(d.id)&&d.items.some(it=>top.some(([m])=>ex(it.exId).mg===m)))}
+    tip=`${top.map(x=>x[0].replace(/^./,c=>c.toUpperCase())).join(' and ')} ${top.length>1?'are':'is'} under target. Add <b style="color:var(--pk)">${need} set${need>1?'s':''}</b>${day?` to ${esc(day.name)}`:' this week'} to even it out.`}
+  else tip=tot?'Every muscle is at or above target this week. Nicely balanced.':'Finish a workout this week to see your balance.';
+  return `<div class="sh-t">Volume Balance<div class="xs mute" style="font-weight:400;margin-top:2px">This week · slice length = sets, dashed ring = your minimum target (${lo0}–${hi0} for big muscles)</div></div>
+  <div class="shp"><svg viewBox="0 0 353 353" style="width:100%;display:block">${o}</svg>
+  <div class="vbleg"><span><i style="background:#FFD60A"></i>In range</span><span><i style="background:#fff"></i>Above</span><span><i style="background:#5a5a60"></i>Under</span><span><i style="width:14px;height:0;border-top:1.5px dashed #FFD60A;border-radius:0"></i>Target</span></div>
+  <div class="wcard" style="margin:14px 0 0;font-size:14px;color:var(--soft);line-height:1.45">${tip}</div></div>`}
+function vbSummary(){const a=weekSets(),u=VBM.filter(m=>(a[m]||0)<vbTarget(m)[0]).length;return sum(VBM.map(m=>a[m]||0))?(u?u+' under target':'All in range'):'No sets this week'}
 /* ===== weight goal assistant ===== */
 function curBW(){const x=[...S.body].sort((a,b)=>b.date-a.date).find(b=>b.bw);return x?x.bw:null}
 function curBF(){const x=[...S.body].sort((a,b)=>b.date-a.date).find(b=>b.bf);return x?x.bf:null}
@@ -1613,6 +1654,8 @@ const setW=st=>{st.w=bar()+2*sum(st.p||[])};
 const RS=()=>{save();render()};
 const ACT={
   noop:()=>{},
+  mnav:x=>{V.mo=Math.min(0,(V.mo||0)+ +x);refreshSheet(monthHtml())},
+  mday:x=>{V.dayBack='mo';openSheet(dayOptHtml(+x))},
   recok:x=>{const s=S.session;if(!s)return;s.recOk=true;closeSheet();if(x==='goex')ACT.goex(V.recEx||0);else ACT.go()},
   recalt:x=>{const [ri,di]=x.split('|');S.session=null;V.inSession=false;closeSheet();startWorkout(ri,di)},
   recwarn:()=>{S.recWarn=S.recWarn===false;RS()},
@@ -1641,7 +1684,7 @@ const ACT={
   sugoff:()=>{S.sugOff=true;save();refreshSheet(stackInfoHtml());render()},
   sugon:()=>{S.sugOff=false;S.sugDismiss=undefined;save();refreshSheet(stackInfoHtml());render()},
   wdet:x=>{V.ins=null;openSheet(wDetail(x))},
-  insopen:x=>{V.ins=x;openSheet(insHtml(x));fillPhotos()},
+  insopen:x=>{V.ins=x;if(x==='mo')V.mo=0;openSheet(insHtml(x));fillPhotos()},
   dayopt:x=>{openSheet(dayOptHtml(+x))},
   dayskip:x=>{const k=ymd(+x);S.dayOv=S.dayOv||{};if(S.dayOv[k]&&S.dayOv[k].skip)delete S.dayOv[k];else S.dayOv[k]={skip:1};save();refreshSheet(dayOptHtml(+x));render()},
   daybar:x=>{const [d,b]=x.split('|'),k=ymd(+d);S.dayOv=S.dayOv||{};const o=S.dayOv[k]=S.dayOv[k]||{};o.bars=o.bars||{};o.bars[b]=!o.bars[b];if(!Object.values(o.bars).some(Boolean))delete S.dayOv[k];save();refreshSheet(dayOptHtml(+d));render();if(closedCount(dayStats(+d))===5)toast('All five closed. Full set!')},
