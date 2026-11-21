@@ -1252,11 +1252,12 @@ function insSummary(k){const bw=curBW();if(k==='str'){if(!bw)return 'Log bodywei
   if(k==='yr'){const n=new Set(S.history.filter(h=>h.date>=Date.now()-365*864e5).map(h=>dayStart(h.date))).size;return n+' active days'}
   if(k==='rd'){const t=readyToday();return t&&t.score?'Today '+t.score+'/5':'No check-in today'}
   if(k==='tr'){const n=Object.keys(S.ach||{}).length;return n+'/'+achDefs().length+' unlocked'}
+  if(k==='pr'){const n=S.exercises.filter(e=>prTimeline(e.id).length).length,m=new Date(),c=prsIn(new Date(m.getFullYear(),m.getMonth(),1).getTime(),Infinity).length;return c?c+' this month · '+n+' lifts':n+' lifts tracked'}
   if(k==='ph'){const n=(S.photos||[]).length;return n?n+' photo'+(n>1?'s':''):'None yet'}}
-const INS=[['str','Strength Balance','radar'],['yr','Training Year','cal'],['tr','Trophy Case','trophy'],['rd','Readiness','heart'],['ph','Progress Photos','camera']];
+const INS=[['pr','Personal Records','trophy'],['str','Strength Balance','radar'],['yr','Training Year','cal'],['tr','Trophy Case','target'],['rd','Readiness','heart'],['ph','Progress Photos','camera']];
 function insTiles(){return `<div class="h2">Insights</div><div class="insg">${INS.map(([k,l,i])=>`<button class="ins" data-a="insopen" data-x="${k}"><span>${ic(i)}</span><b>${l}</b><em>${insSummary(k)}</em></button>`).join('')}</div>`}
-function insHtml(k){const strip=h=>h.replace(/^<div class="h2">[\s\S]*?<\/div>/,'');const t={str:'Strength Balance',yr:'Training Year',tr:'Trophy Case',rd:'Readiness',ph:'Progress Photos'}[k];
-  const body={str:()=>strip(radarCard()),yr:()=>strip(heatmap()),tr:()=>achSection().replace(/^<div class="h2">([\s\S]*?)<\/div>/,''),rd:()=>readyCard()?strip(readyCard()):'<div class="empty sm">Use Check In on the Ready screen before a workout to start tracking readiness.</div>',ph:()=>photosSection().replace(/^<div class="h2">[\s\S]*?<\/div>/,(S.photos||[]).length>=2?'<div class="shp"><button class="olb" data-a="phcmp" style="margin:0 0 10px;width:100%">Compare Photos</button></div>':'')}[k]();
+function insHtml(k){const strip=h=>h.replace(/^<div class="h2">[\s\S]*?<\/div>/,'');const t={pr:'Personal Records',str:'Strength Balance',yr:'Training Year',tr:'Trophy Case',rd:'Readiness',ph:'Progress Photos'}[k];
+  const body={pr:()=>{const a=V.prAll;V.prAll=true;const h=strip(prSection());V.prAll=a;return h},str:()=>strip(radarCard()),yr:()=>strip(heatmap()),tr:()=>achSection().replace(/^<div class="h2">([\s\S]*?)<\/div>/,''),rd:()=>readyCard()?strip(readyCard()):'<div class="empty sm">Use Check In on the Ready screen before a workout to start tracking readiness.</div>',ph:()=>photosSection().replace(/^<div class="h2">[\s\S]*?<\/div>/,(S.photos||[]).length>=2?'<div class="shp"><button class="olb" data-a="phcmp" style="margin:0 0 10px;width:100%">Compare Photos</button></div>':'')}[k]();
   return `<div class="sh-t">${t}</div><div class="insb">${body}</div>`}
 function insRefresh(){if(V.ins&&$('#shc')&&$('.insb')){refreshSheet(insHtml(V.ins));fillPhotos()}}
 
