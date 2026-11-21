@@ -357,6 +357,7 @@ input[type=date].inp{color-scheme:dark;min-height:44px}
 .wtpr{display:flex;align-items:center;gap:4px;margin-top:6px;font-size:11px;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wtpr .i{width:12px;height:12px;color:var(--pk);flex:none}
 .refc{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:12px}.refc button{padding:6px 10px;border-radius:14px;border:1px solid var(--line);font-size:12px;color:var(--soft)}.refc button.on{background:var(--pk);border-color:var(--pk);color:#000;font-weight:600}
 .gychip{display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;padding:6px 12px;border-radius:14px;border:1px solid var(--line);font-size:12px;color:var(--soft)}.gychip .i{width:14px;height:14px}
+.rcwr{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:10px 12px;margin-bottom:6px;border-radius:10px;background:rgba(255,122,122,.08);border:1px solid rgba(255,122,122,.3)}.rcwr b{font-size:15px}.rcwr span{font-size:12px;color:var(--soft);text-align:right}
 .toast{position:fixed;left:50%;top:calc(var(--sat) + 64px);transform:translateX(-50%);background:#fff;color:var(--toastc);padding:10px 16px;border-radius:999px;font-weight:600;font-size:14px;z-index:99;transition:opacity .3s;white-space:nowrap}
 .prbox{margin:14px 20px 0;padding:10px;border:1px solid var(--pk);color:var(--pklt);border-radius:6px;font-weight:600;text-align:center}
 </style>
@@ -682,6 +683,7 @@ function renderMore(){
   <div class="li" style="cursor:default"><div class="g">Rest timer</div><div class="stp w"><button data-a="rest" data-x="-15">${ic('minusc')}</button><span>${mmss(S.rest)}</span><button data-a="rest" data-x="15">${ic('plusc')}</button></div></div>
   <div class="li" style="cursor:default"><div class="g">Auto-start rest timer after each set</div><button class="tog ${S.autoRest?'on':''}" data-a="auto"></button></div>
   <div class="li" style="cursor:default"><div class="g"><div class="tt">Progression suggestions</div><div class="sb">Suggests +1 rep, then more weight at the top of your range</div></div><button class="tog ${S.autoProg!==false?'on':''}" data-a="autoprog"></button></div>
+  <div class="li" style="cursor:default"><div class="g"><div class="tt">Recovery reminders</div><div class="sb">Warn me before training a muscle that hasn’t recovered</div></div><button class="tog ${S.recWarn!==false?'on':''}" data-a="recwarn"></button></div>
   <div class="li" style="cursor:default"><div class="g"><div class="tt">Readiness check-in</div><div class="sb">Show the Check In button before workouts</div></div><button class="tog ${S.readyAsk!==false?'on':''}" data-a="readyask"></button></div>
   <div class="li" style="cursor:default"><div class="g">Barbell weight</div><div class="stp w"><button data-a="barw" data-x="-1">${ic('minusc')}</button><span>${fmt(bar())} ${U()}</span><button data-a="barw" data-x="1">${ic('plusc')}</button></div></div>
   <div class="li" style="cursor:default"><div class="g">Dumbbell weight</div><div class="seg" style="width:180px">${[['per','Per DB'],['total','Total']].map(([k,l])=>`<button class="${S.dbMode===k?'on':''}" data-a="dbm" data-x="${k}">${l}</button>`).join('')}</div></div>
@@ -1286,9 +1288,17 @@ function recovery(){const f={},now=Date.now();S.history.forEach(h=>{const hrs=(n
   const st={};MGS.filter(m=>m!=='cardio'&&m!=='full body').forEach(m=>{const v=f[m]||0;st[m]=v>=4?'tired':v>=1.5?'rec':'fresh'});return st}
 function bestDay(){const r=S.routines.find(x=>x.active);if(!r||!r.days.length)return null;const rc=recovery(),w={fresh:1,rec:.45,tired:0};let best=null;
   r.days.forEach(d=>{let tot=0,sc=0;d.items.forEach(it=>{const m=ex(it.exId).mg;if(!m||!rc[m])return;tot+=it.sets;sc+=it.sets*w[rc[m]]});if(!tot)return;const v=sc/tot+(d.id===nextDay(r)?.05:0);if(!best||v>best.v)best={r,d,v}});return best}
+function lastHitH(mg){for(const h of S.history){if(sum(h.entries.filter(e=>ex(e.exId).mg===mg).map(e=>dn(e).length))>=3)return Math.round((Date.now()-h.date)/36e5)}return null}
+function recWarn(s){if(S.recWarn===false||s.recOk)return [];const cnt={};s.items.forEach(it=>{const m=ex(it.exId).mg;if(m&&m!=='cardio')cnt[m]=(cnt[m]||0)+it.sets.filter(x=>!x.wu).length});
+  return Object.keys(cnt).filter(m=>{if(cnt[m]<2)return false;const need=BIGM.includes(m)?48:36;for(const h of S.history){const hrs=(Date.now()-h.date)/36e5;if(hrs>=need)break;const n=sum(h.entries.filter(e=>ex(e.exId).mg===m).map(e=>dn(e).length));if(n>=3)return true}return false}).sort((a,b)=>cnt[b]-cnt[a])}
+function recWarnHtml(ms,then){const s=S.session,b=bestDay(),alt=b&&b.d.id!==s.did&&b.v>.6?b:null,nm=ms.map(m=>m.replace(/^./,c=>c.toUpperCase()));const list=nm.length>1?nm.slice(0,-1).join(', ')+' and '+nm[nm.length-1]:nm[0];
+  return `<div class="sh-t">Still recovering<div class="xs mute" style="font-weight:400;margin-top:2px">${esc(list)} ${ms.length>1?'were':'was'} trained hard recently</div></div>
+  <div class="shp">${ms.map(m=>{const h=lastHitH(m),need=BIGM.includes(m)?48:36;return `<div class="rcwr"><b>${m.replace(/^./,c=>c.toUpperCase())}</b><span>${h!=null?(h<24?h+' hours ago':Math.round(h/24)+' day'+(Math.round(h/24)>1?'s':'')+' ago'):''} · usually needs ~${need}h</span></div>`}).join('')}
+  <p class="sm" style="color:var(--soft);line-height:1.45;margin:12px 0 0">Training a muscle again before it recovers tends to mean weaker sets and slower progress. A lighter session or a different muscle group is usually the better call.</p></div>
+  ${alt?`<button class="pkb" data-a="recalt" data-x="${alt.r.id}|${alt.d.id}">Do ${esc(alt.d.name)} Instead</button>`:''}<button class="${alt?'olb':'pkb'}" data-a="recok" data-x="${then}">Train Anyway</button><button class="lnk sm" data-a="close" style="display:block;margin:12px auto 0">CANCEL</button>`}
 function recoveryCard(){if(!S.history.some(h=>Date.now()-h.date<120*36e5))return '';const rc=recovery(),grp={fresh:[],rec:[],tired:[]};Object.entries(rc).forEach(([m,s])=>grp[s].push(m));const b=bestDay();
   const row=(k,l,c)=>grp[k].length?`<div class="rcrow"><i style="background:${c}"></i><b>${l}</b><span>${grp[k].join(', ')}</span></div>`:'';
-  return `<div class="wcard rcv" data-a="recmap"><div style="display:flex;justify-content:space-between;align-items:baseline"><div class="xs mute" style="letter-spacing:.08em">RECOVERY</div><span class="xs mute">MAP ›</span></div>
+  return `<div class="wcard"><div class="xs mute" style="letter-spacing:.08em">RECOVERY</div>
   ${row('tired','Fatigued','#ff7a7a')}${row('rec','Recovering','#ffb547')}${grp.fresh.length?`<div class="rcrow"><i style="background:#5fe39a"></i><b>Fresh</b><span>${grp.tired.length||grp.rec.length?'Everything else':'All muscles'}</span></div>`:''}
   ${b&&b.v>.55?`<button class="rcbest" data-a="preview" data-x="${b.r.id}|${b.d.id}">Best fit today: <b>${esc(b.d.name)}</b> ${ic('chev')}</button>`:''}</div>`}
 
@@ -1468,7 +1478,7 @@ function mgStrength(mg){const out=[],ref=(S.strRef||{}).k||'last',rs=refStart();
     if(ss.length<2)continue;let base;if(ref==='last')base=ss[1];else{base=ss.find(x=>x.d<rs);if(!base){const inP=ss.filter(x=>x.d>=rs);if(inP.length>=2)base=inP[inP.length-1]}}if(!base||!base.v||base===ss[0])continue;out.push({e,now:ss[0].v,prev:base.v,d:ss[0].d,pct:(ss[0].v-base.v)/base.v*100})}
   if(!out.length)return null;return {pct:out.reduce((a,x)=>a+x.pct,0)/out.length,list:out.sort((a,b)=>b.d-a.d),d:Math.max(...out.map(x=>x.d))}}
 function bodySvg(){const ws=weekSets(),sel=V.bm,mode=V.bmMode||'str',strC={};if(mode==='str')MGS.forEach(m=>{const s=mgStrength(m);if(s)strC[m]=s.pct});
-  const RC=mode==='rec'?recovery():null;const fillFor=mg=>{if(RC){const v=RC[mg];return v==='tired'?'rgba(255,122,122,.8)':v==='rec'?'rgba(255,181,71,.75)':v?'rgba(95,227,154,.6)':'rgba(255,255,255,.08)'}if(mode==='str'){const p=strC[mg];if(p==null)return 'rgba(255,255,255,.08)';const a=(.3+Math.min(.6,Math.abs(p)/8)).toFixed(2);return Math.abs(p)<.05?'rgba(255,255,255,.22)':p>0?`rgba(46,204,113,${a})`:`rgba(255,92,92,${a})`}const n=ws[mg]||0;return n?`rgba(var(--pkr),${(.25+.65*Math.min(1,n/14)).toFixed(2)})`:'rgba(255,255,255,.08)'};
+  const RC=null;const fillFor=mg=>{if(RC){const v=RC[mg];return v==='tired'?'rgba(255,122,122,.8)':v==='rec'?'rgba(255,181,71,.75)':v?'rgba(95,227,154,.6)':'rgba(255,255,255,.08)'}if(mode==='str'){const p=strC[mg];if(p==null)return 'rgba(255,255,255,.08)';const a=(.3+Math.min(.6,Math.abs(p)/8)).toFixed(2);return Math.abs(p)<.05?'rgba(255,255,255,.22)':p>0?`rgba(46,204,113,${a})`:`rgba(255,92,92,${a})`}const n=ws[mg]||0;return n?`rgba(var(--pkr),${(.25+.65*Math.min(1,n/14)).toFixed(2)})`:'rgba(255,255,255,.08)'};
   const at=mg=>`fill="${fillFor(mg)}" ${sel===mg?'stroke="var(--pk)" stroke-width="2.5"':'stroke="rgba(0,0,0,0)" stroke-width="14"'} data-a="bm" data-x="${mg}" class="bmz"`;
   const E=(x,y,rx,ry,mg,rot)=>`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" ${rot?`transform="rotate(${rot} ${x} ${y})"`:''} ${at(mg)}/>`;
   const both=(c,f)=>f(c,-1)+f(c,1);
@@ -1482,7 +1492,7 @@ function bodySvg(){const ws=weekSets(),sel=V.bm,mode=V.bmMode||'str',strC={};if(
   return side==='front'?`<svg class="bodysvg" viewBox="27 2 116 308">${F}</svg>`:`<svg class="bodysvg" viewBox="197 2 116 308">${B}</svg>`}
 function bodyCard(){const mode=V.bmMode||'str';let chips='';
   if(mode==='str'){const l=MGS.map(m=>[m,mgStrength(m)]).filter(x=>x[1]).sort((a,b)=>b[1].d-a[1].d).slice(0,8);chips=l.length?`<div class="schips">${l.map(([m,s])=>`<button class="${s.pct>=.05?'up':s.pct<=-.05?'dn':''}" data-a="bm" data-x="${m}">${m} <b>${s.pct>0?'+':''}${s.pct.toFixed(1)}%</b></button>`).join('')}</div>`:'<div class="xs mute center" style="margin-top:8px">Train an exercise twice to see strength changes.</div>'}
-  return `<div class="h2">Muscle Map<div class="seg mini2">${[['str','Strength'],['vol','Volume'],['rec','Recovery']].map(([k,l])=>`<button class="${mode===k?'on':''}" data-a="bmmode" data-x="${k}">${l}</button>`).join('')}</div></div><div class="bm"><div class="seg sidesg">${[['front','Front'],['back','Back']].map(([k,l])=>`<button class="${(V.bmSide||'front')===k?'on':''}" data-a="bmside" data-x="${k}">${l}</button>`).join('')}</div><div class="bmwrap"><button class="bmflip" data-a="bmside" data-x="${(V.bmSide||'front')==='front'?'back':'front'}" aria-label="Flip">${ic('rep')}</button>${bodySvg()}</div>
+  return `<div class="h2">Muscle Map<div class="seg mini2">${[['str','Strength'],['vol','Volume']].map(([k,l])=>`<button class="${mode===k?'on':''}" data-a="bmmode" data-x="${k}">${l}</button>`).join('')}</div></div><div class="bm"><div class="seg sidesg">${[['front','Front'],['back','Back']].map(([k,l])=>`<button class="${(V.bmSide||'front')===k?'on':''}" data-a="bmside" data-x="${k}">${l}</button>`).join('')}</div><div class="bmwrap"><button class="bmflip" data-a="bmside" data-x="${(V.bmSide||'front')==='front'?'back':'front'}" aria-label="Flip">${ic('rep')}</button>${bodySvg()}</div>
   ${mode==='rec'?`<div class="bmleg"><span><i style="background:rgba(95,227,154,.7)"></i>Fresh</span><span><i style="background:rgba(255,181,71,.75)"></i>Recovering</span><span><i style="background:rgba(255,122,122,.8)"></i>Fatigued</span></div><div class="xs mute center" style="margin-top:6px">Based on sets in the last few days. Big muscles take longer.</div>`:mode==='vol'?`<div class="bmleg"><span><i style="background:rgba(255,255,255,.08)"></i>Not trained</span><span><i style="background:rgba(var(--pkr),.4)"></i>Some</span><span><i style="background:rgba(var(--pkr),.9)"></i>14+ sets</span></div><div class="xs mute center" style="margin-top:6px">Sets this week · tap a muscle for workouts, routines &amp; PRs</div>`:`<div class="bmleg"><span><i style="background:rgba(46,204,113,.75)"></i>Stronger</span><span><i style="background:rgba(255,92,92,.75)"></i>Weaker</span><span><i style="background:rgba(255,255,255,.08)"></i>No data</span></div>${refChips()}<div class="xs mute center" style="margin-top:6px">Change in estimated 1RM ${refLabel()}</div>${chips}`}</div>`}
 function muscleSuggest(mg,n){const use={};S.history.slice(0,60).forEach(h=>h.entries.forEach(e=>use[e.exId]=(use[e.exId]||0)+1));return S.exercises.filter(e=>e.mg===mg&&avail(e)).map(e=>[(e.pop?3:0)+Math.min(4,use[e.id]||0)*1.5,e]).sort((a,b)=>b[0]-a[0]||a[1].name.localeCompare(b[1].name)).slice(0,n).map(a=>a[1])}
 function muscleHtml(mg){const n=weekSets()[mg]||0;const cap=mg.replace(/\b\w/g,c=>c.toUpperCase());
@@ -1604,6 +1614,9 @@ const setW=st=>{st.w=bar()+2*sum(st.p||[])};
 const RS=()=>{save();render()};
 const ACT={
   noop:()=>{},
+  recok:x=>{const s=S.session;if(!s)return;s.recOk=true;closeSheet();if(x==='goex')ACT.goex(V.recEx||0);else ACT.go()},
+  recalt:x=>{const [ri,di]=x.split('|');S.session=null;V.inSession=false;closeSheet();startWorkout(ri,di)},
+  recwarn:()=>{S.recWarn=S.recWarn===false;RS()},
   shr:x=>shareRoutine(x),
   impadd:x=>impAdd(x==='1'),
   recmap:()=>{V.bmMode='rec';V.tab='prog';V.ps='stats';V.sub=null;render();setTimeout(()=>{const b=document.querySelector('.bm'),m=document.querySelector('#app main');if(b&&m)m.scrollTop=b.offsetTop-160},30)},
@@ -1638,7 +1651,7 @@ const ACT={
   rdset:x=>{const [k,v]=x.split('|');V.rd=V.rd||{};V.rd[k]=+v;refreshSheet(readyHtml())},
   rdgo:()=>{const r=V.rd||{};if(!RDQ.every(([k])=>r[k]))return;S.ready=S.ready||{};S.ready[ymd(Date.now())]={sl:r.sl,so:r.so,en:r.en,score:Math.round((r.sl+r.so+r.en)/3*10)/10};save();closeSheet();const ss=S.session;if(ss&&ss.pre){const sc=S.ready[ymd(Date.now())].score;if(ss.rdLow&&sc>2.4){ss.items.forEach(it=>{const t=ex(it.exId).type;if(t==='cardio'||t==='bodyweight')return;it.sets.forEach(x=>{if(!x.wu&&!x.done){x.w=x.w0!=null?x.w0:rnd(x.w/.9);delete x.w0;delete x.p}});it.hintDone=false});ss.rdLow=0;toast('Weights back to plan')}if(!ss.rdLow)ss.rdAdj=0;readyAdjust()}render()},
   rdopen:()=>{const t=readyToday();V.rd=t&&t.score?{sl:t.sl,so:t.so,en:t.en}:{};openSheet(readyHtml())},
-  go:()=>{const s=S.session;if(!s)return;if(!s.items.length){ACT.saddex();return}s.pre=false;s.start=Date.now();V.ovEdit=false;const k=s.items[s.i].sets.findIndex(z=>!z.done);s.s=k<0?0:k;save();openPanel()},
+  go:()=>{const s=S.session;if(!s)return;if(!s.items.length){ACT.saddex();return}const rw=recWarn(s);if(rw.length){openSheet(recWarnHtml(rw,'go'));return}s.pre=false;s.start=Date.now();V.ovEdit=false;const k=s.items[s.i].sets.findIndex(z=>!z.done);s.s=k<0?0:k;save();openPanel()},
   precancel:()=>{S.session=null;V.inSession=false;V.ov=false;V.restOpen=false;V.ovEdit=false;RS()},
   rdskip:()=>{S.ready=S.ready||{};S.ready[ymd(Date.now())]={skip:1};save();const a=V.rdArgs||[];startWorkout0(a[0],a[1])},
   hmf:x=>{V.hmf=x;insRefresh();render()},
@@ -1789,7 +1802,7 @@ const ACT={
   ovopen:()=>closePanel(),
   ovclose:()=>openPanel(),
   ovedit:()=>{V.ovEdit=!V.ovEdit;render()},
-  goex:x=>{const s=S.session;if(s.pre){s.pre=false;s.start=Date.now()}s.i=+x;const k=s.items[s.i].sets.findIndex(z=>!z.done);s.s=k<0?0:k;save();openPanel()},
+  goex:x=>{const s=S.session;if(s.pre){const rw=recWarn(s);if(rw.length){V.recEx=+x;openSheet(recWarnHtml(rw,'goex'));return}s.pre=false;s.start=Date.now()}s.i=+x;const k=s.items[s.i].sets.findIndex(z=>!z.done);s.s=k<0?0:k;save();openPanel()},
   ovsets:x=>{const [i,d]=x.split('|').map(Number),it=S.session.items[i];if(d>0){if(it.sets.length>=12)return;const l=it.sets[it.sets.length-1];it.sets.push({w:l.w,r:l.r,done:false,p:l.p?[...l.p]:undefined})}else{if(it.sets.length<=1)return;it.sets.pop();if(S.session.i===i)S.session.s=Math.min(S.session.s,it.sets.length-1)}RS()},
   exmv:x=>{const [i,d]=x.split('|').map(Number),a=S.session.items,j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];if(S.session.i===i)S.session.i=j;else if(S.session.i===j)S.session.i=i;RS()},
   exdel:x=>{const s=S.session;s.items.splice(+x,1);s.i=Math.max(0,Math.min(s.i,s.items.length-1));s.s=0;RS()},
