@@ -562,7 +562,7 @@ function newExHtml(){return `<div class="sh-t">Custom Exercise</div><div class="
 const hd=(t,l='',r='',st='')=>`<header class="hd"><div class="hl">${l}</div><h1>${t}${st?`<span class="st">${st}</span>`:''}</h1><div class="hr">${r}</div></header>`;
 const back=()=>`<button class="lnk" data-a="back" style="display:flex">${ic('back',2)}</button>`;
 function statsGrid(a,b,c,d){return `<div class="stats"><div>${ic('dumb')}<div><b>${a}</b><span>Exercises</span></div></div><div>${ic('log')}<div><b>${b}</b><span>Sets</span></div></div><div>${ic('rep')}<div><b>${c}</b><span>Reps</span></div></div><div>${ic('target')}<div><b>${d}<small> ${U()}</small></b><span>Weight lifted</span></div></div></div>`}
-function renderTabs(){const b=(k,l)=>`<button class="${V.tab===k&&!V.sub?'on':''}" data-a="tab" data-x="${k}">${ic(k)}<span>${l}</span></button>`;return `<nav class="tabs">${b('home','Home')}${b('goals','Goals')}<button class="fab" data-a="plus" aria-label="Quick actions"><svg viewBox="0 0 100 100" class="fablogo">${[36,46,33,48,37].map((w,k)=>`<rect x="26" y="${22+k*12}" width="${w}" height="8" rx="4" fill="currentColor" ${k===2?'opacity=".55"':''}/>`).join('')}</svg></button>${b('prog','Progress')}${b('tools','Tools')}</nav>`}
+function renderTabs(){const b=(k,l)=>`<button class="${V.tab===k&&!V.sub?'on':''}" data-a="tab" data-x="${k}">${ic(k)}<span>${l}</span></button>`;return `<nav class="tabs">${b('home','Home')}${b('prog','Progress')}<button class="fab" data-a="plus" aria-label="Quick actions"><svg viewBox="0 0 100 100" class="fablogo">${[36,46,33,48,37].map((w,k)=>`<rect x="26" y="${22+k*12}" width="${w}" height="8" rx="4" fill="currentColor" ${k===2?'opacity=".55"':''}/>`).join('')}</svg></button>${b('goals','Goals')}${b('tools','Tools')}</nav>`}
 
 /* home */
 function renderHome(){
@@ -645,9 +645,7 @@ function renderGoals(){
   h+=planCard();
   h+=`<div class="h2">Body Targets</div>`+bodySection('goal');
   h+=weekVolume();
-  h+=`<div class="h2">Habits</div>${sugNudge()}
-  <div class="li" style="cursor:default"><div class="g">Weekly workout goal</div><div class="stp w"><button data-a="wgoal" data-x="-1">${ic('minusc')}</button><span>${S.weekGoal} / wk</span><button data-a="wgoal" data-x="1">${ic('plusc')}</button></div></div>
-  <div class="li" data-a="stackinfo"><div class="g"><div class="tt">Daily Bars &amp; cardio goals</div><div class="sb">${G().sets} sets · ${G().move} min move · ${G().cardio} min cardio · ${G().weekCardio} min/wk</div></div><span class="chev">${ic('chev')}</span></div>`;
+
   return hd('Goals')+`<main class="pg">${h}</main>`;
 }
 function renderProgress(){const ps=V.ps||'stats';
