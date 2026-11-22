@@ -374,6 +374,8 @@ input[type=date].inp{color-scheme:dark;min-height:44px}
 .setmain{padding-bottom:calc(64px + var(--sab))!important}
 .wnum{font-size:clamp(52px,8.5vh,84px)!important}
 .rnum{font-size:clamp(44px,7vh,68px)!important}
+.setscr .barsvg{width:90%!important;margin-left:auto!important;margin-right:auto!important}
+.ovbar{background:#141416!important;border-top:1px solid var(--line);-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 .toast{position:fixed;left:50%;top:calc(var(--sat) + 64px);transform:translateX(-50%);background:#fff;color:var(--toastc);padding:10px 16px;border-radius:999px;font-weight:600;font-size:14px;z-index:99;transition:opacity .3s;white-space:nowrap}
 .prbox{margin:14px 20px 0;padding:10px;border:1px solid var(--pk);color:var(--pklt);border-radius:6px;font-weight:600;text-align:center}
 </style>
@@ -750,10 +752,10 @@ function renderSet(){
   const rs=s.rest;
   const rtb=rs?`<button class="rtb run" data-a="ropen"><span id="rt2">${mmss(Math.ceil((rs.end-Date.now())/1000))}</span><span style="font-size:10px;letter-spacing:.06em;color:var(--mute)">RESTING</span></button>`:`<button class="rtb" data-a="ropen">${ic('watch')}REST TIMER</button>`;
   return `<div class="setscr">
-  <div class="setmain"><div><div class="grab2"></div><div class="topbar">${e.type!=='bodyweight'&&!it.sets.some(x=>x.wu)?`<button class="wub" data-a="warmup">WARM-UP</button>`:`<button style="visibility:hidden">${ic('calc')}</button>`}<button data-a="ovopen">${ic('down',2)}</button><div class="tbr"><button data-a="taken" aria-label="Equipment taken, swap exercise">${ic('rep')}</button><button data-a="exnote" class="${e.note?'has':''}" aria-label="Exercise note">${ic('note')}</button><button data-a="calc">${ic('calc')}</button></div></div>
+  <div class="setmain"><div><div class="grab2"></div><div class="topbar">${e.type!=='bodyweight'&&!it.sets.some(x=>x.wu)?`<button class="wub" data-a="warmup">WARM-UP</button>`:`<button style="visibility:hidden">${ic('calc')}</button>`}<button data-a="ovopen">${ic('down',2)}</button><div class="tbr"><button data-a="taken" aria-label="Equipment taken, swap exercise">${ic('rep')}</button><button data-a="exnote" class="${e.note?'has':''}" aria-label="Exercise note">${ic('note')}</button></div></div>
   <div class="exn">${esc(e.name)}</div><div class="setl">${setLabel(it,s.s)}${!st.wu&&s.s===it.sets.length-1?`<button class="dsplus" data-a="dropset" aria-label="Add a drop set">${ic('plus',2.6)}</button>`:''}</div>${it.rr&&!st.wu?`<div class="rrl">TARGET ${esc(String(it.rr)).replace('-','–')}${/\d$/.test(it.rr)?' REPS':''}</div>`:''}${inSS(s.i)?`<div class="sstag">SUPERSET${(()=>{const L=seqList(),k=seqIdx(),nx=L[k+1];return nx&&nx[0]!==s.i&&inSS(nx[0])&&grp(nx[0])[0]===grp(s.i)[0]?' · NEXT: '+esc(ex(s.items[nx[0]].exId).name).toUpperCase():''})()}</div>`:''}${coachPill(it,st)+exNoteHtml(e)}</div>
   <div class="mid"><div class="wblock">${wv}</div>
-  <div class="repsrow"><button class="cbtn" data-a="r" data-x="-1">${ic('minus',2)}</button><div><div class="rnum" data-a="typer">${st.r}</div><div class="wunit">REPS</div></div><button class="cbtn" data-a="r" data-x="1">${ic('plus',2)}</button></div>${S.rirOn!==false&&!st.wu?`<div class="rirr"><span>Reps left in the tank</span><div>${[[3,'3+'],[2,'2'],[1,'1'],[0,'0']].map(([v,l])=>`<button class="${st.rir===v?'on':''}" data-a="rir" data-x="${v}">${l}</button>`).join('')}</div></div>`:''}</div>
+  <div class="repsrow"><button class="cbtn" data-a="r" data-x="-1">${ic('minus',2)}</button><div><div class="rnum" data-a="typer">${st.r}</div><div class="wunit">REPS</div></div><button class="cbtn" data-a="r" data-x="1">${ic('plus',2)}</button></div>${S.rirOn!==false&&!st.wu?`<div class="rirr"><span>Reps left in the tank</span><div>${[[0,'0'],[1,'1'],[2,'2'],[3,'3+']].map(([v,l])=>`<button class="${st.rir===v?'on':''}" data-a="rir" data-x="${v}">${l}</button>`).join('')}</div></div>`:''}</div>
   <div class="navrow"><button class="dbl" data-a="prevs">${ic('dl',2.2)}</button>${rtb}<button class="dbl" data-a="nexts">${ic('dr',2.2)}</button></div></div>
   <div class="lw"><div class="lwh"><b>Last workout</b><span>${ic('cal')}${last?dlong(last.date):'—'}</span></div>
   ${last?last.sets.map((x,j)=>`<div class="setrow"><span>${x.wu?'WARM-UP':x.ds?'DROP SET':'SET '+(last.sets.filter(z=>!z.wu&&!z.ds).indexOf(x)+1)}</span><span>${x.skip?'<span class="mute">Skipped</span>':`${fmt(x.w)} ${U()} × ${x.r}`}</span></div>`).join(''):'<div class="setrow"><span>FIRST TIME</span><span class="mute sm">Set a baseline!</span></div>'}
@@ -1617,7 +1619,7 @@ function muscleHtml(mg){const n=weekSets()[mg]||0;const cap=mg.replace(/\b\w/g,c
   <div class="secl">Suggested Exercises${S.session?' · add to '+esc(S.session.name):''}</div>${sug.map(e=>`<div class="li" style="cursor:default"><div class="g"><div class="tt">${esc(e.name)}</div><div class="sb">${EQN[e.eq]||e.type}</div></div><button class="addp" data-a="bmadd" data-x="${e.id}">${S.session?'+ ADD':'START'}</button></div>`).join('')}`}
 
 /* ===== tools ===== */
-const TOOLS=[['plates','Plate Calculator','Load a target weight or add up a bar','dumb'],['pct','Percentage & RPE Chart','Working weights from your 1RM','log'],['interval','Interval Timer','EMOM, Tabata & custom rounds','watch'],['strength','Strength Score','Your lifts vs. bodyweight + DOTS','trophy'],['program','Program Builder','Generate a 5/3/1 routine','cal'],['convert','lb / kg Converter','Quick conversions & plate math','rep'],['calc','One-Rep Max Calculator','Estimate a max from any set','calc']];
+const TOOLS=[['calc','One-Rep Max Calculator','Estimate a max from any set','calc'],['plates','Plate Calculator','Load a target weight or add up a bar','dumb'],['pct','Percentage & RPE Chart','Working weights from your 1RM','log'],['interval','Interval Timer','EMOM, Tabata & custom rounds','watch'],['strength','Strength Score','Your lifts vs. bodyweight + DOTS','trophy'],['program','Program Builder','Generate a 5/3/1 routine','cal'],['convert','lb / kg Converter','Quick conversions & plate math','rep']];
 function availPlates(){const inv=S.inv&&S.inv[U()];const all=PLATES[U()];return inv&&inv.length?all.filter(p=>inv.includes(p)):all}
 function rnd(x){const s=U()==='lb'?5:2.5;return Math.round(x/s)*s}
 const RPET=[100,95.5,92.2,89.2,86.3,83.7,81.1,78.6,76.2,73.9,70.7,68];
@@ -1845,7 +1847,7 @@ const ACT={
   tool:x=>{if(x==='calc'){ACT.calc();return}V.tool=x;if(x==='plates')V.pt=V.pt||{p:[],tgt:''};if(x==='pct'){V.pc=V.pc||{orm:'',mode:'pct'}}if(x==='interval')V.it=V.it||{mode:'emom',emom:60,work:40,rest:20,rounds:10,run:false,phase:'work',round:1,left:null};if(x==='program')V.pb=V.pb||{};render()},
   toolx:()=>{V.tool=null;render()},
   tplate:x=>{const p=+x,P=V.pt,now=Date.now();P.miss=0;const rm=()=>{const k=P.p.lastIndexOf(p);if(k>=0)P.p.splice(k,1)};if(lastTap.p===p&&now-lastTap.t<350){rm();rm();lastTap={p:null,t:0}}else{P.p.push(p);P.p.sort((a,b)=>b-a);lastTap={p,t:now}}render()},
-  tprm:x=>{V.pt.p.splice(+x,1);V.pt.miss=0;render()},
+  tprm:(x,el)=>{if(V.rmBusy)return;const go=()=>{V.rmBusy=false;V.pt.p.splice(+x,1);V.pt.miss=0;render()};if(el&&el.classList&&el.getBBox){V.rmBusy=true;el.classList.add('out');setTimeout(go,200)}else go()},
   tload:()=>{const t=parseFloat($('#ptgt').value);if(!t||t<bar()){toast('Enter a weight above the bar ('+fmt(bar())+')');return}const P=V.pt;P.tgt=t;P.p=greedy((t-bar())/2);P.miss=Math.round((t-(bar()+2*sum(P.p)))*100)/100;render()},
   treset:()=>{V.pt={p:[],tgt:''};render()},
   tinv:x=>{const p=+x;S.inv=S.inv||{};const cur0=availPlates();let l=cur0.includes(p)?cur0.filter(z=>z!==p):[...cur0,p];if(!l.length){toast('Keep at least one plate');return}S.inv[U()]=l.sort((a,b)=>b-a);save();render()},
