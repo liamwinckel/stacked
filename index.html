@@ -376,6 +376,7 @@ input[type=date].inp{color-scheme:dark;min-height:44px}
 .rnum{font-size:clamp(44px,7vh,68px)!important}
 .setscr .barsvg{width:90%!important;margin-left:auto!important;margin-right:auto!important}
 .ovbar{background:#141416!important;border-top:1px solid var(--line);-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.ovnav{display:flex;align-items:center;justify-content:center;width:48px;height:48px;margin:-8px -6px;border-radius:12px;color:var(--pk)}.ovnav:active{background:rgba(255,214,10,.12)}
 .toast{position:fixed;left:50%;top:calc(var(--sat) + 64px);transform:translateX(-50%);background:#fff;color:var(--toastc);padding:10px 16px;border-radius:999px;font-weight:600;font-size:14px;z-index:99;transition:opacity .3s;white-space:nowrap}
 .prbox{margin:14px 20px 0;padding:10px;border:1px solid var(--pk);color:var(--pklt);border-radius:6px;font-weight:600;text-align:center}
 </style>
@@ -778,7 +779,7 @@ function renderOverview(){
   if(V.ovEdit)h+=`<p class="xs mute" style="padding:10px 20px 0;margin:0">Tap ${'🔗'} to superset an exercise with the one below it.</p>`;
   h+=s.pre?`<button class="olb" data-a="minimize" style="margin-top:22px">Save for Later</button>`:`<button class="olb" data-a="ovedit" style="margin-top:22px">${V.ovEdit?'Done Editing':'Edit Exercises'}</button><button class="olb" data-a="minimize">Minimize Workout</button><button class="dng" data-a="discard">Discard workout</button>`;
   const it=s.items[s.i];
-  const bottom=s.pre?`<div class="ovbar prego"><button class="pkb" data-a="go">${ic('play')} Start Workout</button></div>`:it?`<div class="ovbar ins" data-a="ovclose"><span style="display:flex">${ic('dl',2.2)}</span><div class="g"><div>${esc(ex(it.exId).name)}</div><div>${setLabel(it,s.s).toLowerCase().replace(/^./,c=>c.toUpperCase())}</div></div><span style="display:flex">${ic('dr',2.2)}</span></div>`:'';
+  const bottom=s.pre?`<div class="ovbar prego"><button class="pkb" data-a="go">${ic('play')} Start Workout</button></div>`:it?`<div class="ovbar ins" data-a="ovclose"><button class="ovnav" data-a="ovmove" data-x="-1" aria-label="Previous set">${ic('dl',2.2)}</button><div class="g"><div>${esc(ex(it.exId).name)}</div><div>${setLabel(it,s.s).toLowerCase().replace(/^./,c=>c.toUpperCase())}</div></div><button class="ovnav" data-a="ovmove" data-x="1" aria-label="Next set">${ic('dr',2.2)}</button></div>`:'';
   return hd(esc(s.name),'',s.pre?`<button class="lnk" data-a="precancel">Cancel</button>`:`<button class="lnk" data-a="finish">Finish</button>`,s.pre?'READY':'OVERVIEW')+`<main class="pg" style="padding-bottom:calc(170px + var(--sab))">${h}</main>`+bottom+renderTabs();
 }
 function renderRest(){const rs=S.session.rest;const C=2*Math.PI*88;const left=rs?Math.max(0,(rs.end-Date.now())/1000):S.rest;const frac=rs?left*1000/rs.total:1;
@@ -1723,6 +1724,7 @@ const setW=st=>{st.w=bar()+2*sum(st.p||[])};
 const RS=()=>{save();render()};
 const ACT={
   noop:()=>{},
+  ovmove:x=>{const L=seqList(),k=seqIdx(),n=L[k+ +x];if(!n){toast(+x>0?'That’s the last set':'That’s the first set');return}const s=S.session;s.i=n[0];s.s=n[1];save();render()},
   blkon:x=>{R(x).block={build:4,deload:true,start:weekStart(Date.now()),base:{},cycle:1};save();render();toast('Training block started: Week 1')},
   blkn:x=>{const [id,n]=x.split('|');R(id).block.build=+n;save();render()},
   blkdl:x=>{const b=R(x).block;b.deload=!b.deload;save();render()},
