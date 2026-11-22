@@ -718,7 +718,7 @@ function renderMore(){
   <div class="li" data-a="export"><div class="g"><div class="tt">Copy backup as text</div><div class="sb">Fallback if file saving isn't available</div></div><span class="chev">${ic('chev')}</span></div>
   <div class="li" data-a="import"><div class="g">Restore from pasted text</div><span class="chev">${ic('chev')}</span></div>
   <div class="h2">Install</div><div class="li sm mute" style="cursor:default">In Safari, tap Share → Add to Home Screen to launch this like a regular app.</div>
-  <button class="dng" data-a="reset">Reset all data</button><p class="xs mute center">Bars · your personal build</p></main>`;
+  <button class="dng" data-a="reset">Reset all data</button><p class="xs mute center" style="margin-top:14px">Bars · Version ${APPV}<br><span style="opacity:.7">Built ${APPD}</span></p></main>`;
 }
 
 /* session */
@@ -861,6 +861,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
+const APPV='1.34',APPD='Nov 21, 2026';
 const SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
