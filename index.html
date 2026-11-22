@@ -483,12 +483,12 @@ html[data-theme="light"] .ic.w{background:#18181b;color:#fff}html[data-theme="li
 .tpin{width:auto!important;background:var(--panel)!important;color:var(--text)!important;border:1px solid var(--line)!important;user-select:none;-webkit-user-select:none}
 .tpin span{color:var(--mute)!important}
 .tpin .tpi{width:34px;height:34px;border-radius:10px;background:var(--pk);color:#121212!important;display:flex;align-items:center;justify-content:center}
-.tpins.ed .tpin{touch-action:none;border:1.5px dashed rgba(255,214,10,.6)!important;cursor:grab}
+.tpins.ed .tpin{-webkit-touch-callout:none;border:1.5px dashed rgba(255,214,10,.6)!important;cursor:grab}
 .tpin.drag{z-index:5;box-shadow:0 10px 30px rgba(0,0,0,.45);transition:none}
 .ic.g{background:rgba(var(--cyr),.08);color:var(--pk)}
 html[data-theme="light"] .ic.g{background:#fff;color:#18181b;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .tpins.n4 .tpin{min-height:96px;padding:10px}.tpins.n4 .tpin>span:not(.tpi){display:none}.tpins.n4 .tpin b{font-size:12px}
-.tgrid.ed .tdr{touch-action:none;user-select:none;-webkit-user-select:none}.tdr.drag{z-index:5;transition:none}.tdr.drag .ic{box-shadow:0 10px 26px rgba(0,0,0,.5)}
+.tgrid.ed .tdr{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}.tdr.drag,.tpin.drag{z-index:5;transition:none!important}.tdr.drag .ic{box-shadow:0 10px 26px rgba(0,0,0,.5)}
 </style>
 </head>
 <body>
@@ -992,7 +992,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.41';
+const APPV='1.42';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
@@ -1163,10 +1163,10 @@ function renderToolsTab(){const f=V.tf||'all',ed=V.tedit,pn=pins(),seen=S.seenT|
   <div class="chips2 tfil">${TFIL.map(([k,l])=>`<button class="${f===k?'on':''}" data-a="tfil" data-x="${k}">${l}</button>`).join('')}</div>
   <div class="tpinw"><div class="secl tsec" style="display:flex;justify-content:space-between;border:0"><span>Pinned</span><button class="lnk xs" data-a="tedit">${ed?'DONE':'EDIT'}</button></div>
   <div class="tpins ${ed?'ed':''} n${pn.length}" style="grid-template-columns:repeat(${Math.max(3,pn.length)},minmax(0,1fr))">${pn.map((k,i)=>`<button class="tpin" data-a="${ed?'tpin':'tool'}" data-x="${k}"><span class="tpi">${ic(TOOLS.find(x=>x[0]===k)[3])}</span><b>${TSHORT[k]}</b><span>${pinSub(k)}</span>${ed?'<em>✕</em>':''}</button>`).join('')||'<div class="xs mute" style="padding:8px 4px">Tap EDIT, then tap tools to pin them here.</div>'}</div>
-  ${ed?'<div class="xs mute" style="padding:10px 20px 0">Drag any tool to reorder. Tap a tool below to pin it, or ✕ on a pinned tool to unpin (up to 4).</div>':''}</div>
+  ${ed?'<div class="xs mute" style="padding:10px 20px 0">Press and hold a tool, then drag to reorder. Tap a tool below to pin it, or ✕ on a pinned tool to unpin (up to 4).</div>':''}</div>
   <div class="secl tsec" style="border:0">${f==='all'?'All Tools':TFIL.find(x=>x[0]===f)[1]}</div>
   <div class="tgrid ${ed?'ed':''}">${list.map(k=>cell(k,ed?'tpin':'tool',k,TSHORT[k],pc(k),TOOLS.find(x=>x[0]===k)[3],!ed&&NEWT.includes(k)&&!seen.includes(k))).join('')}
-  ${f==='all'&&!ed?cell('','sub','routines','Routines','g','note')+cell('','sub','exercises','Exercises','g','dumb')+cell('','tab','more','Settings','g','gear'):''}</div>
+  ${f==='all'&&!ed?cell('','sub','routines','Routines','g','note')+cell('','sub','exercises','Exercises','g','dumb'):''}</div>
   <div class="empty sm" id="tnone" style="display:none">No tools match.</div>`;
   return hd('Tools')+`<main class="pg">${h}</main>`}
 function tsearch(q){q=q.trim().toLowerCase();document.querySelectorAll('.tdr').forEach(b=>{b.style.display=!q||b.dataset.q.includes(q)?'':'none'});const pw=$('.tpinw');if(pw&&pw.style)pw.style.display=q?'none':'';const any=[...document.querySelectorAll('.tdr')].some(b=>b.style.display!=='none');const n=$('#tnone');if(n&&n.style)n.style.display=any?'none':''}
@@ -1300,15 +1300,19 @@ function calHtml(){const c=V.cl=V.cl||{k:'spin',min:45,eff:1,bw:''};const kg=cal
   ${kg&&today?`<div class="wcard center sm" style="color:var(--soft)">Today so far: about <b style="color:var(--text)">${today}</b> calories from logged workouts and activities</div>`:''}
   <p class="xs mute" style="padding:12px 20px">Estimates use standard MET values from the Compendium of Physical Activities. A heart-rate watch will be more accurate for you.</p>`)}
 
-/* ===== drag to reorder pins ===== */
+/* ===== drag to reorder (long-press, slot based) ===== */
 let PD=null;
-document.addEventListener('pointerdown',e=>{if(!V.tedit||!e.target.closest)return;const c=e.target.closest('.tpin,.tgrid.ed .tdr');if(!c)return;PD={c,w:c.parentNode,x0:e.clientX,y0:e.clientY,moved:false}},{passive:true});
-document.addEventListener('pointermove',e=>{if(!PD)return;let dx=e.clientX-PD.x0,dy=e.clientY-PD.y0;if(!PD.moved){if(Math.hypot(dx,dy)<6)return;PD.moved=true;PD.c.classList.add('drag')}
-  const sib=[...PD.w.children].filter(x=>x!==PD.c&&x.dataset.x);let tgt=PD.c.nextElementSibling,best=1e9;for(const s of sib){const r=s.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dd=Math.hypot(e.clientX-cx,e.clientY-cy);if(dd<best){best=dd;tgt=e.clientX<cx?s:s.nextElementSibling}}if(best>140)tgt=PD.c.nextElementSibling;
-  if(tgt!==PD.c.nextElementSibling&&!(tgt===null&&PD.c===PD.w.lastElementChild)){PD.c.style.transform='';const b=PD.c.getBoundingClientRect();PD.w.insertBefore(PD.c,tgt);const a=PD.c.getBoundingClientRect();PD.x0+=a.left-b.left;PD.y0+=a.top-b.top;dx=e.clientX-PD.x0;dy=e.clientY-PD.y0}
-  PD.c.style.transform=`translate(${dx}px,${dy}px) scale(1.05)`;if(e.cancelable)e.preventDefault()},{passive:false});
-function pdEnd(){if(!PD)return;const d=PD;PD=null;if(!d.moved)return;V.dragT=Date.now();const ord=[...d.w.children].map(x=>x.dataset.x).filter(k=>TCAT[k]);if(d.w.classList.contains('tgrid')){const all=tOrder();S.tord=ord.concat(all.filter(k=>!ord.includes(k)))}else S.pins=ord;save();render()}
-document.addEventListener('pointerup',pdEnd);document.addEventListener('pointercancel',pdEnd);
+function pdItems(w){return [...w.children].filter(x=>x.dataset&&TCAT[x.dataset.x])}
+document.addEventListener('pointerdown',e=>{if(!V.tedit||!e.target.closest||PD)return;const c=e.target.closest('.tpin,.tgrid.ed .tdr');if(!c||!TCAT[c.dataset.x])return;const w=c.parentNode,items=pdItems(w),slots=items.map(x=>{const r=x.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2}});
+  PD={c,w,items,slots,i0:items.indexOf(c),x0:e.clientX,y0:e.clientY,dx:0,dy:0,on:false,to:items.indexOf(c)};PD.tm=setTimeout(()=>{if(!PD)return;PD.on=true;c.classList.add('drag');items.forEach(x=>{if(x!==c)x.style.transition='transform .18s ease'});try{navigator.vibrate&&navigator.vibrate(15)}catch(_){}},220)},{passive:true});
+function pdMove(x,y,ev){if(!PD)return;const dx=x-PD.x0,dy=y-PD.y0;if(!PD.on){if(Math.hypot(dx,dy)>8){clearTimeout(PD.tm);PD=null}return}if(ev&&ev.cancelable)ev.preventDefault();
+  PD.dx=dx;PD.dy=dy;PD.c.style.transform=`translate(${dx}px,${dy}px) scale(1.08)`;const p0=PD.slots[PD.i0],px=p0.x+dx,py=p0.y+dy;let to=0,best=1e9;PD.slots.forEach((s,k)=>{const d=Math.hypot(px-s.x,py-s.y);if(d<best){best=d;to=k}});
+  if(to!==PD.to){PD.to=to;const ord=PD.items.filter(z=>z!==PD.c);ord.splice(to,0,PD.c);ord.forEach((z,k)=>{if(z===PD.c)return;const a=PD.slots[PD.items.indexOf(z)],b=PD.slots[k];z.style.transform=k===PD.items.indexOf(z)?'':`translate(${b.x-a.x}px,${b.y-a.y}px)`})}}
+document.addEventListener('pointermove',e=>pdMove(e.clientX,e.clientY,e),{passive:false});
+document.addEventListener('touchmove',e=>{if(PD&&PD.on&&e.cancelable)e.preventDefault()},{passive:false});
+function pdEnd(){if(!PD)return;const d=PD;PD=null;clearTimeout(d.tm);if(!d.on)return;V.dragT=Date.now();const ord=d.items.filter(z=>z!==d.c);ord.splice(d.to,0,d.c);const keys=ord.map(z=>z.dataset.x);
+  if(d.w.classList.contains('tgrid')){const all=tOrder(),pn=pins();const rest=all.filter(k=>!pn.includes(k));const seq=keys.concat(rest.filter(k=>!keys.includes(k)));S.tord=seq.concat(pn)}else S.pins=keys;save();render()}
+document.addEventListener('pointerup',pdEnd);document.addEventListener('pointercancel',e=>{if(PD&&PD.on)return;pdEnd()});
 
 /* ===== personal profile ===== */
 function P(){return Object.assign({age:null,height:null,exp:'int',goal:'muscle'},S.profile||{})}
