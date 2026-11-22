@@ -929,6 +929,16 @@ function render(){syncBars();
   try{document.body.style.overflow=sp2?'hidden':''}catch(e){}
   if(V.anim){const m=$('#app main');if(m&&m.classList)m.classList.add(V.anim);V.anim=null}
 }
+
+/* ===== swipe from left edge to go back ===== */
+let EB=null;
+function ebTarget(){if(document.getElementById('sheet')||document.getElementById('obw')||V.calc||(S.session&&V.inSession))return null;if(V.tool)return ()=>ACT.toolx();if(V.sub)return ()=>ACT.back();if(V.tab==='more')return ()=>ACT.tab('home');return null}
+function ebEl(){return V.tool?document.querySelector('.toolscr'):document.getElementById('app')}
+document.addEventListener('touchstart',e=>{const t=e.touches[0];if(e.touches.length!==1||t.clientX>28)return;const go=ebTarget();if(!go)return;EB={go,x0:t.clientX,y0:t.clientY,t0:Date.now(),dx:0,act:false,el:ebEl()}},{passive:true});
+document.addEventListener('touchmove',e=>{if(!EB)return;const t=e.touches[0],dx=t.clientX-EB.x0,dy=t.clientY-EB.y0;if(!EB.act){if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>8){EB=null;return}if(dx<8)return;EB.act=true;if(EB.el)EB.el.style.transition='none'}EB.dx=Math.max(0,dx);if(EB.el)EB.el.style.transform=`translateX(${EB.dx}px)`;if(e.cancelable)e.preventDefault()},{passive:false});
+document.addEventListener('touchend',()=>{if(!EB)return;const d=EB;EB=null;if(!d.act)return;const v=d.dx/Math.max(1,Date.now()-d.t0),el=d.el;const done=d.dx>window.innerWidth*.33||(v>.45&&d.dx>50);
+  if(el){el.style.transition='transform .2s ease-out';el.style.transform=done?`translateX(${window.innerWidth}px)`:''}
+  setTimeout(()=>{if(el){el.style.transition='';el.style.transform=''}if(done)d.go()},done?180:200)});
 /* swipe down to dismiss panels & sheets */
 let drag=null;
 document.addEventListener('touchstart',e=>{const p=e.target.closest&&e.target.closest('#sp,.sheet');if(!p||e.target.closest('input,textarea'))return;if(p.scrollTop>0)return;drag={el:p,y0:e.touches[0].clientY,t0:Date.now(),dy:0,act:false}},{passive:true});
@@ -981,7 +991,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.39';
+const APPV='1.40';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
