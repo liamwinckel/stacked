@@ -377,6 +377,11 @@ input[type=date].inp{color-scheme:dark;min-height:44px}
 .setscr .barsvg{width:90%!important;margin-left:auto!important;margin-right:auto!important}
 .ovbar{background:#141416!important;border-top:1px solid var(--line);-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 .ovnav{display:flex;align-items:center;justify-content:center;width:48px;height:48px;margin:-8px -6px;border-radius:12px;color:var(--pk)}.ovnav:active{background:rgba(255,214,10,.12)}
+.tourw{position:absolute;inset:0;z-index:120;transition:opacity .25s}.tourw.out{opacity:0}
+.tourh{position:absolute;box-shadow:0 0 0 9999px rgba(0,0,0,.78);border:2px solid var(--pk);transition:all .3s cubic-bezier(.2,.8,.2,1);pointer-events:none}.tourh.none{left:50%;top:50%;width:0;height:0;border:0}
+.tourc{position:absolute;left:16px;right:16px;max-width:488px;margin:0 auto;background:#1a1a1d;border:1px solid #2c2c30;border-radius:18px;padding:16px 18px;box-shadow:0 10px 40px rgba(0,0,0,.5);animation:fadeIn .25s ease}
+.tourk{font-size:11px;letter-spacing:.12em;color:var(--pk);font-weight:700}.tourc b{display:block;font-size:19px;margin-top:6px}.tourc p{font-size:14px;color:var(--soft);line-height:1.45;margin:6px 0 0}
+.tourn{display:flex;align-items:center;justify-content:space-between;margin-top:14px}.tourn>span{display:flex;gap:8px}.tourn .pkb,.tourn .olb{width:auto;margin:0;padding:10px 18px;font-size:13px}
 .toast{position:fixed;left:50%;top:calc(var(--sat) + 64px);transform:translateX(-50%);background:#fff;color:var(--toastc);padding:10px 16px;border-radius:999px;font-weight:600;font-size:14px;z-index:99;transition:opacity .3s;white-space:nowrap}
 .prbox{margin:14px 20px 0;padding:10px;border:1px solid var(--pk);color:var(--pklt);border-radius:6px;font-weight:600;text-align:center}
 </style>
@@ -718,6 +723,7 @@ function renderMore(){
   <div class="li" data-a="export"><div class="g"><div class="tt">Copy backup as text</div><div class="sb">Fallback if file saving isn't available</div></div><span class="chev">${ic('chev')}</span></div>
   <div class="li" data-a="import"><div class="g">Restore from pasted text</div><span class="chev">${ic('chev')}</span></div>
   <div class="h2">Install</div><div class="li sm mute" style="cursor:default">In Safari, tap Share → Add to Home Screen to launch this like a regular app.</div>
+  <div class="li" data-a="tourstart"><span style="color:var(--cy);display:flex">${ic('play')}</span><div class="g"><div class="tt">Take the tour</div><div class="sb">A quick walk-through of the app</div></div><span class="chev">${ic('chev')}</span></div>
   <button class="dng" data-a="reset">Reset all data</button><p class="xs mute center" style="margin-top:14px">Bars · Version ${APPV}</p></main>`;
 }
 
@@ -861,7 +867,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.35';
+const APPV='1.36';
 const SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
@@ -1456,6 +1462,25 @@ function idleCheck(){const s=S.session;if(!s||s.pre||V.idleAsked===s.id+'|'+(s.l
   <div class="shp"><p class="sm" style="color:var(--soft);margin:0;line-height:1.45">Finishing now records the workout as ending at <b style="color:var(--text)">${at}</b>, your last logged activity, so your time and stats stay accurate.</p></div>
   <button class="pkb" data-a="idlefin">Finish at ${at}</button><button class="olb" data-a="idlekeep">I'm Still Going</button>`)}
 setInterval(idleCheck,60e3);document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(idleCheck,600)});
+/* ===== guided tour ===== */
+const TOUR=[
+ {tab:'home',sel:null,t:'Welcome to Bars',d:'A quick look around so you know where everything lives. It takes about 30 seconds.'},
+ {tab:'home',sel:'.stk',t:'Your five daily bars',d:'Show Up, Lift, Move, Cardio and Beat It. Close all five for a full set. Tap the card to change your goals, or tap a day below it to mark a rest day.'},
+ {tab:'home',sel:'.tabs .fab',t:'Quick actions',d:'Everything starts here: your next workout, Build Me a Workout, an empty session, cardio and body stats.'},
+ {tab:'home',sel:'.tabs [data-x="prog"]',t:'Progress',d:'Your PRs and lift charts, body stats and Insights like Month of Bars and Volume Balance. Switch to History for every past workout.'},
+ {tab:'home',sel:'.tabs [data-x="goals"]',t:'Goals',d:'Your focus, your plan for calories and training volume, a target weight with a date, and this week’s sets per muscle.'},
+ {tab:'home',sel:'.tabs [data-x="tools"]',t:'Tools',d:'Calculators, timers, your routines, ready-made programs and the exercise library.'},
+ {tab:'home',sel:'.gearb',t:'Settings',d:'Your profile, units, gym equipment and iCloud backup. Back up now and then: your data lives only on this phone.'},
+ {tab:'home',sel:'.tabs .fab',t:'During a workout',d:'You start on a Ready screen. Each set shows weight, reps and plates. Swipe down for the overview, and Bars suggests when to add reps or weight.',end:'Let’s Go'}];
+function tourOpen(){V.tour=0;tourShow()}
+function tourShow(){const st=TOUR[V.tour];if(!st)return tourEnd();if(V.tab!==st.tab||V.sub){V.tab=st.tab;V.sub=null;render()}
+  let w=$('#tourw');if(!w){w=document.createElement('div');w.id='tourw';w.className='tourw';document.body.appendChild(w)}
+  const el=st.sel?document.querySelector(st.sel):null,R_=el?el.getBoundingClientRect():null,pad=8,H=document.body.clientHeight||innerHeight;
+  const hole=R_?`<div class="tourh" style="left:${R_.left-pad}px;top:${R_.top-pad}px;width:${R_.width+pad*2}px;height:${R_.height+pad*2}px;border-radius:${st.sel.includes('fab')?'50%':'16px'}"></div>`:'<div class="tourh none"></div>';
+  const below=R_&&R_.top+R_.height/2<H*.45,cardPos=!R_?'top:50%;transform:translateY(-50%)':below?`top:${R_.bottom+pad+14}px`:`bottom:${H-R_.top+pad+14}px`;
+  w.innerHTML=`${hole}<div class="tourc" style="${cardPos}"><div class="tourk">${V.tour+1} / ${TOUR.length}</div><b>${st.t}</b><p>${st.d}</p><div class="tourn"><button class="lnk sm" data-a="tourskip">${V.tour===TOUR.length-1?'':'SKIP TOUR'}</button><span>${V.tour>0?`<button class="olb" data-a="tourgo" data-x="-1">Back</button>`:''}<button class="pkb" data-a="tourgo" data-x="1">${st.end||'Next'}</button></span></div></div>`}
+function tourEnd(){const w=$('#tourw');if(w){w.classList.add('out');setTimeout(()=>w.remove(),250)}V.tour=null;S.toured=true;save()}
+addEventListener('resize',()=>{if(V.tour!=null)tourShow()});
 /* ===== weight goal assistant ===== */
 function curBW(){const x=[...S.body].sort((a,b)=>b.date-a.date).find(b=>b.bw);return x?x.bw:null}
 function curBF(){const x=[...S.body].sort((a,b)=>b.date-a.date).find(b=>b.bf);return x?x.bf:null}
@@ -1725,6 +1750,9 @@ const setW=st=>{st.w=bar()+2*sum(st.p||[])};
 const RS=()=>{save();render()};
 const ACT={
   noop:()=>{},
+  tourgo:x=>{V.tour=Math.max(0,V.tour+ +x);tourShow()},
+  tourskip:()=>tourEnd(),
+  tourstart:()=>{closeSheet();tourOpen()},
   ovmove:x=>{const L=seqList(),k=seqIdx(),n=L[k+ +x];if(!n){toast(+x>0?'That’s the last set':'That’s the first set');return}const s=S.session;s.i=n[0];s.s=n[1];save();render()},
   blkon:x=>{R(x).block={build:4,deload:true,start:weekStart(Date.now()),base:{},cycle:1};save();render();toast('Training block started: Week 1')},
   blkn:x=>{const [id,n]=x.split('|');R(id).block.build=+n;save();render()},
@@ -1766,7 +1794,7 @@ const ACT={
   bknow:()=>{closeSheet();ACT.bkfile()},
   delwid:x=>{closeSheet();ACT.delwid0(x)},
   obnext:(x,el)=>{const st=V.ob||0;if(st===1)obSaveBody();if(st===3&&!(el&&el.dataset.skip)){const t=parseFloat(($('#wgT')||{}).value),d=($('#wgD')||{}).value,bw=curBW();if(t&&d&&bw)S.weightGoal={target:t,date:new Date(d+'T12:00').getTime(),start:bw,startDate:Date.now()};save()}if(st===0&&el&&el.dataset.skip){S.onboarded=true;save();const w=$('#obw');if(w)w.remove();V.ob=null;render();return}V.ob=+x;obOpen()},
-  obdone:()=>{setTimeout(()=>{if(V.imp)impShow()},400);const sg=suggestStack();S.goals=Object.assign(G(),sg.g);S.weekGoal=sg.week;S.onboarded=true;save();const w=$('#obw');if(w){w.classList.add('out');setTimeout(()=>w.remove(),300)}V.ob=null;render();toast('You’re all set'+(S.name?', '+S.name:'')+'!')},
+  obdone:()=>{setTimeout(()=>{if(V.imp)impShow()},400);const sg=suggestStack();S.goals=Object.assign(G(),sg.g);S.weekGoal=sg.week;S.onboarded=true;save();const w=$('#obw');if(w){w.classList.add('out');setTimeout(()=>w.remove(),300)}V.ob=null;render();setTimeout(()=>{if(V.imp)return;tourOpen()},450)},
   obunsure:()=>{S.profile=Object.assign(P(),{goal:'general',goalUnsure:true});save();obOpen()},
   obunit:x=>{if(U()!==x){S.units=x;save()}obOpen()},
   qnewr:()=>{closeSheet();ACT.newroutine()},
