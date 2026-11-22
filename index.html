@@ -368,6 +368,12 @@ input[type=date].inp{color-scheme:dark;min-height:44px}
 .msg{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:4px 16px 0}.msc{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px}.msl{font-size:12px;color:var(--mute)}.msv{display:flex;align-items:baseline;gap:8px;margin:2px 0 4px}.msv b{font-size:22px;font-weight:600}.msv span{font-size:12px;font-weight:700;color:var(--soft)}.msv span.up{color:#5fe39a}.msv span.dn{color:#ff7a7a}.msc svg{width:100%;height:28px;display:block;margin-bottom:4px}
 .blkw{display:flex;gap:6px;padding:6px 16px 4px}.blkw>div{flex:1;text-align:center}.blkw i{display:block;height:10px;border-radius:5px;background:#26262a}.blkw span{font-size:10px;color:var(--mute);font-weight:700;letter-spacing:.04em}.blkw .dn i{background:rgba(255,214,10,.5)}.blkw .on i{background:var(--pk)}.blkw .on span{color:var(--pk)}.blkw .dl i{background:repeating-linear-gradient(45deg,#26262a 0 4px,#33333a 4px 8px)}.blkw .dl.on i{background:#fff}
 .blkchip{display:inline-block;margin:0 6px 10px 0;padding:6px 12px;border-radius:14px;background:rgba(255,214,10,.1);border:1px solid rgba(255,214,10,.35);color:var(--pk);font-size:12px;font-weight:700}
+.grab2{display:none}
+.plates .oct{--b:60px}
+.cbtn{width:44px!important;height:44px!important}.cbtn svg{width:20px;height:20px}
+.setmain{padding-bottom:calc(64px + var(--sab))!important}
+.wnum{font-size:clamp(52px,8.5vh,84px)!important}
+.rnum{font-size:clamp(44px,7vh,68px)!important}
 .toast{position:fixed;left:50%;top:calc(var(--sat) + 64px);transform:translateX(-50%);background:#fff;color:var(--toastc);padding:10px 16px;border-radius:999px;font-weight:600;font-size:14px;z-index:99;transition:opacity .3s;white-space:nowrap}
 .prbox{margin:14px 20px 0;padding:10px;border:1px solid var(--pk);color:var(--pklt);border-radius:6px;font-weight:600;text-align:center}
 </style>
@@ -719,8 +725,8 @@ function octBtn(p,count,act='plate'){
   return `<button class="oct" style="--k:${(sz/76).toFixed(3)}" data-a="${act}" data-x="${p}"><svg viewBox="0 0 100 100"><polygon points="${poly(46)}" fill="var(--octbg)" stroke="var(--cy)" stroke-width="4"/><polygon points="${poly(37)}" fill="none" stroke="var(--cy)" stroke-opacity=".45" stroke-width="2.5"/><text x="50" y="58" text-anchor="middle" font-size="${String(p).length>3?20:26}" fill="#fff" font-family="-apple-system,system-ui,sans-serif">${fmt(p)}</text></svg>${count?`<span class="badge">${count}</span>`:''}</button>`;
 }
 function barSvg(p,tool){
-  const Wd=340,H=140,cy=70,mx=PLATES[U()][0];
-  const pw=x=>11+9*Math.sqrt(x/mx),ph=x=>46+88*Math.sqrt(x/mx);
+  const Wd=340,H=112,cy=56,mx=PLATES[U()][0];
+  const pw=x=>9+7*Math.sqrt(x/mx),ph=x=>34+62*Math.sqrt(x/mx);
   const tot=sum(p.map(x=>pw(x)+2)),sc=tot>102?102/tot:1;
   let g=`<line x1="4" y1="${cy}" x2="${Wd-4}" y2="${cy}" stroke="#fff" stroke-width="4" stroke-linecap="round"/><rect x="108" y="${cy-13}" width="6" height="26" rx="2" fill="#fff"/><rect x="${Wd-114}" y="${cy-13}" width="6" height="26" rx="2" fill="#fff"/><g data-a="${tool?'noop':'editbar'}" style="cursor:pointer"><rect x="118" y="${cy+8}" width="${Wd-236}" height="40" fill="transparent"/><text x="${Wd/2}" y="${cy+34}" text-anchor="middle" font-size="17" fill="var(--soft)" font-family="-apple-system,system-ui,sans-serif">${fmt(bar())} ${U()}s</text></g>`;
   let xr=Wd-106,xl=106;
@@ -735,7 +741,7 @@ function renderSet(){
   let wv;
   if(e.type==='barbell'){
     const cnt={};st.p.forEach(x=>cnt[x]=(cnt[x]||0)+1);
-    wv=`<div class="wnum" data-a="typew">${fmt(st.w)}</div><div class="wunit">${ulab()}</div>${(()=>{const l=lastSetFor(it,s.s);return l?`<div class="lastinl">${l.skip?'Last time: skipped':`Last time: <b>${fmt(l.w)} × ${l.r}</b>`}</div>`:''})()}${barSvg(st.p)}<div class="plates" style="--n:${availPlates().length}">${availPlates().map(p=>octBtn(p,cnt[p])).join('')}</div>`;
+    wv=`<div class="wnum" data-a="typew">${fmt(st.w)}</div><div class="wunit">${ulab()}</div>${barSvg(st.p)}<div class="plates" style="--n:${availPlates().length}">${availPlates().map(p=>octBtn(p,cnt[p])).join('')}</div>`;
   }else{
     const lab=e.type==='dumbbell'?(S.dbMode==='per'?'per dumbbell':'total'):e.type==='bodyweight'?'added weight':'';
     wv=`<div class="repsrow" style="margin-top:18px"><button class="cbtn" data-a="w" data-x="-1">${ic('minus',2)}</button><div><div class="rnum big" data-a="typew">${fmt(st.w)}</div><div class="wunit">${ulab()}${lab?' · '+lab.toUpperCase():''}</div>${(()=>{const l=lastSetFor(it,s.s);return l?`<div class="lastinl">${l.skip?'Last: skipped':`Last: <b>${fmt(l.w)} × ${l.r}</b>`}</div>`:''})()}</div><button class="cbtn" data-a="w" data-x="1">${ic('plus',2)}</button></div>`;
