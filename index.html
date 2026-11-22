@@ -489,6 +489,7 @@ html[data-theme="light"] .ic.w{background:#18181b;color:#fff}html[data-theme="li
 html[data-theme="light"] .ic.g{background:#fff;color:#18181b;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .tpins.n4 .tpin{min-height:96px;padding:10px}.tpins.n4 .tpin>span:not(.tpi){display:none}.tpins.n4 .tpin b{font-size:12px}
 .tgrid.ed .tdr{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}.tdr.drag,.tpin.drag{z-index:5;transition:none!important}.tdr.drag .ic{box-shadow:0 10px 26px rgba(0,0,0,.5)}
+.toolscr .barsvg{width:90%!important;max-width:none!important;max-height:clamp(96px,17vh,160px);height:auto;margin:4px auto 0!important;padding:0 4px}
 </style>
 </head>
 <body>
@@ -992,7 +993,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.42';
+const APPV='1.43';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
@@ -2102,7 +2103,7 @@ function renderTool(){const t=V.tool;
   <div class="center xs mute" style="margin-top:8px">${P.p.length?'Per side: '+P.p.map(fmt).join(' + '):'Tap plates to load the bar'}${P.miss?` · <span style="color:var(--pk)">closest possible (${fmt(P.miss)} ${U()} short)</span>`:''}</div>
   <div class="shp" style="display:flex;gap:10px;margin-top:18px"><input class="inp" id="ptgt" type="number" inputmode="decimal" placeholder="Target weight (${U()})" value="${P.tgt||''}"><button class="pkb" style="margin:0;width:auto;padding:0 20px" data-a="tload">Load</button></div>
   <div class="lblx" style="padding:0 20px">Plates at your gym</div><div class="chips2" style="padding-top:4px">${PLATES[U()].map(p=>`<button class="${av.includes(p)?'on':''}" data-a="tinv" data-x="${p}">${fmt(p)}</button>`).join('')}</div>
-  <button class="olb" data-a="treset" style="margin-top:18px">Clear Bar</button><p class="xs mute center" style="padding:8px 20px">Bar weight is ${fmt(bar())} ${U()}. Change it under More.</p>`)}
+  <button class="olb" data-a="treset" style="margin-top:18px">Clear Bar</button><p class="xs mute center" style="padding:8px 20px">Bar weight is ${fmt(bar())} ${U()}. Change it in Settings.</p>`)}
  if(t==='pct'){const C=V.pc,orm=+C.orm||0;const lifts=bigLifts().filter(x=>x.b.n);
   let body=`<div class="shp" style="padding-top:14px"><div class="lblx">One-rep max (${U()})</div><input class="inp big" id="pcorm" type="number" inputmode="decimal" data-in="pcorm" placeholder="0" value="${C.orm||''}">${lifts.length?`<div class="chips2" style="padding:10px 0 0">${lifts.map(x=>`<button data-a="pcfill" data-x="${Math.round(x.b.e)}">${x.k} ${fmt(Math.round(x.b.e))}</button>`).join('')}</div>`:''}</div>
   <div class="shp" style="margin-top:14px"><div class="seg">${[['pct','% of 1RM'],['rpe','RPE Chart']].map(([k,l])=>`<button class="${C.mode===k?'on':''}" data-a="pcmode" data-x="${k}">${l}</button>`).join('')}</div></div><div id="pctab">${pctTable()}</div>`;
