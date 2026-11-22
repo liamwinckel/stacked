@@ -488,6 +488,7 @@ html[data-theme="light"] .ic.w{background:#18181b;color:#fff}html[data-theme="li
 .ic.g{background:rgba(var(--cyr),.08);color:var(--pk)}
 html[data-theme="light"] .ic.g{background:#fff;color:#18181b;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .tpins.n4 .tpin{min-height:96px;padding:10px}.tpins.n4 .tpin>span:not(.tpi){display:none}.tpins.n4 .tpin b{font-size:12px}
+.tgrid.ed .tdr{touch-action:none;user-select:none;-webkit-user-select:none}.tdr.drag{z-index:5;transition:none}.tdr.drag .ic{box-shadow:0 10px 26px rgba(0,0,0,.5)}
 </style>
 </head>
 <body>
@@ -991,7 +992,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.40';
+const APPV='1.41';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
@@ -1138,7 +1139,8 @@ const TSHORT={calc:'1RM Calc',plates:'Plates',pct:'% & RPE',strength:'Strength',
 const TCOL={lift:'y',cardio:'w',classes:'w',timer:'d',mind:'d'};
 const NEWT=['hrz','pace','runwalk','classes','pass','flow','stretch','breath','warm','cal'];
 const TFIL=[['all','All'],['lift','Lifting'],['cardio','Cardio'],['classes','Classes'],['timer','Timers'],['mind','Mind']];
-function tOrder(){const st=S.style||'lift',ord=st==='lift'?['lift','timer','cardio','classes','mind']:st==='hybrid'?['lift','classes','cardio','timer','mind']:['classes','cardio','timer','mind','lift'];return TOOLS.map(t=>t[0]).sort((a,b)=>ord.indexOf(TCAT[a])-ord.indexOf(TCAT[b]))}
+function tOrder0(){const st=S.style||'lift',ord=st==='lift'?['lift','timer','cardio','classes','mind']:st==='hybrid'?['lift','classes','cardio','timer','mind']:['classes','cardio','timer','mind','lift'];return TOOLS.map(t=>t[0]).sort((a,b)=>ord.indexOf(TCAT[a])-ord.indexOf(TCAT[b]))}
+function tOrder(){const d=tOrder0();if(!S.tord)return d;const o=S.tord.filter(k=>d.includes(k));return o.concat(d.filter(k=>!o.includes(k)))}
 function pins(){return (S.pins||{lift:['plates','calc','interval'],hybrid:['plates','classes','interval'],classes:['classes','interval','pass']}[S.style||'lift']).filter(k=>TCAT[k])}
 function tdesc(k){const t=TOOLS.find(x=>x[0]===k);return t?t[2]:''}
 function pinSub(k){try{
@@ -1156,14 +1158,14 @@ function pinSub(k){try{
 function tIcon(k,big){const c=TCAT[k];return `<span class="ic ${TCOL[c]}">${ic(TOOLS.find(x=>x[0]===k)[3])}</span>`}
 function renderToolsTab(){const f=V.tf||'all',ed=V.tedit,pn=pins(),seen=S.seenT||[];
   const cell=(k,a,x,label,col,icn,dot)=>`<button class="tdr" data-a="${a}" data-x="${x}" data-q="${esc(label.toLowerCase())} ${TCAT[k]||''}"><span class="ic ${col}">${ic(icn)}${ed&&TCAT[k]?`<em class="${pn.includes(k)?'on':''}">${pn.includes(k)?'✓':'+'}</em>`:''}</span>${label}${dot?'<i class="dot"></i>':''}</button>`;
-  const list=tOrder().filter(k=>f==='all'||TCAT[k]===f),pc=k=>pn.includes(k)?'y':'g';
+  const list=tOrder().filter(k=>(f==='all'||TCAT[k]===f)&&!pn.includes(k)),pc=k=>'g';
   let h=`<div class="srch">${ic('search')}<input data-in="tsearch" placeholder="Search tools" value=""></div>
   <div class="chips2 tfil">${TFIL.map(([k,l])=>`<button class="${f===k?'on':''}" data-a="tfil" data-x="${k}">${l}</button>`).join('')}</div>
   <div class="tpinw"><div class="secl tsec" style="display:flex;justify-content:space-between;border:0"><span>Pinned</span><button class="lnk xs" data-a="tedit">${ed?'DONE':'EDIT'}</button></div>
   <div class="tpins ${ed?'ed':''} n${pn.length}" style="grid-template-columns:repeat(${Math.max(3,pn.length)},minmax(0,1fr))">${pn.map((k,i)=>`<button class="tpin" data-a="${ed?'tpin':'tool'}" data-x="${k}"><span class="tpi">${ic(TOOLS.find(x=>x[0]===k)[3])}</span><b>${TSHORT[k]}</b><span>${pinSub(k)}</span>${ed?'<em>✕</em>':''}</button>`).join('')||'<div class="xs mute" style="padding:8px 4px">Tap EDIT, then tap tools to pin them here.</div>'}</div>
-  ${ed?'<div class="xs mute" style="padding:10px 20px 0">Drag pinned tools to reorder. Tap any tool below to pin or unpin it (up to 4).</div>':'<div class="xs mute" style="padding:10px 20px 0">Yellow tools are pinned.</div>'}</div>
+  ${ed?'<div class="xs mute" style="padding:10px 20px 0">Drag any tool to reorder. Tap a tool below to pin it, or ✕ on a pinned tool to unpin (up to 4).</div>':''}</div>
   <div class="secl tsec" style="border:0">${f==='all'?'All Tools':TFIL.find(x=>x[0]===f)[1]}</div>
-  <div class="tgrid">${list.map(k=>cell(k,ed?'tpin':'tool',k,TSHORT[k],pc(k),TOOLS.find(x=>x[0]===k)[3],!ed&&NEWT.includes(k)&&!seen.includes(k))).join('')}
+  <div class="tgrid ${ed?'ed':''}">${list.map(k=>cell(k,ed?'tpin':'tool',k,TSHORT[k],pc(k),TOOLS.find(x=>x[0]===k)[3],!ed&&NEWT.includes(k)&&!seen.includes(k))).join('')}
   ${f==='all'&&!ed?cell('','sub','routines','Routines','g','note')+cell('','sub','exercises','Exercises','g','dumb')+cell('','tab','more','Settings','g','gear'):''}</div>
   <div class="empty sm" id="tnone" style="display:none">No tools match.</div>`;
   return hd('Tools')+`<main class="pg">${h}</main>`}
@@ -1300,12 +1302,12 @@ function calHtml(){const c=V.cl=V.cl||{k:'spin',min:45,eff:1,bw:''};const kg=cal
 
 /* ===== drag to reorder pins ===== */
 let PD=null;
-document.addEventListener('pointerdown',e=>{if(!V.tedit||!e.target.closest)return;const c=e.target.closest('.tpin');if(!c)return;PD={c,w:c.parentNode,x0:e.clientX,y0:e.clientY,moved:false}},{passive:true});
+document.addEventListener('pointerdown',e=>{if(!V.tedit||!e.target.closest)return;const c=e.target.closest('.tpin,.tgrid.ed .tdr');if(!c)return;PD={c,w:c.parentNode,x0:e.clientX,y0:e.clientY,moved:false}},{passive:true});
 document.addEventListener('pointermove',e=>{if(!PD)return;let dx=e.clientX-PD.x0,dy=e.clientY-PD.y0;if(!PD.moved){if(Math.hypot(dx,dy)<6)return;PD.moved=true;PD.c.classList.add('drag')}
-  const sib=[...PD.w.children].filter(x=>x!==PD.c);let tgt=null;for(const s of sib){const r=s.getBoundingClientRect();if(e.clientX<r.left+r.width/2){tgt=s;break}}
+  const sib=[...PD.w.children].filter(x=>x!==PD.c&&x.dataset.x);let tgt=PD.c.nextElementSibling,best=1e9;for(const s of sib){const r=s.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dd=Math.hypot(e.clientX-cx,e.clientY-cy);if(dd<best){best=dd;tgt=e.clientX<cx?s:s.nextElementSibling}}if(best>140)tgt=PD.c.nextElementSibling;
   if(tgt!==PD.c.nextElementSibling&&!(tgt===null&&PD.c===PD.w.lastElementChild)){PD.c.style.transform='';const b=PD.c.getBoundingClientRect();PD.w.insertBefore(PD.c,tgt);const a=PD.c.getBoundingClientRect();PD.x0+=a.left-b.left;PD.y0+=a.top-b.top;dx=e.clientX-PD.x0;dy=e.clientY-PD.y0}
   PD.c.style.transform=`translate(${dx}px,${dy}px) scale(1.05)`;if(e.cancelable)e.preventDefault()},{passive:false});
-function pdEnd(){if(!PD)return;const d=PD;PD=null;if(!d.moved)return;V.dragT=Date.now();S.pins=[...d.w.children].map(x=>x.dataset.x).filter(Boolean);save();render()}
+function pdEnd(){if(!PD)return;const d=PD;PD=null;if(!d.moved)return;V.dragT=Date.now();const ord=[...d.w.children].map(x=>x.dataset.x).filter(k=>TCAT[k]);if(d.w.classList.contains('tgrid')){const all=tOrder();S.tord=ord.concat(all.filter(k=>!ord.includes(k)))}else S.pins=ord;save();render()}
 document.addEventListener('pointerup',pdEnd);document.addEventListener('pointercancel',pdEnd);
 
 /* ===== personal profile ===== */
