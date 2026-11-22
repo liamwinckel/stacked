@@ -853,7 +853,7 @@ function barSvg(p,tool){
   const Wd=340,H=112,cy=56,mx=PLATES[U()][0];
   const pw=x=>9+7*Math.sqrt(x/mx),ph=x=>34+62*Math.sqrt(x/mx);
   const tot=sum(p.map(x=>pw(x)+2)),sc=tot>102?102/tot:1;
-  let g=`<line x1="4" y1="${cy}" x2="${Wd-4}" y2="${cy}" stroke="#fff" stroke-width="4" stroke-linecap="round"/><rect x="108" y="${cy-13}" width="6" height="26" rx="2" fill="#fff"/><rect x="${Wd-114}" y="${cy-13}" width="6" height="26" rx="2" fill="#fff"/><g data-a="${tool?'noop':'editbar'}" style="cursor:pointer"><rect x="118" y="${cy+8}" width="${Wd-236}" height="40" fill="transparent"/><text x="${Wd/2}" y="${cy+34}" text-anchor="middle" font-size="17" fill="var(--soft)" font-family="-apple-system,system-ui,sans-serif">${fmt(bar())} ${U()}s</text></g>`;
+  let g=`<line x1="4" y1="${cy}" x2="${Wd-4}" y2="${cy}" stroke="#fff" stroke-width="4" stroke-linecap="round"/><rect x="108" y="${cy-13}" width="6" height="26" rx="2" fill="#fff"/><rect x="${Wd-114}" y="${cy-13}" width="6" height="26" rx="2" fill="#fff"/><g data-a="${tool?'tbar':'editbar'}" style="cursor:pointer"><rect x="118" y="${cy+8}" width="${Wd-236}" height="40" fill="transparent"/><text x="${Wd/2}" y="${cy+34}" text-anchor="middle" font-size="17" fill="var(--soft)" font-family="-apple-system,system-ui,sans-serif">${fmt(bar())} ${U()}s</text></g>`;
   let xr=Wd-106,xl=106;
   p.forEach((x,k)=>{const w=pw(x)*sc,h=ph(x);
     g+=`<g data-a="${tool?'tprm':'rmplate'}" data-x="${k}" class="bp"><rect x="${xr-1}" y="0" width="${w+2}" height="${H}" fill="transparent"/><rect x="${xl-w-1}" y="0" width="${w+2}" height="${H}" fill="transparent"/><rect x="${xr}" y="${cy-h/2}" width="${w}" height="${h}" rx="3" fill="var(--cy)"/><rect x="${xl-w}" y="${cy-h/2}" width="${w}" height="${h}" rx="3" fill="var(--cy)"/></g>`;xr+=w+2;xl-=w+2});
@@ -993,7 +993,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.43';
+const APPV='1.44';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
@@ -2103,7 +2103,7 @@ function renderTool(){const t=V.tool;
   <div class="center xs mute" style="margin-top:8px">${P.p.length?'Per side: '+P.p.map(fmt).join(' + '):'Tap plates to load the bar'}${P.miss?` · <span style="color:var(--pk)">closest possible (${fmt(P.miss)} ${U()} short)</span>`:''}</div>
   <div class="shp" style="display:flex;gap:10px;margin-top:18px"><input class="inp" id="ptgt" type="number" inputmode="decimal" placeholder="Target weight (${U()})" value="${P.tgt||''}"><button class="pkb" style="margin:0;width:auto;padding:0 20px" data-a="tload">Load</button></div>
   <div class="lblx" style="padding:0 20px">Plates at your gym</div><div class="chips2" style="padding-top:4px">${PLATES[U()].map(p=>`<button class="${av.includes(p)?'on':''}" data-a="tinv" data-x="${p}">${fmt(p)}</button>`).join('')}</div>
-  <button class="olb" data-a="treset" style="margin-top:18px">Clear Bar</button><p class="xs mute center" style="padding:8px 20px">Bar weight is ${fmt(bar())} ${U()}. Change it in Settings.</p>`)}
+  <button class="olb" data-a="treset" style="margin-top:18px">Clear Bar</button><p class="xs mute center" style="padding:8px 20px">Bar weight is ${fmt(bar())} ${U()}. Tap the bar weight above to change it.</p>`)}
  if(t==='pct'){const C=V.pc,orm=+C.orm||0;const lifts=bigLifts().filter(x=>x.b.n);
   let body=`<div class="shp" style="padding-top:14px"><div class="lblx">One-rep max (${U()})</div><input class="inp big" id="pcorm" type="number" inputmode="decimal" data-in="pcorm" placeholder="0" value="${C.orm||''}">${lifts.length?`<div class="chips2" style="padding:10px 0 0">${lifts.map(x=>`<button data-a="pcfill" data-x="${Math.round(x.b.e)}">${x.k} ${fmt(Math.round(x.b.e))}</button>`).join('')}</div>`:''}</div>
   <div class="shp" style="margin-top:14px"><div class="seg">${[['pct','% of 1RM'],['rpe','RPE Chart']].map(([k,l])=>`<button class="${C.mode===k?'on':''}" data-a="pcmode" data-x="${k}">${l}</button>`).join('')}</div></div><div id="pctab">${pctTable()}</div>`;
@@ -2490,6 +2490,9 @@ const ACT={
   plate:x=>{const p=+x,st=cur(),now=Date.now();st.p=st.p||[];const rm=()=>{const k=st.p.lastIndexOf(p);if(k>=0)st.p.splice(k,1)};
     if(lastTap.p===p&&now-lastTap.t<350){rm();rm();lastTap={p:null,t:0}}else{st.p.push(p);st.p.sort((a,b)=>b-a);lastTap={p,t:now}}setW(st);RS()},
   rmplate:(x,el)=>{if(V.rmBusy)return;const go=()=>{V.rmBusy=false;const st=cur();st.p.splice(+x,1);setW(st);RS()};if(el&&el.classList&&el.getBBox){V.rmBusy=true;el.classList.add('out');setTimeout(go,200)}else go()},
+  tbar:()=>{const ps=U()==='kg'?[[20,'Olympic'],[15,'Women’s'],[10,'EZ bar'],[25,'Trap bar'],[7,'Technique']]:[[45,'Olympic'],[35,'Women’s'],[25,'EZ bar'],[55,'Trap bar'],[15,'Technique']];CB=v=>{S.bar[U()]=Math.max(0,v);save();render()};
+    openSheet(`<div class="sh-t">Bar weight (${U()})</div><div class="shp"><div class="chw">${ps.map(([w,n])=>`<button class="${bar()===w?'on':''}" data-a="tbarset" data-x="${w}">${n} · ${w}</button>`).join('')}</div><div class="lblx">Custom</div><input id="numin" class="inp big" type="number" inputmode="decimal" value="${bar()}"></div><button class="pkb" data-a="numok">Save</button>`)},
+  tbarset:x=>{S.bar[U()]=+x;save();closeSheet();render();toast(`Bar set to ${x} ${U()}`)},
   editbar:()=>numSheet('Bar weight ('+U()+')',bar(),v=>{S.bar[U()]=Math.max(0,v);setW(cur())}),
   ropen:()=>{V.restOpen=true;render()},
   rclose:()=>{V.restOpen=false;render()},
