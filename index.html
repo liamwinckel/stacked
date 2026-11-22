@@ -478,6 +478,16 @@ html[data-theme="light"] .ic.w{background:#18181b;color:#fff}html[data-theme="li
 .clt{width:64px;flex:none;font-size:13px;font-weight:700;color:var(--soft)}
 .cday{padding:14px 20px 4px;font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--mute)}
 .pkb.sm2{margin:0;width:auto;padding:9px 16px;font-size:12px}
+
+.tpins{display:grid!important;overflow:visible!important}
+.tpin{width:auto!important;background:var(--panel)!important;color:var(--text)!important;border:1px solid var(--line)!important;user-select:none;-webkit-user-select:none}
+.tpin span{color:var(--mute)!important}
+.tpin .tpi{width:34px;height:34px;border-radius:10px;background:var(--pk);color:#121212!important;display:flex;align-items:center;justify-content:center}
+.tpins.ed .tpin{touch-action:none;border:1.5px dashed rgba(255,214,10,.6)!important;cursor:grab}
+.tpin.drag{z-index:5;box-shadow:0 10px 30px rgba(0,0,0,.45);transition:none}
+.ic.g{background:rgba(var(--cyr),.08);color:var(--pk)}
+html[data-theme="light"] .ic.g{background:#fff;color:#18181b;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.tpins.n4 .tpin{min-height:96px;padding:10px}.tpins.n4 .tpin>span:not(.tpi){display:none}.tpins.n4 .tpin b{font-size:12px}
 </style>
 </head>
 <body>
@@ -596,6 +606,7 @@ const IP={
  link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
  flame:'<path d="M12 3c1 3 4 4.5 4 9a4 4 0 0 1-8 0c0-2 1-3 1-3s.5 2 2 2c0-3-1-5 1-8z"/>',
  scale:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9.5a4 4 0 0 1 6 0l-2 2.5"/>',
+ ramp:'<path d="M4 19h4v-4h4v-4h4V7h4"/><path d="M4 19h16"/>',
  search:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
  pulse:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/><path d="M8 12h2l1-2 2 4 1-2h2"/>',
  gauge:'<path d="M4.5 17a8.5 8.5 0 1 1 15 0"/><path d="M12 14l4-5"/><circle cx="12" cy="14" r="1.3" fill="currentColor"/>',
@@ -970,7 +981,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.38';
+const APPV='1.39';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
@@ -1112,10 +1123,10 @@ function curTheme(){const m=S.themeMode||'dark';if(m==='auto'){try{return matchM
 try{matchMedia('(prefers-color-scheme: light)').addEventListener('change',()=>{if(S.themeMode==='auto'){applyTheme();render()}})}catch(e){}
 
 /* ===== tool drawer ===== */
-const TCAT={calc:'lift',plates:'lift',pct:'lift',strength:'lift',program:'lift',convert:'lift',interval:'timer',hrz:'cardio',pace:'cardio',runwalk:'cardio',classes:'classes',pass:'classes',flow:'timer',stretch:'timer',breath:'mind'};
-const TSHORT={calc:'1RM Calc',plates:'Plates',pct:'% & RPE',strength:'Strength',program:'Programs',convert:'lb / kg',interval:'Circuit Timer',hrz:'HR Zones',pace:'Pace',runwalk:'Run / Walk',classes:'Classes',pass:'Class Pass',flow:'Build a Flow',stretch:'Stretch',breath:'Breathing'};
+const TCAT={calc:'lift',plates:'lift',pct:'lift',strength:'lift',program:'lift',convert:'lift',interval:'timer',hrz:'cardio',pace:'cardio',runwalk:'cardio',classes:'classes',pass:'classes',flow:'timer',stretch:'timer',breath:'mind',warm:'lift',cal:'cardio'};
+const TSHORT={calc:'1RM Calc',plates:'Plates',pct:'% & RPE',strength:'Strength',program:'Programs',convert:'lb / kg',interval:'Circuit Timer',hrz:'HR Zones',pace:'Pace',runwalk:'Run / Walk',classes:'Classes',pass:'Class Pass',flow:'Build a Flow',stretch:'Stretch',breath:'Breathing',warm:'Warm-Up',cal:'Calories'};
 const TCOL={lift:'y',cardio:'w',classes:'w',timer:'d',mind:'d'};
-const NEWT=['hrz','pace','runwalk','classes','pass','flow','stretch','breath'];
+const NEWT=['hrz','pace','runwalk','classes','pass','flow','stretch','breath','warm','cal'];
 const TFIL=[['all','All'],['lift','Lifting'],['cardio','Cardio'],['classes','Classes'],['timer','Timers'],['mind','Mind']];
 function tOrder(){const st=S.style||'lift',ord=st==='lift'?['lift','timer','cardio','classes','mind']:st==='hybrid'?['lift','classes','cardio','timer','mind']:['classes','cardio','timer','mind','lift'];return TOOLS.map(t=>t[0]).sort((a,b)=>ord.indexOf(TCAT[a])-ord.indexOf(TCAT[b]))}
 function pins(){return (S.pins||{lift:['plates','calc','interval'],hybrid:['plates','classes','interval'],classes:['classes','interval','pass']}[S.style||'lift']).filter(k=>TCAT[k])}
@@ -1128,20 +1139,22 @@ function pinSub(k){try{
   if(k==='plates')return `Bar ${fmt(bar())} ${U()}`;
   if(k==='interval')return V.it?{emom:'EMOM',tabata:'Tabata',amrap:'AMRAP',custom:'Custom'}[V.it.mode]:'EMOM · Tabata · AMRAP';
   if(k==='flow')return (S.flows||[]).length?`${S.flows.length} saved`:'Make your own';
+  if(k==='cal'){const c=curBW();return c?`Spin 45 min ≈ ${calOf('spin',45,1)}`:'Add your bodyweight'}
+  if(k==='warm')return 'Ramp to any weight';
   if(k==='calc'){const b=bigLifts().find(x=>x.b.n);return b?`${b.k} ${fmt(Math.round(b.b.e))} ${U()}`:'Estimate a max'}
  }catch(e){}return TSHORT[k]}
 function tIcon(k,big){const c=TCAT[k];return `<span class="ic ${TCOL[c]}">${ic(TOOLS.find(x=>x[0]===k)[3])}</span>`}
 function renderToolsTab(){const f=V.tf||'all',ed=V.tedit,pn=pins(),seen=S.seenT||[];
   const cell=(k,a,x,label,col,icn,dot)=>`<button class="tdr" data-a="${a}" data-x="${x}" data-q="${esc(label.toLowerCase())} ${TCAT[k]||''}"><span class="ic ${col}">${ic(icn)}${ed&&TCAT[k]?`<em class="${pn.includes(k)?'on':''}">${pn.includes(k)?'✓':'+'}</em>`:''}</span>${label}${dot?'<i class="dot"></i>':''}</button>`;
-  const list=tOrder().filter(k=>f==='all'||TCAT[k]===f);
+  const list=tOrder().filter(k=>f==='all'||TCAT[k]===f),pc=k=>pn.includes(k)?'y':'g';
   let h=`<div class="srch">${ic('search')}<input data-in="tsearch" placeholder="Search tools" value=""></div>
   <div class="chips2 tfil">${TFIL.map(([k,l])=>`<button class="${f===k?'on':''}" data-a="tfil" data-x="${k}">${l}</button>`).join('')}</div>
   <div class="tpinw"><div class="secl tsec" style="display:flex;justify-content:space-between;border:0"><span>Pinned</span><button class="lnk xs" data-a="tedit">${ed?'DONE':'EDIT'}</button></div>
-  <div class="tpins">${pn.map((k,i)=>`<button class="tpin ${i===0?'y':i===1?'w':''}" data-a="${ed?'tpin':'tool'}" data-x="${k}">${ic(TOOLS.find(x=>x[0]===k)[3])}<b>${TSHORT[k]}</b><span>${pinSub(k)}</span>${ed?'<em>✕</em>':''}</button>`).join('')||'<div class="xs mute" style="padding:8px 4px">Tap EDIT, then tap tools to pin them here.</div>'}</div>
-  ${ed?'<div class="xs mute" style="padding:8px 20px 0">Tap any tool below to pin or unpin it. Up to 4.</div>':''}</div>
+  <div class="tpins ${ed?'ed':''} n${pn.length}" style="grid-template-columns:repeat(${Math.max(3,pn.length)},minmax(0,1fr))">${pn.map((k,i)=>`<button class="tpin" data-a="${ed?'tpin':'tool'}" data-x="${k}"><span class="tpi">${ic(TOOLS.find(x=>x[0]===k)[3])}</span><b>${TSHORT[k]}</b><span>${pinSub(k)}</span>${ed?'<em>✕</em>':''}</button>`).join('')||'<div class="xs mute" style="padding:8px 4px">Tap EDIT, then tap tools to pin them here.</div>'}</div>
+  ${ed?'<div class="xs mute" style="padding:10px 20px 0">Drag pinned tools to reorder. Tap any tool below to pin or unpin it (up to 4).</div>':'<div class="xs mute" style="padding:10px 20px 0">Yellow tools are pinned.</div>'}</div>
   <div class="secl tsec" style="border:0">${f==='all'?'All Tools':TFIL.find(x=>x[0]===f)[1]}</div>
-  <div class="tgrid">${list.map(k=>cell(k,ed?'tpin':'tool',k,TSHORT[k],TCOL[TCAT[k]],TOOLS.find(x=>x[0]===k)[3],NEWT.includes(k)&&!seen.includes(k))).join('')}
-  ${f==='all'&&!ed?cell('','sub','routines','Routines','n','note')+cell('','sub','exercises','Exercises','n','dumb')+cell('','tab','more','Settings','n','gear'):''}</div>
+  <div class="tgrid">${list.map(k=>cell(k,ed?'tpin':'tool',k,TSHORT[k],pc(k),TOOLS.find(x=>x[0]===k)[3],!ed&&NEWT.includes(k)&&!seen.includes(k))).join('')}
+  ${f==='all'&&!ed?cell('','sub','routines','Routines','g','note')+cell('','sub','exercises','Exercises','g','dumb')+cell('','tab','more','Settings','g','gear'):''}</div>
   <div class="empty sm" id="tnone" style="display:none">No tools match.</div>`;
   return hd('Tools')+`<main class="pg">${h}</main>`}
 function tsearch(q){q=q.trim().toLowerCase();document.querySelectorAll('.tdr').forEach(b=>{b.style.display=!q||b.dataset.q.includes(q)?'':'none'});const pw=$('.tpinw');if(pw&&pw.style)pw.style.display=q?'none':'';const any=[...document.querySelectorAll('.tdr')].some(b=>b.style.display!=='none');const n=$('#tnone');if(n&&n.style)n.style.display=any?'none':''}
@@ -1250,6 +1263,40 @@ function passHtml(){const f=V.pf2;
   <div style="display:flex;align-items:baseline;gap:6px;margin-top:10px"><span style="font-size:44px;font-weight:200">${p.left}</span><span class="mute sm">of ${p.total} left</span></div><div class="wgbar"><i style="display:block;height:100%;width:${p.left/p.total*100}%;background:var(--pk)"></i></div>
   <div style="display:flex;gap:10px;margin-top:12px"><button class="pkb" style="margin:0" data-a="psuse" data-x="${p.id}|-1">Use 1 Credit</button><button class="olb" style="margin:0;width:40%" data-a="psuse" data-x="${p.id}|1">+1</button></div></div>`}).join('')||`<div class="shp" style="padding-top:14px"><p class="sm" style="margin:0;color:var(--soft);line-height:1.45">Keep count of punch cards and class packs. Link a pass to a class in the Class Planner and logging the class uses a credit automatically.</p></div>`}
   <button class="pkb" data-a="pfnew">Add a Pass</button>`)}
+
+/* ===== warm-up sets ===== */
+function warmHtml(){const c=V.wu=V.wu||{w:'',t:'barbell'},w=+c.w||0,plan=w?wuPlan(w,c.t):[];
+  return toolWrap('Warm-Up Sets',`<div class="shp" style="padding-top:14px"><div class="lblx" style="margin-top:0">Working weight (${U()})</div><input class="inp big" type="number" inputmode="decimal" data-in="wuw" value="${c.w}" placeholder="0">
+  <div class="seg" style="margin-top:12px">${[['barbell','Barbell'],['dumbbell','Dumbbell'],['machine','Machine']].map(([k,l])=>`<button class="${c.t===k?'on':''}" data-a="wut" data-x="${k}">${l}</button>`).join('')}</div></div>
+  <div id="wuout">${warmOut()}</div>`)}
+function warmOut(){const c=V.wu,w=+c.w||0;if(!w)return '<div class="empty sm">Enter the weight of your first working set.</div>';const plan=wuPlan(w,c.t);
+  return `<div class="secl">Ramp-Up</div>${plan.map((x,i)=>{const pl=c.t==='barbell'&&x.w>bar()?greedy((x.w-bar())/2):[];return `<div class="setrow"><span>WARM-UP ${i+1}</span><span>${fmt(x.w)} ${U()} × ${x.r}${pl.length?` <span class="mute xs">· ${pl.map(fmt).join(' + ')} a side</span>`:c.t==='barbell'&&x.w<=bar()?' <span class="mute xs">· empty bar</span>':''}</span></div>`}).join('')}
+  <div class="setrow" style="color:var(--pk)"><span>WORKING</span><span>${fmt(w)} ${U()}${c.t==='barbell'&&w>bar()?` <span class="xs">· ${greedy((w-bar())/2).map(fmt).join(' + ')} a side</span>`:''}</span></div>
+  <p class="xs mute" style="padding:12px 20px">Reps drop as the weight climbs so you're warm, not tired. Rest about a minute between warm-ups.</p>`}
+
+/* ===== calories burned ===== */
+const MET={yoga:3,pilates:3.3,barre:3.8,stretch:2.3,spin:8.5,hiit:8,run:9.8,walk:3.5,swim:7,dance:5.5,hike:6,row:7,sport:7,climb:7.5,lift:5};
+function calKg(){const bw=+(V.cl&&V.cl.bw)||curBW()||0;return U()==='kg'?bw:bw/2.20462}
+function calOf(k,min,eff){return Math.round((MET[k]||5)*[.8,1,1.2][eff??1]*calKg()*min/60)}
+function calHtml(){const c=V.cl=V.cl||{k:'spin',min:45,eff:1,bw:''};const kg=calKg(),t0=dayStart(Date.now());
+  let today=0;if(kg)S.history.forEach(h=>{if(h.date<t0)return;today+=h.act?(h.act.k==='breath'?0:calOf(h.act.k,h.act.min,h.act.eff)):calOf('lift',(h.dur||0)/60,1)});
+  return toolWrap('Calories Burned',`<div class="shp" style="padding-top:14px"><div class="chw">${Object.keys(MET).map(k=>`<button class="${c.k===k?'on':''}" data-a="clset" data-x="k|${k}">${k==='lift'?'Lifting':ACTS[k][0]}</button>`).join('')}</div>
+  <div class="lblx">Minutes</div><div class="chw">${[15,20,30,45,60,90].map(m=>`<button class="${c.min===m?'on':''}" data-a="clset" data-x="min|${m}">${m}</button>`).join('')}</div>
+  <div class="lblx">Effort</div><div class="seg">${EFF.map((l,i)=>`<button class="${c.eff===i?'on':''}" data-a="clset" data-x="eff|${i}">${l}</button>`).join('')}</div>
+  ${curBW()?'':`<div class="lblx">Bodyweight (${U()})</div><input class="inp" type="number" inputmode="decimal" data-in="clbw" value="${c.bw}" placeholder="Needed for the estimate">`}</div>
+  <div class="center" style="padding:22px 0 6px"><div style="font-size:64px;font-weight:200" id="clout">${kg?calOf(c.k,c.min,c.eff):'–'}</div><div class="xs mute">estimated calories${curBW()?` at ${fmt(curBW())} ${U()}`:''}</div></div>
+  ${kg&&today?`<div class="wcard center sm" style="color:var(--soft)">Today so far: about <b style="color:var(--text)">${today}</b> calories from logged workouts and activities</div>`:''}
+  <p class="xs mute" style="padding:12px 20px">Estimates use standard MET values from the Compendium of Physical Activities. A heart-rate watch will be more accurate for you.</p>`)}
+
+/* ===== drag to reorder pins ===== */
+let PD=null;
+document.addEventListener('pointerdown',e=>{if(!V.tedit||!e.target.closest)return;const c=e.target.closest('.tpin');if(!c)return;PD={c,w:c.parentNode,x0:e.clientX,y0:e.clientY,moved:false}},{passive:true});
+document.addEventListener('pointermove',e=>{if(!PD)return;let dx=e.clientX-PD.x0,dy=e.clientY-PD.y0;if(!PD.moved){if(Math.hypot(dx,dy)<6)return;PD.moved=true;PD.c.classList.add('drag')}
+  const sib=[...PD.w.children].filter(x=>x!==PD.c);let tgt=null;for(const s of sib){const r=s.getBoundingClientRect();if(e.clientX<r.left+r.width/2){tgt=s;break}}
+  if(tgt!==PD.c.nextElementSibling&&!(tgt===null&&PD.c===PD.w.lastElementChild)){PD.c.style.transform='';const b=PD.c.getBoundingClientRect();PD.w.insertBefore(PD.c,tgt);const a=PD.c.getBoundingClientRect();PD.x0+=a.left-b.left;PD.y0+=a.top-b.top;dx=e.clientX-PD.x0;dy=e.clientY-PD.y0}
+  PD.c.style.transform=`translate(${dx}px,${dy}px) scale(1.05)`;if(e.cancelable)e.preventDefault()},{passive:false});
+function pdEnd(){if(!PD)return;const d=PD;PD=null;if(!d.moved)return;V.dragT=Date.now();S.pins=[...d.w.children].map(x=>x.dataset.x).filter(Boolean);save();render()}
+document.addEventListener('pointerup',pdEnd);document.addEventListener('pointercancel',pdEnd);
 
 /* ===== personal profile ===== */
 function P(){return Object.assign({age:null,height:null,exp:'int',goal:'muscle'},S.profile||{})}
@@ -2023,7 +2070,7 @@ function muscleHtml(mg){const n=weekSets()[mg]||0;const cap=mg.replace(/\b\w/g,c
   <div class="secl">Suggested Exercises${S.session?' · add to '+esc(S.session.name):''}</div>${sug.map(e=>`<div class="li" style="cursor:default"><div class="g"><div class="tt">${esc(e.name)}</div><div class="sb">${EQN[e.eq]||e.type}</div></div><button class="addp" data-a="bmadd" data-x="${e.id}">${S.session?'+ ADD':'START'}</button></div>`).join('')}`}
 
 /* ===== tools ===== */
-const TOOLS=[['calc','One-Rep Max Calculator','Estimate a max from any set','calc'],['plates','Plate Calculator','Load a target weight or add up a bar','dumb'],['pct','Percentage & RPE Chart','Working weights from your 1RM','log'],['interval','Circuit Timer','EMOM, Tabata, AMRAP & custom','watch'],['strength','Strength Score','Your lifts vs. bodyweight + DOTS','trophy'],['program','Program Builder','Generate a 5/3/1 routine','cal'],['convert','lb / kg Converter','Quick conversions & plate math','rep'],['hrz','Heart Rate Zones','Your five training zones','pulse'],['pace','Pace Calculator','Pace, finish times & race predictions','gauge'],['runwalk','Run / Walk Program','8 weeks to a 25-minute run','runner'],['classes','Class Planner','Your weekly classes, one-tap logging','cal'],['pass','Class Pass','Credits left and expiry dates','ticket'],['flow','Build a Flow','Make your own guided session','flow'],['stretch','Stretch Timer','Timed holds with side switches','stretch'],['breath','Breathing Pacer','Box, 4-7-8 and calm breathing','breath']];
+const TOOLS=[['calc','One-Rep Max Calculator','Estimate a max from any set','calc'],['plates','Plate Calculator','Load a target weight or add up a bar','dumb'],['pct','Percentage & RPE Chart','Working weights from your 1RM','log'],['interval','Circuit Timer','EMOM, Tabata, AMRAP & custom','watch'],['strength','Strength Score','Your lifts vs. bodyweight + DOTS','trophy'],['program','Program Builder','Generate a 5/3/1 routine','cal'],['convert','lb / kg Converter','Quick conversions & plate math','rep'],['hrz','Heart Rate Zones','Your five training zones','pulse'],['pace','Pace Calculator','Pace, finish times & race predictions','gauge'],['runwalk','Run / Walk Program','8 weeks to a 25-minute run','runner'],['classes','Class Planner','Your weekly classes, one-tap logging','cal'],['pass','Class Pass','Credits left and expiry dates','ticket'],['flow','Build a Flow','Make your own guided session','flow'],['stretch','Stretch Timer','Timed holds with side switches','stretch'],['breath','Breathing Pacer','Box, 4-7-8 and calm breathing','breath'],['warm','Warm-Up Sets','Ramp-up sets and plates for any weight','ramp'],['cal','Calories Burned','Estimates for classes, cardio and lifting','flame']];
 function availPlates(){const inv=S.inv&&S.inv[U()];const all=PLATES[U()];return inv&&inv.length?all.filter(p=>inv.includes(p)):all}
 function rnd(x){const s=U()==='lb'?5:2.5;return Math.round(x/s)*s}
 const RPET=[100,95.5,92.2,89.2,86.3,83.7,81.1,78.6,76.2,73.9,70.7,68];
@@ -2032,7 +2079,7 @@ function bigLifts(){return [['Squat','Barbell Back Squat'],['Bench','Barbell Ben
 function dots(totalKg,bwKg,sex){const c=sex==='f'?[-57.96288,13.6175032,-.1126655495,.0005158568,-.0000010706]:[-307.75076,24.0900756,-.1918759221,.0007391293,-.000001093];const b=Math.min(Math.max(bwKg,40),sex==='f'?150:210);const d=c[0]+c[1]*b+c[2]*b*b+c[3]*b**3+c[4]*b**4;return totalKg*500/d}
 function toolWrap(title,body){return `<div class="calcscr toolscr"><div class="bgfx"></div><header class="hd" style="background:none"><div class="hl"><button data-a="toolx" style="display:flex">${ic('x',2)}</button></div><h1>${title}</h1><div class="hr"></div></header><div class="tbody">${body}</div></div>`}
 function renderTool(){const t=V.tool;
- if(t==='hrz')return hrHtml();if(t==='pace')return paceHtml();if(t==='runwalk')return rwHtml();if(t==='stretch')return strHtml();if(t==='flow')return flowHtml();if(t==='breath')return brHtml();if(t==='classes')return clsHtml();if(t==='pass')return passHtml();
+ if(t==='hrz')return hrHtml();if(t==='pace')return paceHtml();if(t==='runwalk')return rwHtml();if(t==='stretch')return strHtml();if(t==='flow')return flowHtml();if(t==='breath')return brHtml();if(t==='classes')return clsHtml();if(t==='pass')return passHtml();if(t==='warm')return warmHtml();if(t==='cal')return calHtml();
  if(t==='plates'){const P=V.pt,tot=bar()+2*sum(P.p),cnt={};P.p.forEach(x=>cnt[x]=(cnt[x]||0)+1);const av=availPlates();
   return toolWrap('Plate Calculator',`<div class="center" style="padding-top:10px"><div class="wnum" style="font-size:72px;font-weight:200">${fmt(tot)}</div><div class="wunit">${ulab()}</div></div>${barSvg(P.p,true)}
   <div class="plates" style="--n:${av.length};justify-content:center;flex-wrap:nowrap;padding:0 14px;margin-top:6px">${av.map(p=>octBtn(p,cnt[p],'tplate')).join('')}</div>
@@ -2129,8 +2176,10 @@ const setW=st=>{st.w=bar()+2*sum(st.p||[])};
 const RS=()=>{save();render()};
 const ACT={
   tfil:x=>{V.tf=x;render()},
+  wut:x=>{V.wu.t=x;render()},
+  clset:x=>{const [k,v]=x.split('|');V.cl[k]=k==='k'?v:+v;render()},
   tedit:()=>{V.tedit=!V.tedit;render()},
-  tpin:x=>{let p=pins().slice();if(p.includes(x))p=p.filter(k=>k!==x);else{if(p.length>=4){toast('Up to 4 pins. Unpin one first.');return}p.push(x)}S.pins=p;save();render()},
+  tpin:x=>{if(Date.now()-(V.dragT||0)<500)return;let p=pins().slice();if(p.includes(x))p=p.filter(k=>k!==x);else{if(p.length>=4){toast('Up to 4 pins. Unpin one first.');return}p.push(x)}S.pins=p;save();render()},
   pcm:x=>{V.pace={m:x,d:'',t:'',p:''};render()},
   pcd:x=>{paceRead();V.pace.d=x;V.pace.p=V.pace.t&&V.pace.p?'':V.pace.p;render()},
   pcgo:()=>{paceRead();const c=V.pace,sw=c.m==='swim',d=parseFloat(c.d)||0,t=parseT(c.t),p=parseT(c.p);let D=d,T=t;
@@ -2464,6 +2513,8 @@ function carryW(it,st,old){const j=it.sets.indexOf(st);let n=0;it.sets.forEach((
 document.addEventListener('input',e=>{const el=e.target,k=el.dataset.in;if(!k)return;const x=el.dataset.x;
   if(k==='acnote'){V.ac.note=el.value;return}
   if(k==='tsearch'){tsearch(el.value);return}
+  if(k==='wuw'){V.wu.w=el.value;const o=$('#wuout');if(o)o.innerHTML=warmOut();return}
+  if(k==='clbw'){V.cl.bw=el.value;const o=$('#clout');if(o)o.textContent=calKg()?calOf(V.cl.k,V.cl.min,V.cl.eff):'–';return}
   if(k==='hra'||k==='hrr'){V[k]=el.value;if(k==='hrr'){S.hr={rest:+el.value||0};save()}const o=$('#hrout');if(o)o.innerHTML=hrOut();return}
   if(k==='fen'){V.fe.n=el.value;return}
   if(k==='fesn'){V.fe.steps[+x][0]=el.value;return}
