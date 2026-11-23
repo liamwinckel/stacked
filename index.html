@@ -1099,7 +1099,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.50';
+const APPV='1.51';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
@@ -2210,7 +2210,7 @@ function tourPaint(st,L){const w=tWrap(),H=window.innerHeight,W=window.innerWidt
   const und=st.under&&$q(st.under),undB=und?und.getBoundingClientRect().bottom+8:null;
   const tb=document.querySelector('.tabs'),useTb=tb&&!V.inSession&&!st.round&&!document.getElementById('sheet');
   const lay=dk=>{c.className='tourc '+dk;c.style.top=dk==='top'&&undB?undB+'px':'';const cr=c.getBoundingClientRect();const sat=(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sat'))||0);
-    const ctop=dk==='mid'?H/2-c.offsetHeight/2:cr.top;const lo=dk==='top'?cr.bottom+16:Math.max(16,sat+12),hi=Math.min(dk==='bottom'||dk==='mid'?ctop-16:H-16,useTb?tb.getBoundingClientRect().top-12:H);
+    const ctop=dk==='mid'?H/2-c.offsetHeight/2:cr.top;const hdr=V.inSession&&!document.querySelector('#sp')?$q('#app header'):(!document.getElementById('sheet')&&!V.inSession?$q('#app header'):null),hb=hdr&&hdr.getBoundingClientRect().height?hdr.getBoundingClientRect().bottom+10:0;const lo=dk==='top'?cr.bottom+16:Math.max(16,sat+12,hb),hi=Math.min(dk==='bottom'||dk==='mid'?ctop-16:H-16,useTb?tb.getBoundingClientRect().top-12:H);
     if(!els.length)return {R_:null,ok:true,n:0};if(st.round)return {R_:tUnion(els),ok:true,n:1};
     const sc=tScroller(els[0]),full=tUnion(els),r0=tBox(els[0]),fits=full&&full.b-full.t<=hi-lo;
     if(sc&&(r0.top<lo||(fits?full.b>hi:r0.top>lo+40))){const before=sc.scrollTop;sc.scrollTop+=fits?(full.t-lo-((hi-lo)-(full.b-full.t))/2):(r0.top-lo-4)}
