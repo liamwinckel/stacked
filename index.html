@@ -541,6 +541,7 @@ html[data-theme="light"] .qh.car{background:#18181b;color:#fff}html[data-theme="
 .shwrap.qpop .shbg{transition:opacity .35s ease}
 .wplan .li{min-height:58px}.wpn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--mute);flex:none}.wpn.ok{background:var(--pk);border-color:var(--pk);color:#121212}
 .upn{margin-bottom:6px}
+.srch.exs{position:sticky;top:0;z-index:2}.chips2.sm2 button{font-size:12px;padding:6px 11px}
 </style>
 </head>
 <body>
@@ -799,11 +800,19 @@ function renderDay(x){
   h+=`<button class="cyl" data-a="itadd" data-x="${ri}|${di}">${ic('plusc')} Add Exercise</button><p class="xs mute" style="padding:10px 20px;margin:0">Tap ${ic('link')} to superset an exercise with the one below it. You'll alternate between them set by set.</p>`;
   return hd('Edit Workout',back())+`<main class="pg">${h}</main>`;
 }
-function renderExercises(){
-  let h=`<p class="sm mute" style="padding:12px 20px 0;margin:0">${S.exercises.length} exercises. Tap ✕ to remove one from your library.</p>`;for(const m of [...MGS,undefined]){const l=S.exercises.filter(e=>e.mg===m||(m===undefined&&!PAT[e.mg])).sort((a,b)=>a.name.localeCompare(b.name));if(!l.length)continue;
-    h+=`<div class="h2" style="text-transform:capitalize">${m||'Custom'}<small>${l.length}</small></div>`+l.map(e=>`<div class="li" data-sw="lib|${e.id}" style="cursor:default"><div class="g"><div class="tt">${esc(e.name)}</div><div class="sb">${EQN[e.eq]||e.type}</div></div><button class="ico" data-a="delex" data-x="${e.id}">${ic('x')}</button></div>`).join('')}
+function renderExercises(){const f=V.exf=V.exf||{mg:'all',eq:'all'},used={};S.history.forEach(h=>h.entries.forEach(e=>used[e.exId]=(used[e.exId]||0)+1));
+  const eqs=[...new Set(S.exercises.map(e=>e.eq).filter(q=>EQN[q]))];
+  let h=`<div class="srch exs">${ic('search')}<input data-in="exq" placeholder="Search ${S.exercises.length} exercises" value=""></div>
+  <div class="chips2" style="padding-top:12px">${[['all','All'],['used','Done before'],...MGS.map(m=>[m,m])].map(([k,l])=>`<button class="${f.mg===k?'on':''}" data-a="exf" data-x="mg|${k}" style="text-transform:capitalize">${l}</button>`).join('')}</div>
+  <div class="chips2 sm2" style="padding-top:8px">${[['all','Any equipment'],...eqs.map(q=>[q,EQN[q]])].map(([k,l])=>`<button class="${f.eq===k?'on':''}" data-a="exf" data-x="eq|${k}">${l}</button>`).join('')}</div>`;
+  const pass=e=>(f.mg==='all'||(f.mg==='used'?used[e.id]:e.mg===f.mg))&&(f.eq==='all'||e.eq===f.eq);let n=0;
+  for(const m of [...MGS,undefined]){const l=S.exercises.filter(e=>(e.mg===m||(m===undefined&&!PAT[e.mg]))&&pass(e)).sort((a,b)=>a.name.localeCompare(b.name));if(!l.length)continue;n+=l.length;
+    h+=`<div class="exg"><div class="h2" style="text-transform:capitalize">${m||'Custom'}<small>${l.length}</small></div>`+l.map(e=>`<div class="li exr" data-sw="lib|${e.id}" data-a="wdet" data-x="${e.id}" data-q="${esc((e.name+' '+(EQN[e.eq]||'')+' '+(e.mg||'')+' '+({D:'db',B:'bb',K:'kb',C:'cable',M:'machine',R:'band'}[e.eq]||'')).toLowerCase())}"><div class="g"><div class="tt">${esc(e.name)}</div><div class="sb">${EQN[e.eq]||e.type}${used[e.id]?` · done ${used[e.id]}×`:''}</div></div><button class="ico" data-a="delex" data-x="${e.id}">${ic('x')}</button></div>`).join('')+`</div>`}
+  if(!n)h+=`<div class="empty sm">No exercises match these filters.</div>`;
+  h+=`<div class="empty sm" id="exnone" style="display:none">No matches. Try another word, or tap Add New.</div>`;
   return hd('Exercises',back(),`<button class="lnk" data-a="newex">Add New</button>`)+`<main class="pg">${h}</main>`;
 }
+function exSearch(q){q=q.trim().toLowerCase();const w=q.split(/\s+/);let any=false;document.querySelectorAll('.exg').forEach(g=>{let v=0;g.querySelectorAll('.exr').forEach(r=>{const ok=!q||w.every(x=>r.dataset.q.includes(x));r.style.display=ok?'':'none';if(ok)v++});g.style.display=v?'':'none';if(v)any=true});const n=document.getElementById('exnone');if(n)n.style.display=any?'none':''}
 
 /* log */
 function renderLog(){return hd('Log')+`<main class="pg">${streakStrip()}${calendar()}<div class="h2">History</div>${S.history.map(histRow).join('')||`<div class="empty">No finished workouts yet.<br><span class="sm">Complete a workout and it'll show up here.</span></div>`}</main>`}
@@ -2355,6 +2364,7 @@ const ACT={
   bfsex:x=>{V.bf.sex=x;render()},
   bfsave:x=>{const t=dayStart(Date.now());let e=S.body.find(b=>dayStart(b.date)===t);if(!e){e={id:uid(),date:Date.now()};S.body.unshift(e)}e.bf=+x;save();toast(`Body fat ${x}% saved`)},
   tfil:x=>{V.tf=x;render()},
+  exf:x=>{const [k,v]=x.split('|');V.exf[k]=v;render()},
   wut:x=>{V.wu.t=x;render()},
   clset:x=>{const [k,v]=x.split('|');V.cl[k]=k==='k'?v:+v;render()},
   tedit:()=>{V.tedit=!V.tedit;render()},
@@ -2686,6 +2696,7 @@ function carryW(it,st,old){const j=it.sets.indexOf(st);let n=0;it.sets.forEach((
 document.addEventListener('input',e=>{const el=e.target,k=el.dataset.in;if(!k)return;const x=el.dataset.x;
   if(k==='acnote'){V.ac.note=el.value;return}
   if(k==='tsearch'){tsearch(el.value);return}
+  if(k==='exq'){exSearch(el.value);return}
   if(k==='bfv'){V.bf[x]=el.value;const o=$('#bfout');if(o)o.innerHTML=bfOut();return}
   if(k==='wuw'){V.wu.w=el.value;const o=$('#wuout');if(o)o.innerHTML=warmOut();return}
   if(k==='clbw'){V.cl.bw=el.value;const o=$('#clout');if(o)o.textContent=calKg()?calOf(V.cl.k,V.cl.min,V.cl.eff):'–';return}
