@@ -377,7 +377,7 @@ input[type=date].inp{color-scheme:dark;min-height:44px}
 .setscr .barsvg{width:90%!important;margin-left:auto!important;margin-right:auto!important}
 .ovbar{background:#141416!important;border-top:1px solid var(--line);-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 .ovnav{display:flex;align-items:center;justify-content:center;width:48px;height:48px;margin:-8px -6px;border-radius:12px;color:var(--pk)}.ovnav:active{background:rgba(255,214,10,.12)}
-.tourw{position:absolute;inset:0;z-index:120;transition:opacity .25s}.tourw.out{opacity:0}
+.tourw{position:absolute;inset:0;z-index:400;transition:opacity .25s}.tourw.out{opacity:0}
 .tourh{position:absolute;box-shadow:0 0 0 9999px rgba(0,0,0,.78);border:2px solid var(--pk);transition:all .3s cubic-bezier(.2,.8,.2,1);pointer-events:none}.tourh.none{left:50%;top:50%;width:0;height:0;border:0}
 .tourc{position:absolute;left:16px;right:16px;max-width:488px;margin:0 auto;background:#1a1a1d;border:1px solid #2c2c30;border-radius:18px;padding:16px 18px;box-shadow:0 10px 40px rgba(0,0,0,.5);animation:fadeIn .25s ease}
 .tourk{font-size:11px;letter-spacing:.12em;color:var(--pk);font-weight:700}.tourc b{display:block;font-size:19px;margin-top:6px}.tourc p{font-size:14px;color:var(--soft);line-height:1.45;margin:6px 0 0}
@@ -555,6 +555,7 @@ html[data-theme="light"] .qh.car{background:#18181b;color:#fff}html[data-theme="
 .qh.lift .qhi{background:rgba(0,0,0,.12)}
 .av.ph{background-size:cover;background-position:center}
 .avset{width:52px;height:52px;border-radius:50%;flex:none;background:rgba(255,214,10,.14) center/cover no-repeat;color:var(--pk);display:flex;align-items:center;justify-content:center;cursor:pointer;margin-right:4px}
+.tourk{display:flex;justify-content:space-between}.tourk span{color:var(--mute);letter-spacing:.06em}.tourp{display:flex;gap:3px;margin-top:8px}.tourp i{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.12)}.tourp i.on{background:var(--pk)}html[data-theme="light"] .tourp i{background:rgba(0,0,0,.1)}html[data-theme="light"] .tourp i.on{background:var(--pk)}
 </style>
 </head>
 <body>
@@ -616,6 +617,7 @@ const THEMES={navy:{name:'Navy & Pink',meta:'#10215f',bg:'#10215f',a:'#ec3a6e',b
 function appIcon(t,px){const T=THEMES[t];return `<svg width="${px}" height="${px}" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="${T.bg}"/>${[16,32,48,32,16].map((w,k)=>`<rect x="26" y="${22+k*12}" width="${w}" height="8" rx="2" fill="${k===2?T.b:T.a}"/>`).join('')}</svg>`}
 function applyTheme(){const t=typeof S!=='undefined'&&S?curTheme():'volt';try{document.documentElement.dataset.theme=t;const m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content',t==='light'?'#f2f2f4':THEMES.volt.meta);const l=document.querySelector('link[rel=apple-touch-icon]');if(l)l.setAttribute('href','icon-bars-180.png')}catch(e){}}
 let S=load()||Object.assign(seed(),{onboarded:false});
+if(S.session&&S.session.demo)S.session=null;
 if(S.onboarded===undefined)S.onboarded=true;
 if(!S.m1){S.autoRest=false;S.m1=1}
 if(S.libv!==LIBV){mergeLib();save()}
@@ -2107,25 +2109,57 @@ function idleCheck(){const s=S.session;if(!s||s.pre||V.idleAsked===s.id+'|'+(s.l
   <div class="shp"><p class="sm" style="color:var(--soft);margin:0;line-height:1.45">Finishing now records the workout as ending at <b style="color:var(--text)">${at}</b>, your last logged activity, so your time and stats stay accurate.</p></div>
   <button class="pkb" data-a="idlefin">Finish at ${at}</button><button class="olb" data-a="idlekeep">I'm Still Going</button>`)}
 setInterval(idleCheck,60e3);document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(idleCheck,600)});
-/* ===== guided tour ===== */
+/* ===== guided tour v2: walks through the real app ===== */
+const $q=x=>document.querySelector(x);
+const h2el=t=>[...document.querySelectorAll('#app .h2')].find(x=>x.textContent.trim().startsWith(t));
+const h2pair=t=>{const h=h2el(t);return h?[h,h.nextElementSibling]:null};
+let TDEMO=null;
+function tBase(tab){closeSheet();tDemoEnd();V.tool=null;V.sub=null;V.stack=[];V.tab=tab;render();const m=$q('#app main');if(m)m.scrollTop=0}
+function tDemoDay(){const r=S.routines.find(x=>x.active&&x.days.length)||S.routines.find(x=>x.days.some(d=>d.items.length));if(!r)return null;const d=r.active?D(r.id,nextDay(r)):r.days.find(d=>d.items.length);return d&&d.items.length?{r,d}:null}
+function tDemo(pre){if(S.session&&!TDEMO)return false;closeSheet();if(!TDEMO){const x=tDemoDay();if(!x)return false;TDEMO={prev:null};startWorkout0(x.r.id,x.d.id);S.session.demo=true}V.inSession=true;V.tab='home';V.sub=null;const s=S.session;s.pre=pre;if(!pre){s.i=0;s.s=0;V.ov=false}render();return true}
+function tDemoEnd(){if(!TDEMO)return;TDEMO=null;if(S.session&&S.session.demo){S.session=null;V.inSession=false;V.ov=false;V.restOpen=false;save();render()}}
 const TOUR=[
- {tab:'home',sel:null,t:'Welcome to Bars',d:'A quick look around so you know where everything lives. It takes about 30 seconds.'},
- {tab:'home',sel:'.stk',t:'Your five daily bars',d:'Show Up, Lift, Move, Cardio and Beat It. Close all five for a full set. Tap the card to change your goals, or tap a day below it to mark a rest day.'},
- {tab:'home',sel:'.tabs .fab',t:'Quick actions',d:'Everything starts here: your next workout, Build Me a Workout, an empty session, cardio and body stats.'},
- {tab:'home',sel:'.tabs [data-x="prog"]',t:'Progress',d:'Your PRs and lift charts, body stats and Insights like Month of Bars and Volume Balance. Switch to History for every past workout.'},
- {tab:'home',sel:'.tabs [data-x="goals"]',t:'Goals',d:'Your focus, your plan for calories and training volume, a target weight with a date, and this week’s sets per muscle.'},
- {tab:'home',sel:'.tabs [data-x="tools"]',t:'Tools',d:'Calculators, timers, your routines, ready-made programs and the exercise library.'},
- {tab:'home',sel:'.gearb',t:'Settings',d:'Your profile, units, gym equipment and iCloud backup. Back up now and then: your data lives only on this phone.'},
- {tab:'home',sel:'.tabs .fab',t:'During a workout',d:'You start on a Ready screen. Each set shows weight, reps and plates. Swipe down for the overview, and Bars suggests when to add reps or weight.',end:'Let’s Go'}];
+ {c:'Welcome',go:()=>tBase('home'),t:'Welcome to Bars',d:'Let’s walk through the app together. I’ll open each screen so you can see exactly where things live and what they do. About two minutes, and you can skip any time.'},
+ {c:'Home',go:()=>tBase('home'),sel:'.stk',t:'Today’s Bars',d:'Five daily goals, like rings on a watch. Log a workout, sets, minutes and cardio to fill them. Close all five for a full set. The little week below shows each day.'},
+ {c:'Home',go:()=>{tBase('home');ACT.stackinfo()},sel:'.sheet',t:'Make the bars yours',d:'Tap the bars card any time to open this. Pick which five bars you want (steps, water, sleep, mobility and more), log quick numbers, and set each goal.'},
+ {c:'Home',go:()=>tBase('home'),sel:()=>$q('.upn')&&[h2el('This Week'),$q('.upn')],t:'Your week, planned',d:'Your active routine laid out for the week. The suggested workout is at the top: tap Start to go, or Preview to see the exercises. Finished days get a yellow ✓.'},
+ {c:'Home',go:()=>tBase('home'),sel:'.hrow2',t:'Routines and exercises',d:'Jump straight to your saved routines, or look up any exercise to see how to do it.'},
+ {c:'Quick Actions',go:()=>tBase('home'),sel:'.tabs .fab',round:1,t:'The yellow button',d:'Everything you start begins here. Let’s open it.'},
+ {c:'Quick Actions',go:()=>{tBase('home');openQuick()},wait:650,sel:'.qheros',t:'Lift or Cardio',d:'The two big ways to train. Lift starts a weights workout. Cardio tracks a run, ride or row, or logs a class.'},
+ {c:'Quick Actions',go:()=>{tBase('home');openQuick()},wait:650,sel:'.qgrid.qd',t:'Your shortcuts',d:'Six handy shortcuts. Press and hold any tile to customize: remove ones you don’t use, add tools or actions, and drag to reorder.'},
+ {c:'Quick Actions',go:()=>{tBase('home');ACT.qlift()},sel:'.sheet',t:'Picking a lift',d:'Tapping Lift shows every workout in your routines. Your next one is highlighted, but you can pick any. Empty Workout and Build Me a Workout are at the bottom.'},
+ {c:'Quick Actions',go:()=>{tBase('home');ACT.qcar()},sel:'.sheet',t:'Picking cardio',d:'Tapping Cardio lets you track a machine live, log a class you already did (yoga, spin, Pilates…), or follow a guided session.'},
+ {c:'Working Out',demo:1,go:()=>{tBase('home');tDemo(true)},sel:()=>[$q('.ovbar.prego')],t:'The Ready screen',d:'Starting a workout opens this first. Check your exercises, reorder or swap them, then tap Start Workout. (This is a practice run. Nothing gets saved.)'},
+ {c:'Working Out',demo:1,go:()=>{tBase('home');tDemo(false)},wait:450,sel:()=>[$q('#sp .setl'),$q('#sp .wnum')],t:'One set at a time',d:'The exercise, which set you’re on, and the weight. Tap the number to type a weight. Bars suggests when to add reps or weight.'},
+ {c:'Working Out',demo:1,go:()=>{tBase('home');tDemo(false)},wait:450,sel:()=>[$q('#sp .barsvg'),$q('#sp .plates')],t:'Load the bar',d:'Tap a plate to add it to both sides. Tap a plate on the bar to take it off. The total updates as you go.'},
+ {c:'Working Out',demo:1,go:()=>{tBase('home');tDemo(false)},wait:450,sel:()=>[$q('#sp .rnum')?$q('#sp .rnum').parentNode:null,$q('#sp .rirr')],t:'Reps and effort',d:'Set your reps with − and +. Then rate how many reps you had left in the tank. Bars uses this to pick your next weights.'},
+ {c:'Working Out',demo:1,go:()=>{tBase('home');tDemo(false)},wait:450,sel:'#sp .navrow',t:'Next set',d:'The right arrows log the set and move on. The left arrows go back. The timer starts your rest if you want one. When you’re done, tap Finish.'},
+ {c:'Progress',go:()=>tBase('prog'),sel:()=>h2pair('Workout Progress'),t:'Progress',d:'Charts for the lifts you care about. Tap one for your best sets and history, or Track an Exercise to add more. ALL PRS shows every record.'},
+ {c:'Progress',go:()=>tBase('prog'),sel:()=>{const h=h2el('Insights');if(h)h.scrollIntoView({block:'start'});return h2pair('Insights')},t:'Insights',d:'Deeper looks: your month of bars, volume balance across muscles, strength levels, readiness and more. Tap any tile.'},
+ {c:'Goals',go:()=>tBase('goals'),sel:()=>h2pair('Your Focus'),t:'Goals',d:'Tell Bars what you’re after and how you like to train. It sets your weekly targets, calories and which muscles to prioritise.'},
+ {c:'Tools',go:()=>tBase('tools'),sel:'.tbig',t:'Tools',d:'Routines and the exercise library sit at the top. Programs, templates and your own routines are inside Routines.'},
+ {c:'Tools',go:()=>tBase('tools'),sel:()=>[$q('.tpinw'),$q('.tgrid')],t:'Every tool',d:'Plate calculator, timers, pace, heart rate zones and more. Pin favourites to the top with EDIT, and search or filter to find one fast.'},
+ {c:'Tools',go:()=>{tBase('tools');ACT.sub('exercises')},sel:()=>[$q('.srch.exs'),$q('.chips2.sm2')],t:'Find any exercise',d:'Search by name, or filter by muscle and equipment. “Done Before” shows only exercises you’ve logged.'},
+ {c:'Tools',go:()=>{tBase('tools');ACT.sub('exercises');ACT.wdet(exByName('Barbell Bench Press').id)},sel:'.sheet',t:'How to do it',d:'Tap any exercise to see the muscles it works, step-by-step technique, your progress, and a button to add it to a routine day.'},
+ {c:'Settings',go:()=>tBase('home'),sel:'.av',round:1,t:'Settings',d:'Tap your photo (or initial) for settings: profile photo, units, appearance, your gym’s equipment and the tour again. Back up to iCloud now and then. Your data lives only on this phone.'},
+ {c:'Done',go:()=>tBase('home'),t:'You’re ready',d:'Tap the yellow button and pick Lift or Cardio to start. You can replay this tour any time from Settings.',end:'Let’s Go'}];
+function tSteps(){return TOUR.filter(st=>!st.demo||!S.session||(S.session&&S.session.demo)).filter(st=>!st.demo||tDemoDay())}
 function tourOpen(){V.tour=0;tourShow()}
-function tourShow(){const st=TOUR[V.tour];if(!st)return tourEnd();if(V.tab!==st.tab||V.sub){V.tab=st.tab;V.sub=null;render()}
-  let w=$('#tourw');if(!w){w=document.createElement('div');w.id='tourw';w.className='tourw';document.body.appendChild(w)}
-  const el=st.sel?document.querySelector(st.sel):null,R_=el?el.getBoundingClientRect():null,pad=8,H=document.body.clientHeight||innerHeight;
-  const hole=R_?`<div class="tourh" style="left:${R_.left-pad}px;top:${R_.top-pad}px;width:${R_.width+pad*2}px;height:${R_.height+pad*2}px;border-radius:${st.sel.includes('fab')?'50%':'16px'}"></div>`:'<div class="tourh none"></div>';
-  const below=R_&&R_.top+R_.height/2<H*.45,cardPos=!R_?'top:50%;transform:translateY(-50%)':below?`top:${R_.bottom+pad+14}px`:`bottom:${H-R_.top+pad+14}px`;
-  w.innerHTML=`${hole}<div class="tourc" style="${cardPos}"><div class="tourk">${V.tour+1} / ${TOUR.length}</div><b>${st.t}</b><p>${st.d}</p><div class="tourn"><button class="lnk sm" data-a="tourskip">${V.tour===TOUR.length-1?'':'SKIP TOUR'}</button><span>${V.tour>0?`<button class="olb" data-a="tourgo" data-x="-1">Back</button>`:''}<button class="pkb" data-a="tourgo" data-x="1">${st.end||'Next'}</button></span></div></div>`}
-function tourEnd(){const w=$('#tourw');if(w){w.classList.add('out');setTimeout(()=>w.remove(),250)}V.tour=null;S.toured=true;save()}
-addEventListener('resize',()=>{if(V.tour!=null)tourShow()});
+function tourShow(){const L=tSteps(),st=L[V.tour];if(!st)return tourEnd();
+  let w=$q('#tourw');if(!w){w=document.createElement('div');w.id='tourw';w.className='tourw';document.body.appendChild(w)}
+  w.innerHTML='<div class="tourh none"></div>';try{st.go()}catch(e){console.log(e)}
+  const n=V.tour;setTimeout(()=>{if(V.tour!==n)return;tourPaint(st,L)},st.wait||(st.sel?380:120))}
+function tourPaint(st,L){const w=$q('#tourw');if(!w)return;let els=typeof st.sel==='function'?st.sel():st.sel?$q(st.sel):null;if(els&&!Array.isArray(els))els=[els];els=(els||[]).filter(Boolean);
+  if(els.length&&!st.sel.toString().includes('sheet')&&!st.round){try{const r0=els[0].getBoundingClientRect(),Hh=document.body.clientHeight||innerHeight;if(r0.top<60||r0.bottom>Hh-100)els[0].scrollIntoView({block:'center'})}catch(e){}}
+  let R_=null;els.forEach(e=>{const r=e.getBoundingClientRect();if(!r.width&&!r.height)return;R_=R_?{left:Math.min(R_.left,r.left),top:Math.min(R_.top,r.top),right:Math.max(R_.right,r.right),bottom:Math.max(R_.bottom,r.bottom)}:{left:r.left,top:r.top,right:r.right,bottom:r.bottom}});
+  const H=document.body.clientHeight||innerHeight,W=document.body.clientWidth||innerWidth,pad=st.round?6:6;
+  const tb=document.querySelector('.tabs'),tbt=tb&&!V.inSession&&!st.round&&!(typeof st.sel==='string'&&st.sel.includes('.tabs'))?tb.getBoundingClientRect().top:H;if(R_){R_.left=Math.max(4,R_.left);R_.right=Math.min(W-4,R_.right);R_.top=Math.max(4,R_.top);R_.bottom=Math.min(H-4,tbt-8,R_.bottom)}
+  const hole=R_?`<div class="tourh" style="left:${R_.left-pad}px;top:${R_.top-pad}px;width:${R_.right-R_.left+pad*2}px;height:${R_.bottom-R_.top+pad*2}px;border-radius:${st.round?'50%':'18px'}"></div>`:'<div class="tourh none"></div>';
+  const up=R_?R_.top:0,dn=R_?H-R_.bottom:0,cardPos=!R_?'top:50%;transform:translateY(-50%)':dn>=up?`top:${Math.min(R_.bottom+pad+12,H-230)}px`:up>=210?`bottom:${H-R_.top+pad+12}px`:'top:calc(var(--sat,0px) + 12px)';
+  const chs=[...new Set(L.map(x=>x.c))],ci=chs.indexOf(st.c),last=V.tour===L.length-1;
+  w.innerHTML=`${hole}<div class="tourc" style="${cardPos}"><div class="tourk">${st.c.toUpperCase()}<span>${V.tour+1} / ${L.length}</span></div><div class="tourp">${L.map((_,k)=>`<i class="${k<=V.tour?'on':''}"></i>`).join('')}</div><b>${st.t}</b><p>${st.d}</p><div class="tourn"><button class="lnk sm" data-a="tourskip">${last?'':'SKIP TOUR'}</button><span>${V.tour>0?`<button class="olb" data-a="tourgo" data-x="-1">Back</button>`:''}<button class="pkb" data-a="tourgo" data-x="1">${st.end||(V.tour===0?'Show Me':'Next')}</button></span></div></div>`}
+function tourEnd(){const w=$q('#tourw');if(w){w.classList.add('out');setTimeout(()=>w.remove(),250)}V.tour=null;S.toured=true;closeSheet();tDemoEnd();V.tool=null;V.sub=null;V.stack=[];V.tab='home';save();render()}
+addEventListener('resize',()=>{if(V.tour!=null){const L=tSteps();if(L[V.tour])tourPaint(L[V.tour],L)}});
 /* ===== custom nutrition ===== */
 function nutRec(){const a=S.nutCustom;S.nutCustom=null;let r;try{r=nutritionCard(true)}finally{S.nutCustom=a}return r}
 function nutImpact(c,rec){const bw=curBW();if(!bw||!rec)return null;const lbw=U()==='kg'?bw*2.20462:bw,wkLb=(c.kcal-rec.tdee)*7/3500,wkU=U()==='kg'?wkLb/2.20462:wkLb,pct=wkLb/lbw*100,warn=[];
