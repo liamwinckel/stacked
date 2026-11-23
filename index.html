@@ -2210,7 +2210,7 @@ function tourPaint(st,L){const w=tWrap(),H=window.innerHeight,W=window.innerWidt
   const und=st.under&&$q(st.under),undB=und?und.getBoundingClientRect().bottom+8:null;
   const tb=document.querySelector('.tabs'),useTb=tb&&!V.inSession&&!st.round&&!document.getElementById('sheet');
   const lay=dk=>{c.className='tourc '+dk;c.style.top=dk==='top'&&undB?undB+'px':'';const cr=c.getBoundingClientRect();const sat=(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sat'))||0);
-    const lo=dk==='top'?cr.bottom+16:Math.max(16,sat+12),hi=Math.min(dk==='bottom'||dk==='mid'?cr.top-16:H-16,useTb?tb.getBoundingClientRect().top-12:H);
+    const ctop=dk==='mid'?H/2-c.offsetHeight/2:cr.top;const lo=dk==='top'?cr.bottom+16:Math.max(16,sat+12),hi=Math.min(dk==='bottom'||dk==='mid'?ctop-16:H-16,useTb?tb.getBoundingClientRect().top-12:H);
     if(!els.length)return {R_:null,ok:true,n:0};if(st.round)return {R_:tUnion(els),ok:true,n:1};
     const sc=tScroller(els[0]),full=tUnion(els),r0=tBox(els[0]),fits=full&&full.b-full.t<=hi-lo;
     if(sc&&(r0.top<lo||(fits?full.b>hi:r0.top>lo+40))){const before=sc.scrollTop;sc.scrollTop+=fits?(full.t-lo-((hi-lo)-(full.b-full.t))/2):(r0.top-lo-4)}
