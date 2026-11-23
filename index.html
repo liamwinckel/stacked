@@ -553,6 +553,8 @@ html[data-theme="light"] .qh.car{background:#18181b;color:#fff}html[data-theme="
 .qgrid.qed .qtile[data-dk]>span{animation:qwig .3s ease-in-out infinite}.qgrid.qed .qtile[data-dk]:nth-child(2n)>span{animation-delay:-.15s}
 .qgrid.qed .qtile.drag>span{animation:none}
 .qh.lift .qhi{background:rgba(0,0,0,.12)}
+.av.ph{background-size:cover;background-position:center}
+.avset{width:52px;height:52px;border-radius:50%;flex:none;background:rgba(255,214,10,.14) center/cover no-repeat;color:var(--pk);display:flex;align-items:center;justify-content:center;cursor:pointer;margin-right:4px}
 </style>
 </head>
 <body>
@@ -771,7 +773,7 @@ function renderTabs(){const b=(k,l)=>`<button class="${V.tab===k&&!V.sub?'on':''
 /* home */
 function renderHome(){
   const bkDue=S.history.length>0&&(!S.lastBackup||Date.now()-S.lastBackup>7*864e5);
-  let h=`<div class="greet">${true?`<button class="bkic ${bkDue?'due':''}" data-a="bkfile" aria-label="Back up to iCloud">${ic('cloud')}${bkDue?`<span>${S.lastBackup?'Back up · '+Math.floor((Date.now()-S.lastBackup)/864e5)+'d':'Back up'}</span>`:''}</button>`:''}<button class="av" data-a="tab" data-x="more" aria-label="Settings">${esc((S.name||'?')[0].toUpperCase())}</button>Hi${S.name?', '+esc(S.name):''}<button class="gearb" data-a="tab" data-x="more" aria-label="Settings">${ic('gear')}</button></div>`;
+  let h=`<div class="greet">${true?`<button class="bkic ${bkDue?'due':''}" data-a="bkfile" aria-label="Back up to iCloud">${ic('cloud')}${bkDue?`<span>${S.lastBackup?'Back up · '+Math.floor((Date.now()-S.lastBackup)/864e5)+'d':'Back up'}</span>`:''}</button>`:''}<button class="av ${S.avatar?'ph':''}" data-a="tab" data-x="more" aria-label="Settings" ${S.avatar?`style="background-image:url(${S.avatar})"`:''}>${S.avatar?'':esc((S.name||'?')[0].toUpperCase())}</button>Hi${S.name?', '+esc(S.name):''}<button class="gearb" data-a="tab" data-x="more" aria-label="Settings">${ic('gear')}</button></div>`;
   if(S.session)h+=`<div class="resume" data-a="resume"><div style="flex:1"><b>${S.session.pre?'READY TO START':'WORKOUT IN PROGRESS'}</b><div class="sm">${esc(S.session.name)} · <span id="el2">${mmss((Date.now()-S.session.start)/1000)}</span></div></div><span class="lnk sm">RESUME</span></div>`;
   h+=cycChip();
   h+=stackCard();
@@ -874,7 +876,7 @@ function calcRows(){const w=+V.calc.w||0,r=+V.calc.r||0,m=w&&r?e1(w,r):0;return 
 /* more */
 function renderMore(){
   return hd('Settings',`<button class="lnk" data-a="tab" data-x="home" style="display:flex" aria-label="Back">${ic('back',2)}</button>`)+`<main class="pg">
-  <div class="h2">Profile</div><div class="li" style="cursor:default"><div class="g sm mute">Your name</div><input class="inp" style="width:55%;padding:8px 10px" data-in="name" value="${esc(S.name||'')}" placeholder="Name"></div>
+  <div class="h2">Profile</div><div class="li" style="cursor:default"><label class="avset" style="${S.avatar?`background-image:url(${S.avatar})`:''}">${S.avatar?'':ic('plusc')}<input type="file" accept="image/*" id="avin" style="display:none"></label><div class="g"><div class="tt">Profile photo</div><div class="sb">${S.avatar?'Shows on Home. Tap the photo to change it.':'Optional. Tap to choose a photo.'}</div></div>${S.avatar?'<button class="lnk sm" data-a="avrm">REMOVE</button>':''}</div><div class="li" style="cursor:default"><div class="g sm mute">Your name</div><input class="inp" style="width:55%;padding:8px 10px" data-in="name" value="${esc(S.name||'')}" placeholder="Name"></div>
   <div class="li" style="cursor:default"><div class="g sm mute">Age</div><input class="inp" style="width:55%;padding:8px 10px" type="number" inputmode="numeric" data-in="pfage" value="${P().age||''}" placeholder="Years"></div>
   <div class="li" style="cursor:default"><div class="g sm mute">Height</div>${U()==='kg'?`<input class="inp" style="width:55%;padding:8px 10px" type="number" inputmode="decimal" data-in="pfht" value="${P().height||''}" placeholder="cm">`:`<div style="width:55%;display:flex;gap:8px"><label class="ftin"><input class="inp" type="number" inputmode="numeric" data-in="pfft" id="pfft" value="${P().height?Math.floor(P().height/12):''}" placeholder="5"><span>ft</span></label><label class="ftin"><input class="inp" type="number" inputmode="numeric" data-in="pfin" id="pfin" value="${P().height?Math.round(P().height%12):''}" placeholder="10"><span>in</span></label></div>`}</div>
   <div class="li" style="cursor:default"><div class="g sm mute">Sex</div><div class="seg" style="width:55%">${[['m','Male'],['f','Female']].map(([k,l])=>`<button class="${(S.sex||'m')===k?'on':''}" data-a="ssex" data-x="${k}">${l}</button>`).join('')}</div></div>
@@ -1055,7 +1057,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.46-test';
+const APPV='1.46';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
@@ -1762,6 +1764,7 @@ function cmpLoad(){const P_=S.photos||[],a=V.pcA||P_[P_.length-1].id,b=V.pcB||P_
 function cmpSet(v){const w=$('#pcAw'),l=$('#pcl'),box=$('#pcmp');if(!w||!box)return;w.style.width=v+'%';l.style.left=v+'%';const im=$('#pcA');if(im)im.style.width=box.clientWidth+'px'}
 document.addEventListener('input',e=>{if(e.target&&e.target.id==='pcr')cmpSet(+e.target.value)});
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='phin'){photoAdd(e.target.files[0]);e.target.value=''}});
+document.addEventListener('change',e=>{if(!e.target||e.target.id!=='avin'||!e.target.files||!e.target.files[0])return;const f=e.target.files[0];e.target.value='';const u=URL.createObjectURL(f),im=new Image();im.onload=()=>{const N=200,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),m=Math.min(im.width,im.height);x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,N,N);URL.revokeObjectURL(u);try{S.avatar=c.toDataURL('image/jpeg',.82);save();render();toast('Profile photo updated')}catch(_){toast('Couldn’t use that photo')}};im.onerror=()=>{URL.revokeObjectURL(u);toast('Couldn’t read that photo')};im.src=u});
 
 /* ===== year heatmap ===== */
 const HMF=[['all','All'],['chest','Chest'],['back','Back'],['legs','Legs'],['shoulders','Shoulders'],['arms','Arms'],['cardio','Cardio']];
@@ -2663,6 +2666,7 @@ const ACT={
   qcar:()=>{closeSheet();openSheet(cardioHtml())},
   hm:x=>{V.hm=x;render()},
   qcheck:()=>{closeSheet();ACT.rdopen()},
+  avrm:()=>{delete S.avatar;save();render();toast('Photo removed')},
   qdone:()=>{V.qedit=false;refreshSheet(quickHtml())},
   qrm:x=>{S.qtiles=qTiles().filter(k=>k!==x);save();refreshSheet(quickHtml())},
   qaddpick:()=>refreshSheet(qPickHtml()),
