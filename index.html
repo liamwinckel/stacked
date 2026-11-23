@@ -532,6 +532,15 @@ html[data-theme="light"] .qh.car{background:#18181b;color:#fff}html[data-theme="
 .pgc b{display:block;font-size:15px}.pgc span{font-size:12px;color:var(--mute)}.pgc.on{border-color:var(--pk);background:rgba(255,214,10,.08)}
 .pgd{margin:0 16px 10px;padding:12px 14px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
 .pgd b{display:block;font-size:14px;margin-bottom:6px;color:var(--pk)}.pgd div{display:flex;justify-content:space-between;font-size:13px;padding:3px 0}.pgd em{font-style:normal;color:var(--mute);white-space:nowrap;margin-left:8px}
+
+.shwrap.qpop .sheet{transform:translateY(14px) scale(.94)!important;opacity:1;clip-path:circle(30px at var(--ox,50%) var(--oy,100%));transition:clip-path .55s cubic-bezier(.22,1,.36,1),transform .55s cubic-bezier(.22,1,.36,1)!important;will-change:clip-path,transform}
+.shwrap.qpop.in .sheet{transform:none!important;clip-path:circle(150% at var(--ox,50%) var(--oy,100%))}
+.shwrap.qpop .sheet>#shc>*{opacity:0;transform:translateY(10px);transition:opacity .35s ease,transform .45s cubic-bezier(.22,1,.36,1)}
+.shwrap.qpop.in .sheet>#shc>*{opacity:1;transform:none}
+.shwrap.qpop.in .sheet>#shc>*:nth-child(2){transition-delay:.05s}.shwrap.qpop.in .sheet>#shc>*:nth-child(3){transition-delay:.09s}.shwrap.qpop.in .sheet>#shc>*:nth-child(4){transition-delay:.13s}.shwrap.qpop.in .sheet>#shc>*:nth-child(5){transition-delay:.16s}
+.shwrap.qpop .shbg{transition:opacity .35s ease}
+.wplan .li{min-height:58px}.wpn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--mute);flex:none}.wpn.ok{background:var(--pk);border-color:var(--pk);color:#121212}
+.upn{margin-bottom:6px}
 </style>
 </head>
 <body>
@@ -754,12 +763,11 @@ function renderHome(){
   if(S.session)h+=`<div class="resume" data-a="resume"><div style="flex:1"><b>${S.session.pre?'READY TO START':'WORKOUT IN PROGRESS'}</b><div class="sm">${esc(S.session.name)} · <span id="el2">${mmss((Date.now()-S.session.start)/1000)}</span></div></div><span class="lnk sm">RESUME</span></div>`;
   h+=cycChip();
   h+=stackCard();
-  h+=homeSplit();
+  h+=weekPlan();
   h+=planCardHome();
   h+=deloadCard();
-  if((V.hm||(S.style==='classes'?'move':'lift'))==='move')return `<main class="pg">${h}</main>`;
-  h+=`<div class="h2">Recent Workouts</div>`;
-  h+=S.history.filter(x=>!x.act).slice(0,3).map(histRow).join('')||`<div class="empty sm">Nothing logged yet. Your finished workouts will show up here.</div>`;
+  h+=`<div class="h2">Recent</div>`;
+  h+=S.history.slice(0,3).map(histRow).join('')||`<div class="empty sm">Nothing logged yet. Your finished workouts will show up here.</div>`;
   return `<main class="pg">${h}</main>`;
 }
 function histRow(x){if(x.act)return `<div class="li" data-sw="h|${x.id}" data-a="sub" data-x="hist:${x.id}"><span style="display:flex;color:var(--pk)">${ic('heart')}</span><div class="g"><div class="tt">${esc(x.name)}</div><div class="sb">${dlong(x.date)} · ${x.act.min} min · ${EFF[x.act.eff]}${x.act.note?' · '+esc(x.act.note):''}</div></div><span class="chev">${ic('chev')}</span></div>`;return `<div class="li" data-sw="h|${x.id}" data-a="sub" data-x="hist:${x.id}"><span class="mute" style="display:flex">${ic('clock')}</span><div class="g"><div class="tt">${esc(x.name)}</div><div class="sb">${dlong(x.date)} · ${mmss(x.dur)} · ${volOf(x)?fmt(Math.round(volOf(x)))+' '+U():'cardio'}</div></div><span class="chev">${ic('chev')}</span></div>`}
@@ -980,7 +988,7 @@ let drag=null;
 document.addEventListener('touchstart',e=>{const p=e.target.closest&&e.target.closest('#sp,.sheet');if(!p||e.target.closest('input,textarea'))return;if(p.scrollTop>0)return;drag={el:p,y0:e.touches[0].clientY,t0:Date.now(),dy:0,act:false}},{passive:true});
 document.addEventListener('touchmove',e=>{if(!drag)return;const dy=e.touches[0].clientY-drag.y0;if(!drag.act){if(dy>8&&drag.el.scrollTop<=0){drag.act=true;drag.el.style.transition='none'}else if(dy<-4||drag.el.scrollTop>0){drag=null;return}else return}drag.dy=Math.max(0,dy);drag.el.style.transform=`translateY(${drag.dy}px)`;if(e.cancelable)e.preventDefault()},{passive:false});
 document.addEventListener('touchend',()=>{if(!drag)return;const d=drag;drag=null;if(!d.act)return;const v=d.dy/Math.max(1,Date.now()-d.t0);d.el.style.transition='';if(d.dy>110||(v>.5&&d.dy>40)){if(d.el.id==='sp')closePanel();else closeSheetAnim()}else d.el.style.transform=''});
-function closeSheetAnim(){const w=$('#sheet');if(!w||!w.querySelector){closeSheet();return}const sh=w.querySelector('.sheet');const qp=w.classList.contains('qpop');w.classList.remove('in');if(sh&&!qp)sh.style.transform='translateY(100%)';setTimeout(()=>{if(w.parentNode)w.remove()},240)}
+function closeSheetAnim(){const w=$('#sheet');if(!w||!w.querySelector){closeSheet();return}const sh=w.querySelector('.sheet');const qp=w.classList.contains('qpop');w.classList.remove('in');if(sh&&!qp)sh.style.transform='translateY(100%)';setTimeout(()=>{if(w.parentNode)w.remove()},qp?480:240)}
 function finishNow(){
   const s=S.session;
   s.items.forEach(it=>{if(isCardio(it.exId))it.sets.forEach(x=>{if(x.run){x.dur=cEl(x);x.run=null}if(x.dur>0||x.dist>0)x.done=true})});
@@ -1351,8 +1359,8 @@ function pdEnd(){if(!PD)return;const d=PD;PD=null;clearTimeout(d.tm);if(!d.on)re
 document.addEventListener('pointerup',pdEnd);document.addEventListener('pointercancel',e=>{if(PD&&PD.on)return;pdEnd()});
 
 /* ===== quick menu v2 ===== */
-const QT={routines:['log','Routines','Yours & programs'],empty:['plusc','Empty Workout','Add as you go'],repeat:['rep','Repeat Last',''],build:['target','Build Me a Workout','From fresh muscles'],body:['scale','Log Body','Weight & measures'],plates:['dumb','Plate Calc','Load the bar']};
-const QA={routines:['shsub','routines'],empty:['start',''],repeat:['repeat',null],build:['bld',null],body:['bodylog',null],plates:['qplates',null]};
+const QT={routines:['log','Routines','Yours & programs'],empty:['plusc','Empty Workout','Add as you go'],exlib:['search','Exercises','Look one up'],build:['target','Build Me a Workout','From fresh muscles'],body:['scale','Log Body','Weight & measures'],checkin:['heart','Check In','How you feel today']};
+const QA={routines:['shsub','routines'],empty:['start',''],exlib:['shsub','exercises'],build:['bld',null],body:['bodylog',null],checkin:['qcheck',null]};
 function qOrder(){const d=Object.keys(QT),o=(S.qord||[]).filter(k=>QT[k]);return o.concat(d.filter(k=>!o.includes(k)))}
 function liftSug(){const r=S.routines.find(x=>x.active);return r&&r.days.length?{r,d:D(r.id,nextDay(r))}:null}
 function wkCardio(){return Math.round(cardioMinSince(weekStart(Date.now()),Infinity))}
@@ -1360,9 +1368,9 @@ function quickHtml(){const sug=liftSug(),last=S.history.find(z=>!z.act),g=G().we
   let h=`<div class="qtop"><span class="qlbl">Quick Actions</span></div>`;
   if(S.session)h+=`<button class="qhero res" data-a="shres"><span>${ic('play')}</span><div><small>${S.session.pre?'READY TO START':'WORKOUT IN PROGRESS'}</small><b>${S.session.pre?'Open':'Resume'} ${esc(S.session.name)}</b><em ${S.session.pre?'':'id="el3"'}>${S.session.pre?S.session.items.length+' exercises':mmss((Date.now()-S.session.start)/1000)+' elapsed'}</em></div>${ic('chev')}</button>`;
   h+=`<div class="qheros"><button class="qh lift" data-a="qlift"><span class="qhi">${ic('dumb')}</span><b>Lift</b><em>${sug?'Next · '+esc(sug.d.name):'Pick a workout'}</em></button><button class="qh car" data-a="qcar"><span class="qhi">${ic('heart')}</span><b>Cardio</b><em>${wk} / ${g} min this week</em></button></div>`;
-  h+=`<div class="qgrid qd">${qOrder().map(k=>{const [icn,l,sub]=QT[k],[a,x]=QA[k];const xx=k==='repeat'?(last?last.id:null):x;const dis=k==='repeat'&&!last;return `<button class="qtile" data-dk="${k}" data-a="${dis?'noop':a}" ${xx!=null?`data-x="${xx}"`:''} ${dis?'style="opacity:.45"':''}><span>${ic(icn)}</span><b>${l}</b><small>${k==='repeat'?(last?esc(last.name):'Nothing yet'):sub}</small></button>`}).join('')}</div><div class="xs mute center" style="padding:10px 0 2px">Press and hold a tile to rearrange</div>`;
+  h+=`<div class="qgrid qd">${qOrder().map(k=>{const [icn,l,sub]=QT[k],[a,x]=QA[k];const xx=x;const dis=false;return `<button class="qtile" data-dk="${k}" data-a="${dis?'noop':a}" ${xx!=null?`data-x="${xx}"`:''} ${dis?'style="opacity:.45"':''}><span>${ic(icn)}</span><b>${l}</b><small>${k==='checkin'&&readyToday()&&readyToday().score?'Done today ✓':sub}</small></button>`}).join('')}</div><div class="xs mute center" style="padding:10px 0 2px">Press and hold a tile to rearrange</div>`;
   return h}
-function openQuick(){openSheet(quickHtml());const w=document.getElementById('sheet');if(!w)return;w.classList.add('qpop');const f=document.querySelector('.fab');if(f){const r=f.getBoundingClientRect();const sh=w.querySelector('.sheet');if(sh){const sr=sh.getBoundingClientRect();sh.style.transformOrigin=`${r.left+r.width/2-sr.left}px ${r.top+r.height/2-sr.top}px`}const x=document.createElement('button');x.className='qx';x.dataset.a='close';x.style.left=r.left+'px';x.style.top=r.top+'px';x.style.width=r.width+'px';x.style.height=r.height+'px';x.innerHTML=ic('x');w.appendChild(x)}}
+function openQuick(){openSheet(quickHtml());const w=document.getElementById('sheet');if(!w)return;w.classList.add('qpop');const f=document.querySelector('.fab');if(f){const r=f.getBoundingClientRect();const sh=w.querySelector('.sheet');if(sh){const ox=r.left+r.width/2-sh.offsetLeft,oy=r.top+r.height/2-sh.offsetTop;sh.style.transformOrigin=`${ox}px ${oy}px`;sh.style.setProperty('--ox',ox+'px');sh.style.setProperty('--oy',oy+'px')}const x=document.createElement('button');x.className='qx';x.dataset.a='close';x.style.left=r.left+'px';x.style.top=r.top+'px';x.style.width=r.width+'px';x.style.height=r.height+'px';x.innerHTML=ic('x');w.appendChild(x)}}
 
 /* ===== lift & cardio pickers ===== */
 function liftHtml(){const rs=S.routines.filter(r=>r.days.length).sort((a,b)=>(b.active?1:0)-(a.active?1:0)),sug=liftSug();
@@ -1382,7 +1390,17 @@ function cardioHtml(){const wk=wkCardio(),g=G().weekCardio,{list,last}=cardioLis
   <div class="secl">Guided & Timed</div><div class="chips2 gch">${allGuided().map(g2=>`<button data-a="gpstart" data-x="${g2.id}">${esc(g2.n)}</button>`).join('')}</div>
   <div class="li" data-a="qtool" data-x="interval"><span class="mute" style="display:flex">${ic('watch')}</span><div class="g"><div class="tt">Circuit Timer</div><div class="sb">EMOM, Tabata, AMRAP · logs as cardio</div></div><span class="chev">${ic('chev')}</span></div><div class="li" data-a="qtool" data-x="runwalk"><span class="mute" style="display:flex">${ic('runner')}</span><div class="g"><div class="tt">Run / Walk Program</div><div class="sb">${S.rw?'Week '+(S.rw.wk+1):'8 weeks to a 25-minute run'}</div></div><span class="chev">${ic('chev')}</span></div>`}
 
-/* ===== home: lift | move ===== */
+/* ===== home: week plan ===== */
+function weekPlan(){const r=S.routines.find(x=>x.active),ws=weekStart(Date.now()),done=S.history.filter(x=>x.date>=ws&&!x.act).length,td=clsToday();
+  let h=`<div class="h2">This Week<small>${done} / ${S.weekGoal} WORKOUTS</small></div>`;
+  if(!r||!r.days.length)h+=`<div class="upn"><div class="upnt">No active routine</div><div class="sm mute">Pick a program or template to plan your week.</div><div class="upnb"><button class="pkb" data-a="sub" data-x="routines">Browse Routines</button><button class="olb" data-a="qlift">Pick a Workout</button></div></div>`;
+  else{const nx=nextDay(r),i0=Math.max(0,r.days.findIndex(d=>d.id===nx)),ord=r.days.slice(i0).concat(r.days.slice(0,i0)),d0=ord[0];
+    h+=`<div class="upn"><div class="xs" style="letter-spacing:.1em;color:var(--pk);font-weight:700">SUGGESTED · ${esc(r.name).toUpperCase()}</div><div class="upnt">${esc(d0.name)}</div><div class="sm mute">${d0.items.length} exercises · ${esc(d0.items.slice(0,4).map(it=>ex(it.exId).name).join(', '))}${d0.items.length>4?'…':''}</div><div class="upnb"><button class="pkb" data-a="startd" data-x="${r.id}|${d0.id}">${ic('play')} Start</button><button class="olb" data-a="preview" data-x="${r.id}|${d0.id}">Preview</button></div></div>`;
+    h+=`<div class="wplan">${ord.slice(1).map((d,k)=>{const dn2=S.history.find(x=>x.did===d.id&&x.date>=ws);return `<div class="li" data-a="preview" data-x="${r.id}|${d.id}"><span class="wpn ${dn2?'ok':''}">${dn2?'✓':k+2}</span><div class="g"><div class="tt">${esc(d.name)}</div><div class="sb">${dn2?'Done '+new Date(dn2.date).toLocaleDateString(undefined,{weekday:'short'}):d.items.length+' exercises'}</div></div><span class="chev">${ic('chev')}</span></div>`}).join('')}</div>`}
+  if(td.length)h+=td.map(c=>clsRow(c,true)).join('');
+  h+=`<div class="hrow2"><button data-a="sub" data-x="routines"><span>${ic('log')}</span><div><b>Routines</b><em>${S.routines.length} saved</em></div></button><button data-a="sub" data-x="exercises"><span>${ic('search')}</span><div><b>Exercises</b><em>Look one up</em></div></button></div>`;
+  return h+recoveryCard()}
+/* ===== home: lift | move (unused) ===== */
 function homeSplit(){const m=V.hm||(S.style==='classes'?'move':'lift'),sug=liftSug(),wk=wkCardio(),g=G().weekCardio,ws=weekStart(Date.now());
   const lw=S.history.filter(h=>h.date>=ws&&!h.act&&h.entries.some(e=>!isCardio(e.exId))).length;
   let h=`<div class="hsplit"><button class="${m==='lift'?'on':''}" data-a="hm" data-x="lift"><span class="hsi">${ic('dumb')}</span><small>LIFT</small><b>${lw} / ${S.weekGoal}</b><em>workouts this week</em></button><button class="${m==='move'?'on':''}" data-a="hm" data-x="move"><span class="hsi">${ic('heart')}</span><small>MOVE</small><b>${wk} / ${g}</b><em>cardio min this week</em></button></div>`;
@@ -2575,6 +2593,7 @@ const ACT={
   qlift:()=>{closeSheet();openSheet(liftHtml())},
   qcar:()=>{closeSheet();openSheet(cardioHtml())},
   hm:x=>{V.hm=x;render()},
+  qcheck:()=>{closeSheet();ACT.rdopen()},
   repeat:x=>{const h=S.history.find(z=>z.id===x);if(!h)return;if(S.session){closeSheet();ACT.resume();toast('Workout already in progress');return}closeSheet();S.session={id:uid(),rid:h.rid||null,did:h.did||null,name:h.name,start:Date.now(),items:h.entries.map(e=>mkItem(e.exId,Math.max(1,e.sets.filter(z=>!z.wu).length))),i:0,s:0,rest:null,pre:true};V.inSession=true;V.ov=false;V.animIn=true;save();render();V.animIn=false},
   qtools:()=>openSheet(`<div class="sh-t">Tools</div><div class="qgrid">${tOrder().map(k=>`<button class="qtile" data-a="qtool" data-x="${k}"><span>${ic(TOOLS.find(t=>t[0]===k)[3])}</span><b>${TSHORT[k]}</b></button>`).join('')}</div>`),
   qtool:x=>{closeSheet();ACT.tool(x)},
