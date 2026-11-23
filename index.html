@@ -590,6 +590,11 @@ html[data-theme="light"] .qh.car{background:#18181b;color:#fff}html[data-theme="
 @keyframes tpress3{0%{transform:scale(1)}45%{transform:scale(.9)}100%{transform:scale(1)}}
 .tourw .tourc .tourt,.tourw .tourc .tourk .tch{transition:opacity .16s ease,transform .32s cubic-bezier(.22,1,.36,1)!important}
 .tourw.moving .tring{opacity:0}
+
+.tourw.init .tourh,.tourw.init .tourc{transition:none!important}
+.tourw.init{animation:tfade .35s ease}
+@keyframes tfade{from{opacity:0}to{opacity:1}}
+.tring{display:none!important}
 </style>
 </head>
 <body>
@@ -1093,7 +1098,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.48';
+const APPV='1.49';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
@@ -2168,30 +2173,31 @@ const TOUR=[
  {c:'Quick Actions',go:()=>{tBase('home');ACT.qlift()},sel:()=>{const r=$q('.sheet .sugrow');return [r&&r.previousElementSibling,r,...after(r,2)]},t:'Picking a lift',d:'Every workout in your routines. Your next one is highlighted, but you can start any of them. Empty Workout and Build Me a Workout are further down.'},
  {c:'Quick Actions',go:()=>{tBase('home');ACT.qcar()},sel:()=>{const a=secl('Track Live');return [a,...after(a,2)]},t:'Picking cardio',d:'Track a machine live with time, distance and pace. Below that you can log a class you already did, or follow a guided session.'},
  {c:'Working Out',demo:1,under:'#app header',go:()=>{tBase('home');tDemo(true)},sel:()=>[$q('.ovbar.prego')],tap:'.ovbar.prego .pkb',t:'The Ready screen',d:'Starting a workout opens this first. Check your exercises, reorder or swap them, then tap Start Workout. This is a practice run, so nothing gets saved.'},
- {c:'Working Out',demo:1,go:()=>{tBase('home');tDemo(false)},wait:90,sel:()=>[$q('#sp .setl'),$q('#sp .wnum')],t:'One set at a time',d:'The exercise, which set you’re on, and the weight. Tap the number to type a weight.'},
+ {c:'Working Out',demo:1,go:()=>{tBase('home');tDemo(false)},wait:90,sel:()=>[$q('#sp .setl'),$q('#sp .wnum'),$q('#sp .wunit')],t:'One set at a time',d:'The exercise, which set you’re on, and the weight. Tap the number to type a weight.'},
  {c:'Working Out',demo:1,go:()=>{tBase('home');tDemo(false)},wait:90,sel:()=>[$q('#sp .barsvg'),$q('#sp .plates')],t:'Load the bar',d:'Tap a plate to add it to both sides. Tap a plate on the bar to take it off.'},
- {c:'Working Out',demo:1,go:()=>{tBase('home');tDemo(false)},wait:90,sel:()=>[$q('#sp .rnum')?$q('#sp .rnum').parentNode:null,$q('#sp .rirr')],t:'Reps and effort',d:'Set reps with − and +, then rate how many you had left in the tank. Bars uses this to pick your next weights.'},
+ {c:'Working Out',demo:1,go:()=>{tBase('home');tDemo(false)},wait:90,sel:()=>[$q('#sp .rnum')?$q('#sp .rnum').closest('.repsrow'):null,$q('#sp .rirr')],t:'Reps and effort',d:'Set reps with − and +, then rate how many you had left in the tank. Bars uses this to pick your next weights.'},
  {c:'Working Out',demo:1,go:()=>{tBase('home');tDemo(false)},wait:90,sel:'#sp .navrow',t:'Next set',d:'The right arrows log the set and move on. The timer starts a rest if you want one. Tap Finish when you’re done.'},
  {c:'Progress',go:()=>{tBase('prog');tSample()},sel:()=>[h2el('Workout Progress'),$q('.wtg')],t:'Progress',d:'Charts for the lifts you care about, like this sample. Tap Track an Exercise to add one, and tap any chart for your best sets and history.'},
  {c:'Progress',go:()=>tBase('prog'),sel:()=>[h2el('Insights'),...[...document.querySelectorAll('.insg .ins')]],tap:'.tabs [data-x="goals"]',t:'Insights',d:'Deeper looks: your month of bars, volume balance, strength levels, readiness and more.'},
  {c:'Goals',go:()=>tBase('goals'),sel:()=>h2pair('Your Focus'),tap:'.tabs [data-x="tools"]',t:'Goals',d:'Tell Bars what you’re after and how you like to train. It sets your weekly targets, calories and priority muscles.'},
  {c:'Tools',go:()=>tBase('tools'),sel:'.tbig',t:'Tools',d:'Routines and the exercise library sit at the top. Programs and templates live inside Routines.'},
- {c:'Tools',go:()=>tBase('tools'),sel:()=>[$q('.tpinw')],tap:'.tbig [data-x="exercises"]',t:'Every tool',d:'Plate calculator, timers, pace, heart rate zones and more. Pin favourites here with EDIT, and search or filter to find any tool.'},
- {c:'Tools',go:()=>{tBase('tools');ACT.sub('exercises')},sel:()=>[$q('.srch.exs'),...document.querySelectorAll('#app main>.chips2')],tap:'.exr',t:'Find any exercise',d:'Search by name, or filter by muscle and equipment. “Done Before” shows only exercises you’ve logged.'},
+ {c:'Tools',go:()=>tBase('tools'),sel:()=>[$q('.tpinw')],t:'Pinned tools',d:'Your favourite tools sit up top. Tap EDIT to pin up to four, and drag them into any order.'},
+ {c:'Tools',go:()=>tBase('tools'),sel:()=>[secl('All Tools'),...document.querySelectorAll('.tgrid .tdr')],tap:'.tbig [data-x="exercises"]',t:'Every tool',d:'Plate calculator, timers, pace, heart rate zones and more. Search or filter at the top to find one fast.'},
+ {c:'Tools',go:()=>{tBase('tools');ACT.sub('exercises')},sel:()=>[$q('.srch.exs'),...document.querySelectorAll('#app main>.chips2')],tap:()=>[...document.querySelectorAll('.exr')].find(r=>r.querySelector('.tt').textContent==='Barbell Bench Press'),t:'Find any exercise',d:'Search by name, or filter by muscle and equipment. “Done Before” shows only exercises you’ve logged.'},
  {c:'Tools',go:()=>{tBase('tools');ACT.sub('exercises');ACT.wdet(exByName('Barbell Bench Press').id)},sel:()=>[$q('.sheet .sh-t'),$q('.sheet .exm'),secl('How To Do It'),...[...document.querySelectorAll('.sheet .exsteps li')]],t:'How to do it',d:'Every exercise shows the muscles it works, step-by-step technique, your progress, and a button to add it to a routine.'},
  {c:'Settings',go:()=>tBase('home'),sel:'.greet .av',round:1,t:'Your photo',d:'Tap your initial to add a profile photo, or tap it again later to change it.'},
- {c:'Settings',go:()=>tBase('home'),sel:'.gearb',round:1,tap:'.gearb',t:'Settings',d:'The gear opens settings: units, appearance, your gym’s equipment and this tour. Back up to iCloud now and then, since your data lives only on this phone.'},
+ {c:'Settings',go:()=>tBase('home'),sel:'.gearb',round:1,pulse:'.gearb',t:'Settings',d:'The gear opens settings: units, appearance, your gym’s equipment and this tour. Back up to iCloud now and then, since your data lives only on this phone.'},
  {c:'Settings',go:()=>tBase('home'),sel:'.bkic',round:1,pulse:'.bkic',t:'Back up to iCloud',d:'Tap the cloud to save a backup file to iCloud Drive. It lights up with a reminder when it’s been a week. Restore from a backup any time in Settings.'},
  {c:'Done',go:()=>tBase('home'),t:'You’re ready',d:'Tap the yellow button and pick Lift or Cardio to start. You can replay this tour any time from Settings.',end:'Let’s Go'}];
 function tSteps(){return TOUR.filter(st=>!st.demo||!S.session||(S.session&&S.session.demo)).filter(st=>!st.demo||tDemoDay())}
-function tourOpen(){V.tour=0;const w0=$q('#tourw');if(w0)w0.remove();tourShow()}
+function tourOpen(){V.tour=0;TBUSY=false;const w0=$q('#tourw');if(w0)w0.remove();const w=tWrap();w.classList.add('init');tourShow();setTimeout(()=>w.classList.remove('init'),450)}
 function tWrap(){let w=$q('#tourw');if(!w){w=document.createElement('div');w.id='tourw';w.className='tourw';w.innerHTML='<div class="tourh none"></div><div class="tring"></div><div class="tourc mid"><div class="tourk"></div><div class="tourp"></div><div class="tourt"></div><div class="tourn"></div></div>';document.body.appendChild(w);document.documentElement.classList.add('touring')}return w}
 function tourShow(){const L=tSteps(),st=L[V.tour];if(!st)return tourEnd();const w=tWrap();w.classList.add('moving');document.querySelectorAll('.tpulse').forEach(e=>e.classList.remove('tpulse'));
   try{st.go()}catch(e){console.log(e)}const n=V.tour;
   requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(()=>{if(V.tour!==n)return;try{tourPaint(st,L)}catch(e){console.log(e)}w.classList.remove('moving')},st.wait||60)))}
 function tEls(st){let els=null;try{els=typeof st.sel==='function'?st.sel():st.sel?$q(st.sel):null}catch(e){}if(els&&!Array.isArray(els))els=[els];return (els||[]).filter(e=>e&&e.getBoundingClientRect&&e.getBoundingClientRect().height>0)}
 function tScroller(el){let p=el.parentElement;while(p&&p!==document.body){const cs=getComputedStyle(p);if(/(auto|scroll)/.test(cs.overflowY)&&p.scrollHeight>p.clientHeight+2)return p;p=p.parentElement}return null}
-function tBox(e){const cs=getComputedStyle(e),boxed=(cs.backgroundColor&&cs.backgroundColor!=='rgba(0, 0, 0, 0)'&&cs.backgroundColor!=='transparent')||(parseFloat(cs.borderTopWidth)>0&&parseFloat(cs.borderLeftWidth)>0)||cs.backgroundImage!=='none';
+function tBox(e){if(!e.matches('.h2,.secl,.sh-t'))return e.getBoundingClientRect();const cs=getComputedStyle(e),boxed=(cs.backgroundColor&&cs.backgroundColor!=='rgba(0, 0, 0, 0)'&&cs.backgroundColor!=='transparent')||(parseFloat(cs.borderTopWidth)>0&&parseFloat(cs.borderLeftWidth)>0)||cs.backgroundImage!=='none';
   if(boxed)return e.getBoundingClientRect();try{const rg=document.createRange();rg.selectNodeContents(e);const r=rg.getBoundingClientRect();if(r.width&&r.height)return r}catch(_){}return e.getBoundingClientRect()}
 function tUnion(els){let R_=null;els.forEach(e=>{if(!e)return;const r=tBox(e);if(!r.width&&!r.height)return;R_=R_?{l:Math.min(R_.l,r.left),t:Math.min(R_.t,r.top),r:Math.max(R_.r,r.right),b:Math.max(R_.b,r.bottom)}:{l:r.left,t:r.top,r:r.right,b:r.bottom}});return R_}
 function tourPaint(st,L){const w=tWrap(),H=window.innerHeight,W=window.innerWidth,last=V.tour===L.length-1;let els=tEls(st);const c=w.querySelector('.tourc');
@@ -2214,9 +2220,19 @@ function tourPaint(st,L){const w=tWrap(),H=window.innerHeight,W=window.innerWidt
   if(R_&&R_.b-R_.t>16){const pad=st.round?7:12,l=Math.max(6,R_.l-pad),r=Math.min(W-6,R_.r+pad);h.classList.remove('none');Object.assign(h.style,{left:l+'px',top:(R_.t-pad)+'px',width:(r-l)+'px',height:(R_.b-R_.t+pad*2)+'px',borderRadius:st.round?'50%':'18px'})}
   else{h.classList.add('none');Object.assign(h.style,{left:W/2+'px',top:H/2+'px',width:'0px',height:'0px'})}
   const ring=w.querySelector('.tring');ring.className='tring';const pt=st.pulse?$q(st.pulse):null;if(pt)pt.classList.add('tpulse');
-  if(st.tap){const te=$q(st.tap);if(te){const r=te.getBoundingClientRect(),cr2=c.getBoundingClientRect(),inHole=R_&&r.top>=R_.t-14&&r.bottom<=R_.b+14&&r.left>=R_.l-14&&r.right<=R_.r+14;
-    if(inHole)te.classList.add('tpulse');else if(r.width&&r.bottom>8&&r.top<H-8&&!(r.bottom>cr2.top&&r.top<cr2.bottom)){const br=getComputedStyle(te).borderRadius;Object.assign(ring.style,{left:(r.left-4)+'px',top:(r.top-4)+'px',width:(r.width+8)+'px',height:(r.height+8)+'px',borderRadius:(parseFloat(br)||12)+4+'px'});ring.className='tring on'}}}}
-function tourNext(d){const L=tSteps(),st=L[V.tour],w=$q('#tourw');const pressed=document.querySelector('.tpulse')||(w&&w.querySelector('.tring.on'));if(d>0&&pressed&&st&&(st.tap||st.pulse)){pressed.classList.add('tpress');setTimeout(()=>{pressed.classList.remove('tpress');V.tour=Math.max(0,V.tour+d);tourShow()},260);return}V.tour=Math.max(0,V.tour+d);tourShow()}
+  
+}
+function tTgt(t){try{return typeof t==='function'?t():$q(t)}catch(e){return null}}
+let TBUSY=false;
+function tourNext(d){if(TBUSY)return;const L=tSteps(),st=L[V.tour],w=$q('#tourw');const go=()=>{TBUSY=false;document.querySelectorAll('.tpulse,.tpress').forEach(e=>e.classList.remove('tpulse','tpress'));V.tour=Math.max(0,V.tour+d);tourShow()};
+  if(d<=0||!st){go();return}
+  if(st.tap){const te=tTgt(st.tap);if(te){TBUSY=true;const sc=tScroller(te),H=window.innerHeight,c=w.querySelector('.tourc').getBoundingClientRect();let r=te.getBoundingClientRect();
+      const free=c.top>H/2?[60,c.top-20]:[c.bottom+20,H-100],need=sc&&(r.top<free[0]||r.bottom>free[1]);
+      if(need)sc.scrollTo({top:sc.scrollTop+(r.top-(free[0]+free[1])/2+r.height/2),behavior:'smooth'});
+      setTimeout(()=>{r=te.getBoundingClientRect();const h=w.querySelector('.tourh'),pad=8;h.classList.remove('none');const br=parseFloat(getComputedStyle(te).borderRadius)||14;Object.assign(h.style,{left:(r.left-pad)+'px',top:(r.top-pad)+'px',width:(r.width+pad*2)+'px',height:(r.height+pad*2)+'px',borderRadius:Math.min(br+pad,999)+'px'});
+        te.classList.add('tpulse');setTimeout(()=>{te.classList.remove('tpulse');te.classList.add('tpress');setTimeout(go,240)},620)},need?520:60);return}}
+  const pr=document.querySelector('.tpulse');if(pr){TBUSY=true;pr.classList.remove('tpulse');pr.classList.add('tpress');setTimeout(go,260);return}
+  go()}
 function tourEnd(){document.documentElement.classList.remove('touring');document.querySelectorAll('.tpulse').forEach(e=>e.classList.remove('tpulse'));const w=$q('#tourw');if(w){w.classList.add('out');setTimeout(()=>w.remove(),250)}V.tour=null;S.toured=true;closeSheet();tDemoEnd();V.tool=null;V.sub=null;V.stack=[];V.tab='home';save();render()}
 addEventListener('resize',()=>{if(V.tour!=null){const L=tSteps();if(L[V.tour])tourPaint(L[V.tour],L)}});
 /* ===== custom nutrition ===== */
@@ -2627,7 +2643,7 @@ const ACT={
   bknow:()=>{closeSheet();ACT.bkfile()},
   delwid:x=>{closeSheet();ACT.delwid0(x)},
   obnext:(x,el)=>{const st=V.ob||0;if(st===1)obSaveBody();if(st===3&&!(el&&el.dataset.skip)){const t=parseFloat(($('#wgT')||{}).value),d=($('#wgD')||{}).value,bw=curBW();if(t&&d&&bw)S.weightGoal={target:t,date:new Date(d+'T12:00').getTime(),start:bw,startDate:Date.now()};save()}if(st===0&&el&&el.dataset.skip){S.onboarded=true;save();const w=$('#obw');if(w)w.remove();V.ob=null;render();return}V.ob=+x;obOpen()},
-  obdone:()=>{setTimeout(()=>{if(V.imp)impShow()},400);const sg=suggestStack();S.goals=Object.assign(G(),sg.g);S.weekGoal=sg.week;S.onboarded=true;save();const w=$('#obw');if(w){w.classList.add('out');setTimeout(()=>w.remove(),300)}V.ob=null;render();setTimeout(()=>{if(V.imp)return;tourOpen()},450)},
+  obdone:()=>{setTimeout(()=>{if(V.imp)impShow()},400);const sg=suggestStack();S.goals=Object.assign(G(),sg.g);S.weekGoal=sg.week;S.onboarded=true;save();const w=$('#obw');if(w){w.classList.add('out');setTimeout(()=>w.remove(),300)}V.ob=null;render();setTimeout(()=>{if(V.imp)return;tourOpen()},700)},
   obunsure:()=>{S.profile=Object.assign(P(),{goal:'general',goalUnsure:true});save();obOpen()},
   obunit:x=>{if(U()!==x){S.units=x;save()}obOpen()},
   qnewr:()=>{closeSheet();ACT.newroutine()},
