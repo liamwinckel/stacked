@@ -544,6 +544,15 @@ html[data-theme="light"] .qh.car{background:#18181b;color:#fff}html[data-theme="
 .srch.exs{position:sticky;top:0;z-index:2}.chips2.sm2 button{font-size:12px;padding:6px 11px}
 .exm{display:flex;flex-wrap:wrap;gap:6px;padding:6px 20px 4px}.exm span{font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;border:1px solid var(--line);color:var(--soft)}.exm span.p{background:var(--pk);color:#121212;border-color:var(--pk)}
 .exsteps{margin:0;padding:10px 20px 4px 40px}.exsteps li{font-size:14px;line-height:1.45;color:var(--soft);padding:4px 0}.exsteps li::marker{color:var(--pk);font-weight:700}
+
+.qhint{text-align:center;font-size:12px;color:var(--mute);padding:10px 0 2px;display:flex;justify-content:center;align-items:center;gap:12px}
+.qtile{position:relative}
+.qtile .qm{position:absolute;top:-7px;left:-7px;width:24px;height:24px;border-radius:50%;background:#3a3a40;color:#fff;font-style:normal;font-weight:800;font-size:17px;line-height:22px;display:flex;align-items:center;justify-content:center;border:2px solid var(--sh1);z-index:2}
+.qtile.qadd{border:1.5px dashed rgba(255,214,10,.5);background:transparent}.qtile.qadd b{color:var(--pk)}
+@keyframes qwig{0%{transform:rotate(-2.5deg)}50%{transform:rotate(2.5deg)}100%{transform:rotate(-2.5deg)}}
+.qgrid.qed .qtile[data-dk]>span{animation:qwig .3s ease-in-out infinite}.qgrid.qed .qtile[data-dk]:nth-child(2n)>span{animation-delay:-.15s}
+.qgrid.qed .qtile.drag>span{animation:none}
+.qh.lift .qhi{background:rgba(0,0,0,.12)}
 </style>
 </head>
 <body>
@@ -1355,10 +1364,13 @@ function calHtml(){const c=V.cl=V.cl||{k:'spin',min:45,eff:1,bw:''};const kg=cal
   <p class="xs mute" style="padding:12px 20px">Estimates use standard MET values from the Compendium of Physical Activities. A heart-rate watch will be more accurate for you.</p>`)}
 
 /* ===== drag to reorder (long-press, slot based) ===== */
-let PD=null;
+let PD=null,QLP=null;
+document.addEventListener('pointerdown',e=>{if(V.qedit||!e.target.closest)return;const c=e.target.closest('.qgrid.qd .qtile');if(!c)return;const x0=e.clientX,y0=e.clientY;QLP={x0,y0,t:setTimeout(()=>{QLP=null;V.qedit=true;V.dragT=Date.now();try{navigator.vibrate&&navigator.vibrate(20)}catch(_){}refreshSheet(quickHtml())},450)}},{passive:true});
+document.addEventListener('pointermove',e=>{if(QLP&&Math.hypot(e.clientX-QLP.x0,e.clientY-QLP.y0)>8){clearTimeout(QLP.t);QLP=null}},{passive:true});
+document.addEventListener('pointerup',()=>{if(QLP){clearTimeout(QLP.t);QLP=null}});
 function pdKey(x){return x.dataset&&(x.dataset.dk||(TCAT[x.dataset.x]?x.dataset.x:null))}
 function pdItems(w){return [...w.children].filter(x=>pdKey(x))}
-document.addEventListener('pointerdown',e=>{if(!e.target.closest||PD)return;const c=e.target.closest(V.tedit?'.tpin,.tgrid.ed .tdr,.qgrid.qd .qtile':'.qgrid.qd .qtile');if(!c||!pdKey(c))return;const w=c.parentNode,items=pdItems(w),slots=items.map(x=>{const r=x.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2}});
+document.addEventListener('pointerdown',e=>{if(!e.target.closest||PD)return;const c=e.target.closest(V.tedit?'.tpin,.tgrid.ed .tdr':'.qgrid.qed .qtile[data-dk]');if(!c||!pdKey(c))return;const w=c.parentNode,items=pdItems(w),slots=items.map(x=>{const r=x.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2}});
   PD={c,w,items,slots,i0:items.indexOf(c),x0:e.clientX,y0:e.clientY,dx:0,dy:0,on:false,to:items.indexOf(c)};PD.tm=setTimeout(()=>{if(!PD)return;PD.on=true;c.classList.add('drag');items.forEach(x=>{if(x!==c)x.style.transition='transform .18s ease'});try{navigator.vibrate&&navigator.vibrate(15)}catch(_){}},220)},{passive:true});
 function pdMove(x,y,ev){if(!PD)return;const dx=x-PD.x0,dy=y-PD.y0;if(!PD.on){if(Math.hypot(dx,dy)>8){clearTimeout(PD.tm);PD=null}return}if(ev&&ev.cancelable)ev.preventDefault();
   PD.dx=dx;PD.dy=dy;PD.c.style.transform=`translate(${dx}px,${dy}px) scale(1.08)`;const p0=PD.slots[PD.i0],px=p0.x+dx,py=p0.y+dy;let to=0,best=1e9;PD.slots.forEach((s,k)=>{const d=Math.hypot(px-s.x,py-s.y);if(d<best){best=d;to=k}});
@@ -1366,22 +1378,27 @@ function pdMove(x,y,ev){if(!PD)return;const dx=x-PD.x0,dy=y-PD.y0;if(!PD.on){if(
 document.addEventListener('pointermove',e=>pdMove(e.clientX,e.clientY,e),{passive:false});
 document.addEventListener('touchmove',e=>{if(PD&&PD.on&&e.cancelable)e.preventDefault()},{passive:false});
 function pdEnd(){if(!PD)return;const d=PD;PD=null;clearTimeout(d.tm);if(!d.on)return;V.dragT=Date.now();const ord=d.items.filter(z=>z!==d.c);ord.splice(d.to,0,d.c);const keys=ord.map(z=>pdKey(z));
-  if(d.w.classList.contains('qgrid')){S.qord=keys;save();refreshSheet(quickHtml());return}else if(d.w.classList.contains('tgrid')){const all=tOrder(),pn=pins();const rest=all.filter(k=>!pn.includes(k));const seq=keys.concat(rest.filter(k=>!keys.includes(k)));S.tord=seq.concat(pn)}else S.pins=keys;save();render()}
+  if(d.w.classList.contains('qgrid')){S.qtiles=keys;save();refreshSheet(quickHtml());return}else if(d.w.classList.contains('tgrid')){const all=tOrder(),pn=pins();const rest=all.filter(k=>!pn.includes(k));const seq=keys.concat(rest.filter(k=>!keys.includes(k)));S.tord=seq.concat(pn)}else S.pins=keys;save();render()}
 document.addEventListener('pointerup',pdEnd);document.addEventListener('pointercancel',e=>{if(PD&&PD.on)return;pdEnd()});
 
 /* ===== quick menu v2 ===== */
-const QT={routines:['log','Routines','Yours & programs'],empty:['plusc','Empty Workout','Add as you go'],exlib:['search','Exercises','Look one up'],build:['target','Build Me a Workout','From fresh muscles'],body:['scale','Log Body','Weight & measures'],checkin:['heart','Check In','How you feel today']};
-const QA={routines:['shsub','routines'],empty:['start',''],exlib:['shsub','exercises'],build:['bld',null],body:['bodylog',null],checkin:['qcheck',null]};
-function qOrder(){const d=Object.keys(QT),o=(S.qord||[]).filter(k=>QT[k]);return o.concat(d.filter(k=>!o.includes(k)))}
+const QT={routines:['log','Routines','Yours & programs'],empty:['plusc','Empty Workout','Add as you go'],exlib:['search','Exercises','Look one up'],build:['target','Build Me a Workout','From fresh muscles'],body:['scale','Log Body','Weight & measures'],checkin:['gauge','Check In','How you feel today'],repeat:['rep','Repeat Last','Same as last time'],act:['note','Log Activity','Classes & more'],prog:['prog','Progress','Charts & PRs'],goals:['goals','Goals','Targets & plan'],backup:['cloud','Back Up','Save to iCloud']};
+const QA={routines:['shsub','routines'],empty:['start',''],exlib:['shsub','exercises'],build:['bld',null],body:['bodylog',null],checkin:['qcheck',null],repeat:['qrepeat',null],act:['qact',null],prog:['qtab','prog'],goals:['qtab','goals'],backup:['bkfile',null]};
 function liftSug(){const r=S.routines.find(x=>x.active);return r&&r.days.length?{r,d:D(r.id,nextDay(r))}:null}
 function wkCardio(){return Math.round(cardioMinSince(weekStart(Date.now()),Infinity))}
+const QDEF=['routines','empty','exlib','build','body','checkin'];
+function qDef(k){if(QT[k]){const [icn,l,sub]=QT[k],[a,x]=QA[k];return {icn,l,sub,a,x}}if(k&&k.startsWith('tool:')){const t=TOOLS.find(z=>z[0]===k.slice(5));if(t)return {icn:t[3],l:TSHORT[t[0]],sub:t[2],a:'qtool',x:t[0]}}return null}
+function qTiles(){return (S.qtiles||(S.qord?S.qord.filter(k=>QDEF.includes(k)):QDEF)).filter(k=>qDef(k)).slice(0,6)}
+function qPickHtml(){const have=qTiles(),row=k=>{const d=qDef(k);return `<div class="li" data-a="qadd" data-x="${k}"><span style="color:var(--pk);display:flex">${ic(d.icn)}</span><div class="g"><div class="tt">${d.l}</div><div class="sb">${esc(d.sub)}</div></div><span style="color:var(--pk);display:flex">${ic('plusc')}</span></div>`};
+  const acts=Object.keys(QT).filter(k=>!have.includes(k)),tools=tOrder().map(k=>'tool:'+k).filter(k=>!have.includes(k));
+  return `<div class="qtop" style="display:flex;justify-content:space-between;align-items:center"><span class="qlbl">Add a Tile</span><button class="lnk sm" data-a="qpickx">CANCEL</button></div>${acts.length?`<div class="secl">Actions</div>${acts.map(row).join('')}`:''}<div class="secl">Tools</div>${tools.map(row).join('')}`}
 function quickHtml(){const sug=liftSug(),last=S.history.find(z=>!z.act),g=G().weekCardio,wk=wkCardio();
   let h=`<div class="qtop"><span class="qlbl">Quick Actions</span></div>`;
   if(S.session)h+=`<button class="qhero res" data-a="shres"><span>${ic('play')}</span><div><small>${S.session.pre?'READY TO START':'WORKOUT IN PROGRESS'}</small><b>${S.session.pre?'Open':'Resume'} ${esc(S.session.name)}</b><em ${S.session.pre?'':'id="el3"'}>${S.session.pre?S.session.items.length+' exercises':mmss((Date.now()-S.session.start)/1000)+' elapsed'}</em></div>${ic('chev')}</button>`;
-  h+=`<div class="qheros"><button class="qh lift" data-a="qlift"><span class="qhi">${ic('dumb')}</span><b>Lift</b><em>${sug?'Next · '+esc(sug.d.name):'Pick a workout'}</em></button><button class="qh car" data-a="qcar"><span class="qhi">${ic('heart')}</span><b>Cardio</b><em>${wk} / ${g} min this week</em></button></div>`;
-  h+=`<div class="qgrid qd">${qOrder().map(k=>{const [icn,l,sub]=QT[k],[a,x]=QA[k];const xx=x;const dis=false;return `<button class="qtile" data-dk="${k}" data-a="${dis?'noop':a}" ${xx!=null?`data-x="${xx}"`:''} ${dis?'style="opacity:.45"':''}><span>${ic(icn)}</span><b>${l}</b><small>${k==='checkin'&&readyToday()&&readyToday().score?'Done today ✓':sub}</small></button>`}).join('')}</div><div class="xs mute center" style="padding:10px 0 2px">Press and hold a tile to rearrange</div>`;
+  h+=`<div class="qheros"><button class="qh lift" data-a="qlift"><span class="qhi">${ic('dumb')}</span><b>Lift</b><em>${sug?'Next · '+esc(sug.d.name):'Pick a workout'}</em></button><button class="qh lift" data-a="qcar"><span class="qhi">${ic('heart')}</span><b>Cardio</b><em>${wk} / ${g} min this week</em></button></div>`;
+  const ed=V.qedit,tl=qTiles();h+=`<div class="qgrid qd ${ed?'qed':''}">${tl.map(k=>{const d=qDef(k);return `<button class="qtile" data-dk="${k}" data-a="${ed?'noop':d.a}" ${d.x!=null?`data-x="${d.x}"`:''}>${ed?`<em class="qm" data-a="qrm" data-x="${k}">−</em>`:''}<span>${ic(d.icn)}</span><b>${d.l}</b><small>${k==='checkin'&&readyToday()&&readyToday().score?'Done today ✓':k==='repeat'?(last?esc(last.name):'Nothing yet'):esc(d.sub)}</small></button>`}).join('')}${ed?Array(6-tl.length).fill(`<button class="qtile qadd" data-a="qaddpick"><span>${ic('plusc')}</span><b>Add</b><small>Action or tool</small></button>`).join(''):''}</div><div class="qhint">${ed?`Drag to reorder · tap − to remove <button class="lnk sm" data-a="qdone">DONE</button>`:'Press and hold a tile to customize'}</div>`;
   return h}
-function openQuick(){openSheet(quickHtml());const w=document.getElementById('sheet');if(!w)return;w.classList.add('qpop');const f=document.querySelector('.fab');if(f){const r=f.getBoundingClientRect();const sh=w.querySelector('.sheet');if(sh){const ox=r.left+r.width/2-sh.offsetLeft,oy=r.top+r.height/2-sh.offsetTop;sh.style.transformOrigin=`${ox}px ${oy}px`;sh.style.setProperty('--ox',ox+'px');sh.style.setProperty('--oy',oy+'px')}const x=document.createElement('button');x.className='qx';x.dataset.a='close';x.style.left=r.left+'px';x.style.top=r.top+'px';x.style.width=r.width+'px';x.style.height=r.height+'px';x.innerHTML=ic('x');w.appendChild(x)}}
+function openQuick(){V.qedit=false;openSheet(quickHtml());const w=document.getElementById('sheet');if(!w)return;w.classList.add('qpop');const f=document.querySelector('.fab');if(f){const r=f.getBoundingClientRect();const sh=w.querySelector('.sheet');if(sh){const ox=r.left+r.width/2-sh.offsetLeft,oy=r.top+r.height/2-sh.offsetTop;sh.style.transformOrigin=`${ox}px ${oy}px`;sh.style.setProperty('--ox',ox+'px');sh.style.setProperty('--oy',oy+'px')}const x=document.createElement('button');x.className='qx';x.dataset.a='close';x.style.left=r.left+'px';x.style.top=r.top+'px';x.style.width=r.width+'px';x.style.height=r.height+'px';x.innerHTML=ic('x');w.appendChild(x)}}
 
 /* ===== lift & cardio pickers ===== */
 function liftHtml(){const rs=S.routines.filter(r=>r.days.length).sort((a,b)=>(b.active?1:0)-(a.active?1:0)),sug=liftSug();
@@ -2646,6 +2663,13 @@ const ACT={
   qcar:()=>{closeSheet();openSheet(cardioHtml())},
   hm:x=>{V.hm=x;render()},
   qcheck:()=>{closeSheet();ACT.rdopen()},
+  qdone:()=>{V.qedit=false;refreshSheet(quickHtml())},
+  qrm:x=>{S.qtiles=qTiles().filter(k=>k!==x);save();refreshSheet(quickHtml())},
+  qaddpick:()=>refreshSheet(qPickHtml()),
+  qpickx:()=>refreshSheet(quickHtml()),
+  qadd:x=>{const t=qTiles();if(t.length<6&&!t.includes(x))t.push(x);S.qtiles=t;save();refreshSheet(quickHtml())},
+  qrepeat:()=>{const l=S.history.find(z=>!z.act);if(l)ACT.repeat(l.id);else toast('No workouts yet')},
+  qtab:x=>{closeSheet();V.sub=null;V.stack=[];V.tool=null;ACT.tab(x)},
   repeat:x=>{const h=S.history.find(z=>z.id===x);if(!h)return;if(S.session){closeSheet();ACT.resume();toast('Workout already in progress');return}closeSheet();S.session={id:uid(),rid:h.rid||null,did:h.did||null,name:h.name,start:Date.now(),items:h.entries.map(e=>mkItem(e.exId,Math.max(1,e.sets.filter(z=>!z.wu).length))),i:0,s:0,rest:null,pre:true};V.inSession=true;V.ov=false;V.animIn=true;save();render();V.animIn=false},
   qtools:()=>openSheet(`<div class="sh-t">Tools</div><div class="qgrid">${tOrder().map(k=>`<button class="qtile" data-a="qtool" data-x="${k}"><span>${ic(TOOLS.find(t=>t[0]===k)[3])}</span><b>${TSHORT[k]}</b></button>`).join('')}</div>`),
   qtool:x=>{closeSheet();ACT.tool(x)},
