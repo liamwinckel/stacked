@@ -71,6 +71,11 @@ textarea.inp{font-size:12px;font-family:ui-monospace,Menlo,monospace}
 .stp span{min-width:28px;text-align:center;font-size:17px;color:#fff}
 .stp.w span{min-width:66px;font-size:15px}
 .ico{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;color:var(--mute);flex:none}
+.ldh{touch-action:none;cursor:grab}[data-ld]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.li.ldrag{position:relative;z-index:20;background:var(--sh1,#1c1c1f);box-shadow:0 10px 28px rgba(0,0,0,.45);border-radius:12px;transition:box-shadow .15s,border-radius .15s}
+.ldon [data-ld]:not(.ldrag){transition:transform .18s ease}
+.pk{display:flex;align-items:center;justify-content:center;min-width:26px;height:26px}.pk b{width:24px;height:24px;border-radius:50%;background:var(--pk);color:#121212;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.pkbar{position:sticky;bottom:0;padding:10px 16px calc(6px + var(--sab));background:linear-gradient(180deg,transparent,var(--sh2) 30%);z-index:5;display:none}.pkbar.on{display:block}.pkbar button{width:100%;height:52px;border-radius:14px;background:var(--pk);color:#121212;font-size:16px;font-weight:800}
 .stats{display:grid;grid-template-columns:1fr 1fr;margin:4px 20px 0}
 .stats>div{display:flex;gap:12px;align-items:flex-start;padding:20px 8px}
 .stats>div:nth-child(1),.stats>div:nth-child(2){border-bottom:1px dashed rgba(255,255,255,.18)}
@@ -723,6 +728,7 @@ const IP={
  scale:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9.5a4 4 0 0 1 6 0l-2 2.5"/>',
  ramp:'<path d="M4 19h4v-4h4v-4h4V7h4"/><path d="M4 19h16"/>',
  fig:'<circle cx="12" cy="4.6" r="2.1"/><path d="M12 7.5v6.5M6.5 10.5l5.5-1.6 5.5 1.6M8.8 21l3.2-7 3.2 7"/>',
+ grip:'<path d="M5 8h14M5 12h14M5 16h14"/>',chk:'<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.5"/>',
  search:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
  pulse:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/><path d="M8 12h2l1-2 2 4 1-2h2"/>',
  gauge:'<path d="M4.5 17a8.5 8.5 0 1 1 15 0"/><path d="M12 14l4-5"/><circle cx="12" cy="14" r="1.3" fill="currentColor"/>',
@@ -778,13 +784,15 @@ function beep(){try{if(!AC)return;[0,.25,.5].forEach(t=>{const o=AC.createOscill
 let _prT=0;function toast(m){if(Date.now()-_prT<2600){setTimeout(()=>toast(m),2700-(Date.now()-_prT));return}const d=document.createElement('div');d.className='toast';d.textContent=m;document.body.appendChild(d);setTimeout(()=>d.style.opacity=0,1800);setTimeout(()=>d.remove(),2200)}
 
 /* sheets */
-let CB=null,PICK=null;
+let CB=null,PICK=null,PICKM=null;
 function openSheet(html){closeSheet();const d=document.createElement('div');d.className='shwrap';d.id='sheet';d.innerHTML=`<div class="shbg" data-a="close"></div><div class="sheet"><div class="grab"></div><div id="shc">${html}</div></div>`;document.body.appendChild(d);figMountSheet();requestAnimationFrame(()=>requestAnimationFrame(()=>d.classList.add('in')))}
 function refreshSheet(html){const c=$('#shc');if(c){c.innerHTML=html;figMountSheet()}}
 function closeSheet(){const d=$('#sheet');if(d)d.remove()}
 function confirmSheet(msg,fn,label='Confirm',safe=false){CB=fn;openSheet(`<div class="sh-t center">${esc(msg)}</div><button class="pkb" data-a="cbok" ${safe?'':'style="background:#c22b55"'}>${label}</button><button class="olb" data-a="close">Cancel</button>`)}
 function numSheet(title,val,fn){CB=fn;openSheet(`<div class="sh-t">${esc(title)}</div><div class="shp"><input id="numin" class="inp big" type="number" inputmode="decimal" value="${val}"></div><button class="pkb" data-a="numok">Save</button>`);setTimeout(()=>{const i=$('#numin');if(i){i.focus();i.select()}},60)}
-function pickExercise(fn,ctx){PICK=fn;V.pf={q:'',eq:'',mg:'',ctx:ctx||[]};openSheet(`<div class="sh-t">Add Exercise</div><div class="shp stick"><input class="inp" id="pq" placeholder="Search ${S.exercises.length} exercises" data-in="pq" autocomplete="off"></div><div id="pl">${pickBody()}</div><button class="cyl" data-a="newexp" style="border:0">${ic('plusc')} Create custom exercise</button>`)}
+function pickExercise(fn,ctx,multi){PICK=fn;PICKM=multi||null;V.pf={q:'',eq:'',mg:'',ctx:ctx||[],multi:!!multi,sel:[]};openSheet(`<div class="sh-t">${multi?'Add Exercises<div class="xs mute" style="font-weight:400">Tap to select as many as you like</div>':'Add Exercise'}</div><div class="shp stick"><input class="inp" id="pq" placeholder="Search ${S.exercises.length} exercises" data-in="pq" autocomplete="off"></div><div id="pl">${pickBody()}</div><button class="cyl" data-a="newexp" style="border:0">${ic('plusc')} Create custom exercise</button>${multi?'<div class="pkbar" id="pkbar"><button data-a="pickdone"></button></div>':''}`)}
+function pkBar(){const b=$('#pkbar');if(!b)return;const n=V.pf.sel.length;b.classList.toggle('on',n>0);b.firstChild.textContent=`Add ${n} exercise${n===1?'':'s'}`}
+function pkMark(e){const k=V.pf.sel.indexOf(e.id);return k<0?`<span class="pk" style="color:var(--cy)">${ic('plusc')}</span>`:`<span class="pk"><b>${k+1}</b></span>`}
 function suggest(list){
   const ctx=V.pf.ctx.map(ex),mc={},pc={},use={};
   ctx.forEach(e=>{if(e.mg)mc[e.mg]=(mc[e.mg]||0)+1;if(e.pat)pc[e.pat]=(pc[e.pat]||0)+1});
@@ -796,7 +804,7 @@ function suggest(list){
   const top=Object.entries(pc).sort((a,b)=>b[1]-a[1])[0];
   return {list:out,label:top?`Suggested for your ${top[0]} workout`:'Suggested'};
 }
-function exRow(e){return `<div class="li" data-a="pick" data-x="${e.id}"><div class="g"><div class="tt">${esc(e.name)}</div><div class="sb" style="text-transform:capitalize">${esc(e.mg||'custom')} · ${EQN[e.eq]||e.type}</div></div><span style="color:var(--cy);display:flex">${ic('plusc')}</span></div>`}
+function exRow(e){const m=V.pf&&V.pf.multi;return `<div class="li${m&&V.pf.sel.includes(e.id)?' psel':''}" data-a="pick" data-x="${e.id}"><div class="g"><div class="tt">${esc(e.name)}</div><div class="sb" style="text-transform:capitalize">${esc(e.mg||'custom')} · ${EQN[e.eq]||e.type}</div></div>${m?pkMark(e):`<span style="color:var(--cy);display:flex">${ic('plusc')}</span>`}</div>`}
 function pickBody(){
   const f=V.pf,q=f.q.toLowerCase().trim();
   const eqs=['',...Object.keys(EQN).filter(k=>S.exercises.some(e=>e.eq===k))];
@@ -858,8 +866,8 @@ function renderRoutine(id){
 function renderDay(x){
   const [ri,di]=x.split('|');const r=R(ri),d=r&&r.days.find(z=>z.id===di);if(!d){V.sub=null;return renderHome()}
   let h=`<div class="shp" style="padding-top:16px"><input class="inp" data-in="dname" data-x="${ri}|${di}" value="${esc(d.name)}"><div class="lblx">Notes</div><textarea class="inp notes" rows="3" data-in="dnotes" data-x="${ri}|${di}" placeholder="Cues, tempo, form reminders, warm-up plan…">${esc(d.notes||'')}</textarea></div><div class="h2">Exercises<small>SETS</small></div>`;
-  d.items.forEach((it,ii)=>{h+=`<div class="li" data-sw="it|${ri}|${di}|${ii}" style="cursor:default"><div class="g">${esc(ex(it.exId).name)}<div class="sb" data-a="itrr" data-x="${ri}|${di}|${ii}" style="color:var(--cy);cursor:pointer">${it.rr?esc(String(it.rr)).replace('-','–')+' reps ✎':'+ rep target'}</div>${(it.sn||(ii>0&&d.items[ii-1].sn))?'<div><span class="sstag sm2">SUPERSET</span></div>':''}</div><div class="stp"><button data-a="its" data-x="${ri}|${di}|${ii}|-1">${ic('back',2)}</button><span>${it.sets}</span><button data-a="its" data-x="${ri}|${di}|${ii}|1">${ic('chev',2)}</button></div>${ii<d.items.length-1?`<button class="ico ${it.sn?'lon':''}" data-a="itss" data-x="${ri}|${di}|${ii}">${ic('link')}</button>`:''}<button class="ico" data-a="itmv" data-x="${ri}|${di}|${ii}">${ic('up')}</button><button class="ico" data-a="itdel" data-x="${ri}|${di}|${ii}">${ic('x')}</button></div>`});
-  h+=`<button class="cyl" data-a="itadd" data-x="${ri}|${di}">${ic('plusc')} Add Exercise</button><p class="xs mute" style="padding:10px 20px;margin:0">Tap ${ic('link')} to superset an exercise with the one below it. You'll alternate between them set by set.</p>`;
+  d.items.forEach((it,ii)=>{h+=`<div class="li" data-sw="it|${ri}|${di}|${ii}" data-ld="day|${ri}|${di}|${ii}" style="cursor:default"><div class="g">${esc(ex(it.exId).name)}<div class="sb" data-a="itrr" data-x="${ri}|${di}|${ii}" style="color:var(--cy);cursor:pointer">${it.rr?esc(String(it.rr)).replace('-','–')+' reps ✎':'+ rep target'}</div>${(it.sn||(ii>0&&d.items[ii-1].sn))?'<div><span class="sstag sm2">SUPERSET</span></div>':''}</div><div class="stp"><button data-a="its" data-x="${ri}|${di}|${ii}|-1">${ic('back',2)}</button><span>${it.sets}</span><button data-a="its" data-x="${ri}|${di}|${ii}|1">${ic('chev',2)}</button></div>${ii<d.items.length-1?`<button class="ico ${it.sn?'lon':''}" data-a="itss" data-x="${ri}|${di}|${ii}">${ic('link')}</button>`:''}<button class="ico" data-a="itdel" data-x="${ri}|${di}|${ii}">${ic('x')}</button><span class="ico ldh" aria-label="Hold and drag to reorder">${ic('grip')}</span></div>`});
+  h+=`<button class="cyl" data-a="itadd" data-x="${ri}|${di}">${ic('plusc')} Add Exercise</button><p class="xs mute" style="padding:10px 20px;margin:0">Press and hold an exercise, then drag to reorder. Tap ${ic('link')} to superset an exercise with the one below it. You'll alternate between them set by set.</p>`;
   return hd('Edit Workout',back())+`<main class="pg">${h}</main>`;
 }
 function renderExercises(){const f=V.exf=V.exf||{mg:'all',eq:'all'},used={};S.history.forEach(h=>h.entries.forEach(e=>used[e.exId]=(used[e.exId]||0)+1));
@@ -1005,7 +1013,7 @@ function renderOverview(){
     ${sc?`<div class="prrd ${sc<=2.4?'lo':''}">${ic('heart')}<span>Feeling ${sc}/5 · ${sc<=2.4?'Easy day: weights −10%, lighter goals':sc<=3.4?'Steady day: plan as written':'Feeling strong: go get it'}</span></div>`:''}
     <div class="prbtns">${S.readyAsk!==false?`<button class="olb" data-a="rdopen">${ic('heart')} Check In</button>`:''}<button class="olb ${V.ovEdit?'on':''}" data-a="ovedit">${ic('edit')} ${V.ovEdit?'Done':'Edit'}</button></div></div>`}
   h+=`<div class="h2">Exercises<small>SETS</small></div>`;
-  h+=s.items.map((it,i)=>`<div class="li" data-sw="ex|${i}" ${V.ovEdit?'style="cursor:default"':`data-a="goex" data-x="${i}"`}><div class="g"><div class="tt" ${i===s.i?'style="color:var(--cy)"':''}>${esc(ex(it.exId).name)}</div><div class="sb">${inSS(i)?'<span class="sstag sm2">SUPERSET</span> ':''}${it.sets.filter(x=>x.done&&!x.wu).length} of ${it.sets.filter(x=>!x.wu).length} logged${(()=>{if(ex(it.exId).type!=='barbell')return '';const nx=it.sets.find(x=>!x.done&&!x.wu)||it.sets[it.sets.length-1];if(!nx||nx.w<=bar())return '';const pl=greedy((nx.w-bar())/2);return pl.length?`<div class="plstrip">${fmt(nx.w)}: ${pl.map(p=>`<i style="--s:${(.55+.45*Math.sqrt(p/PLATES[U()][0])).toFixed(2)}">${fmt(p)}</i>`).join('')}<em>per side</em></div>`:''})()}</div></div>${V.ovEdit?`${i<s.items.length-1?`<button class="ico ${it.sn?'lon':''}" data-a="exss" data-x="${i}" title="Superset with next">${ic('link')}</button>`:''}<button class="ico" data-a="exmv" data-x="${i}|-1">${ic('up')}</button><button class="ico" data-a="exdel" data-x="${i}">${ic('x')}</button>`:`<div class="stp"><button data-a="ovsets" data-x="${i}|-1">${ic('back',2)}</button><span>${it.sets.length}</span><button data-a="ovsets" data-x="${i}|1">${ic('chev',2)}</button></div>`}</div>`).join('');
+  h+=s.items.map((it,i)=>`<div class="li" data-sw="ex|${i}" ${V.ovEdit?`data-ld="ov|${i}" style="cursor:default"`:`data-a="goex" data-x="${i}"`}><div class="g"><div class="tt" ${i===s.i?'style="color:var(--cy)"':''}>${esc(ex(it.exId).name)}</div><div class="sb">${inSS(i)?'<span class="sstag sm2">SUPERSET</span> ':''}${it.sets.filter(x=>x.done&&!x.wu).length} of ${it.sets.filter(x=>!x.wu).length} logged${(()=>{if(ex(it.exId).type!=='barbell')return '';const nx=it.sets.find(x=>!x.done&&!x.wu)||it.sets[it.sets.length-1];if(!nx||nx.w<=bar())return '';const pl=greedy((nx.w-bar())/2);return pl.length?`<div class="plstrip">${fmt(nx.w)}: ${pl.map(p=>`<i style="--s:${(.55+.45*Math.sqrt(p/PLATES[U()][0])).toFixed(2)}">${fmt(p)}</i>`).join('')}<em>per side</em></div>`:''})()}</div></div>${V.ovEdit?`${i<s.items.length-1?`<button class="ico ${it.sn?'lon':''}" data-a="exss" data-x="${i}" title="Superset with next">${ic('link')}</button>`:''}<button class="ico" data-a="exdel" data-x="${i}">${ic('x')}</button><span class="ico ldh" aria-label="Hold and drag to reorder">${ic('grip')}</span>`:`<div class="stp"><button data-a="ovsets" data-x="${i}|-1">${ic('back',2)}</button><span>${it.sets.length}</span><button data-a="ovsets" data-x="${i}|1">${ic('chev',2)}</button></div>`}</div>`).join('');
   h+=`<button class="cyl" data-a="saddex">${ic('plusc')} Add Exercise</button>`;
   const dn0=s.rid&&s.did&&R(s.rid)?(R(s.rid).days.find(d=>d.id===s.did)||{}).notes:'';
   h+=`<div class="h2" style="border:0">Notes</div><div class="shp">${dn0?`<div class="tnote">${esc(dn0)}</div>`:''}<textarea class="inp notes" rows="2" data-in="snote" placeholder="How did today feel? Anything to remember next time…">${esc(s.note||'')}</textarea></div>`;
@@ -1106,7 +1114,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.56';
+const APPV='1.57';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
@@ -1430,6 +1438,28 @@ document.addEventListener('pointermove',e=>pdMove(e.clientX,e.clientY,e),{passiv
 document.addEventListener('touchmove',e=>{if(PD&&PD.on&&e.cancelable)e.preventDefault()},{passive:false});
 function pdEnd(){if(!PD)return;const d=PD;PD=null;clearTimeout(d.tm);if(!d.on)return;V.dragT=Date.now();const ord=d.items.filter(z=>z!==d.c);ord.splice(d.to,0,d.c);const keys=ord.map(z=>pdKey(z));
   if(d.w.classList.contains('qgrid')){S.qtiles=keys;save();refreshSheet(quickHtml());return}else if(d.w.classList.contains('tgrid')){const all=tOrder(),pn=pins();const rest=all.filter(k=>!pn.includes(k));const seq=keys.concat(rest.filter(k=>!keys.includes(k)));S.tord=seq.concat(pn)}else S.pins=keys;save();render()}
+/* ===== list drag reorder (hold & drag) ===== */
+let LD=null;
+function ldScroller(el){let p=el.parentElement;while(p&&p!==document.body){const o=getComputedStyle(p).overflowY;if((o==='auto'||o==='scroll')&&p.scrollHeight>p.clientHeight)return p;p=p.parentElement}return document.scrollingElement}
+document.addEventListener('pointerdown',e=>{if(LD||!e.target.closest)return;const c=e.target.closest('[data-ld]');if(!c)return;const h=e.target.closest('.ldh');if(!h&&e.target.closest('button,input,textarea,select,[data-a]'))return;
+  const grp=c.dataset.ld.split('|')[0];const items=[...document.querySelectorAll('[data-ld]')].filter(x=>x.dataset.ld.split('|')[0]===grp);
+  LD={c,items,grp,i0:items.indexOf(c),to:items.indexOf(c),x0:e.clientX,y0:e.clientY,y:e.clientY,on:false,sc:ldScroller(c)};
+  const go=()=>{if(!LD)return;LD.on=true;SW=null;drag=null;EB=null;LD.st0=LD.sc.scrollTop;LD.rects=LD.items.map(x=>{const r=x.getBoundingClientRect();return {t:r.top,h:r.height}});LD.c.classList.add('ldrag');document.body.classList.add('ldon');try{navigator.vibrate&&navigator.vibrate(15)}catch(_){}ldLoop()};
+  if(h)go();else LD.tm=setTimeout(go,380)},{passive:true});
+function ldApply(){const d=LD,ds=d.sc.scrollTop-d.st0,dy=d.y-d.y0+ds;d.c.style.transform=`translateY(${dy}px) scale(1.02)`;const r0=d.rects[d.i0],mid=r0.t+r0.h/2+dy;
+  let to=d.i0;for(let k=0;k<d.i0;k++){const r=d.rects[k];if(mid<r.t+r.h/2){to=k;break}}if(to===d.i0)for(let k=d.rects.length-1;k>d.i0;k--){const r=d.rects[k];if(mid>r.t+r.h/2){to=k;break}}
+  d.to=to;d.items.forEach((x,k)=>{if(x===d.c)return;let sh=0;if(d.i0<to&&k>d.i0&&k<=to)sh=-r0.h;if(d.i0>to&&k>=to&&k<d.i0)sh=r0.h;x.style.transform=sh?`translateY(${sh}px)`:''})}
+function ldLoop(){if(!LD||!LD.on)return;const y=LD.y,H=innerHeight;let v=0;if(y<110)v=-Math.min(14,(110-y)/6);else if(y>H-120)v=Math.min(14,(y-(H-120))/6);if(v)LD.sc.scrollTop+=v;ldApply();requestAnimationFrame(ldLoop)}
+document.addEventListener('pointermove',e=>{if(!LD)return;LD.y=e.clientY;if(!LD.on){if(Math.hypot(e.clientX-LD.x0,e.clientY-LD.y0)>8){clearTimeout(LD.tm);LD=null}return}if(e.cancelable)e.preventDefault()},{passive:false});
+document.addEventListener('touchmove',e=>{if(LD&&LD.on&&e.cancelable)e.preventDefault()},{passive:false});
+document.addEventListener('contextmenu',e=>{if(LD)e.preventDefault()});
+function ldEnd(){if(!LD)return;const d=LD;LD=null;clearTimeout(d.tm);if(!d.on)return;document.body.classList.remove('ldon');d.items.forEach(x=>{x.style.transform='';x.classList.remove('ldrag')});V.dragT=Date.now();SWEAT=false;if(d.to===d.i0)return;
+  const mv=(a)=>{const it=a.splice(d.i0,1)[0];if(d.i0>0&&a[d.i0-1])delete a[d.i0-1].sn;delete it.sn;a.splice(d.to,0,it);if(a.length)delete a[a.length-1].sn;return it};
+  if(d.grp==='day'){const [,ri,di]=d.c.dataset.ld.split('|');mv(D(ri,di).items);RS()}
+  else if(d.grp==='ov'){const s=S.session,cur=s.items[s.i];mv(s.items);s.i=Math.max(0,s.items.indexOf(cur));save();render()}}
+document.addEventListener('pointerup',ldEnd);document.addEventListener('pointercancel',()=>{if(LD&&LD.on)return;if(LD){clearTimeout(LD.tm);LD=null}});
+document.addEventListener('touchend',()=>{if(LD&&LD.on)ldEnd()});
+
 document.addEventListener('pointerup',pdEnd);document.addEventListener('pointercancel',e=>{if(PD&&PD.on)return;pdEnd()});
 
 /* ===== quick menu v2 ===== */
@@ -3899,12 +3929,14 @@ const ACT={
   shcalc:()=>{closeSheet();ACT.calc()},
   cbok:()=>{const f=CB;CB=null;closeSheet();if(f)f()},
   numok:()=>{const v=parseFloat($('#numin').value);const f=CB;CB=null;closeSheet();if(!isNaN(v)&&f){f(v);RS()}},
-  pick:x=>{const f=PICK;PICK=null;closeSheet();if(f)f(x)},
+  pick:x=>{if(V.pf&&V.pf.multi){const a=V.pf.sel,k=a.indexOf(x);if(k<0)a.push(x);else a.splice(k,1);try{navigator.vibrate&&navigator.vibrate(8)}catch(_){}document.querySelectorAll('#pl [data-a="pick"]').forEach(r=>{const id=r.dataset.x,on=a.includes(id);r.classList.toggle('psel',on);const m=r.querySelector('.pk');if(m)m.outerHTML=pkMark({id})});pkBar();return}
+    const f=PICK;PICK=null;closeSheet();if(f)f(x)},
+  pickdone:()=>{const ids=V.pf.sel.slice(),f=PICK,fm=PICKM;PICK=null;PICKM=null;closeSheet();if(!ids.length)return;if(fm)fm(ids);else if(f)ids.forEach(f);toast(`Added ${ids.length} exercise${ids.length===1?'':'s'}`)},
   newex:()=>{PICK=null;V.nn=(V.pf&&V.pf.q)||'';V.neq=(V.pf&&V.pf.eq)||'B';V.nmg=(V.pf&&V.pf.mg)||'chest';openSheet(newExHtml())},
   newexp:()=>{V.nn=V.pf.q||'';V.neq=V.pf.eq||'B';V.nmg=V.pf.mg||(V.pf.ctx.length?ex(V.pf.ctx[0]).mg:'')||'chest';openSheet(newExHtml())},
   pfeq:x=>{V.pf.eq=x;$('#pl').innerHTML=pickBody()},
   pfmg:x=>{V.pf.mg=x;$('#pl').innerHTML=pickBody()},
-  saveex:()=>{const n=$('#nen').value.trim();if(!n){toast('Give it a name');return}const eq=$('#neq').value,mg=$('#nmg').value;if(S.exercises.some(z=>z.name.toLowerCase()===n.toLowerCase())){toast('That exercise already exists');return}const e={id:uid(),name:n,eq,mg,pat:PAT[mg],type:EQT[eq],custom:true};S.exercises.push(e);save();const f=PICK;PICK=null;closeSheet();if(f)f(e.id);else render()},
+  saveex:()=>{const n=$('#nen').value.trim();if(!n){toast('Give it a name');return}const eq=$('#neq').value,mg=$('#nmg').value;if(S.exercises.some(z=>z.name.toLowerCase()===n.toLowerCase())){toast('That exercise already exists');return}const e={id:uid(),name:n,eq,mg,pat:PAT[mg],type:EQT[eq],custom:true};S.exercises.push(e);save();const f=PICK,fm=PICKM;PICK=null;PICKM=null;closeSheet();if(V.pf&&V.pf.multi&&fm){fm(V.pf.sel.concat(e.id))}else if(f)f(e.id);else render()},
   // calculator
   calc:()=>{let w='',r='';if(S.session&&V.inSession&&!V.ov&&S.session.items.length){const st=cur();w=st.w||'';r=st.r||''}V.calc={w,r};render()},
   calcx:()=>{V.calc=null;render()},
@@ -3917,7 +3949,7 @@ const ACT={
   ovsets:x=>{const [i,d]=x.split('|').map(Number),it=S.session.items[i];if(d>0){if(it.sets.length>=12)return;const l=it.sets[it.sets.length-1];it.sets.push({w:l.w,r:l.r,done:false,p:l.p?[...l.p]:undefined})}else{if(it.sets.length<=1)return;it.sets.pop();if(S.session.i===i)S.session.s=Math.min(S.session.s,it.sets.length-1)}RS()},
   exmv:x=>{const [i,d]=x.split('|').map(Number),a=S.session.items,j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];if(S.session.i===i)S.session.i=j;else if(S.session.i===j)S.session.i=i;RS()},
   exdel:x=>{const s=S.session;s.items.splice(+x,1);s.i=Math.max(0,Math.min(s.i,s.items.length-1));s.s=0;RS()},
-  saddex:()=>pickExercise(id=>{const s=S.session;s.items.push(mkItem(id,3));s.i=s.items.length-1;s.s=0;save();openPanel()},S.session.items.map(it=>it.exId)),
+  saddex:()=>pickExercise(id=>{const s=S.session;s.items.push(mkItem(id,3));s.i=s.items.length-1;s.s=0;save();openPanel()},S.session.items.map(it=>it.exId),ids=>{const s=S.session,k=s.items.length;ids.forEach(id=>s.items.push(mkItem(id,3)));s.i=k;s.s=0;save();openPanel()}),
   minimize:()=>{V.inSession=false;V.ov=false;V.restOpen=false;V.anim='fade';render()},
   discard:()=>confirmSheet('Discard this workout? Nothing from it will be saved.',()=>{S.session=null;V.inSession=false;V.ov=false;V.restOpen=false;RS()},'Discard'),
   finish:()=>{const s=S.session,done=sum(s.items.map(it=>it.sets.filter(x=>(x.done&&!x.wu)||(x.dur!=null&&(cEl(x)>0||x.dist>0))).length));if(!done){confirmSheet('No sets logged yet. Discard this workout?',()=>{S.session=null;V.inSession=false;V.ov=false;RS()},'Discard');return}const left=sum(s.items.map(it=>it.sets.filter(x=>!x.done&&!x.wu&&!(x.dur!=null&&(cEl(x)>0||x.dist>0))).length));confirmSheet(left?`Finish workout? ${left} unlogged set${left>1?'s':''} will be marked skipped.`:'Finish workout?',finishNow,'Finish',true)},
@@ -3949,7 +3981,7 @@ const ACT={
   its:x=>{const [ri,di,ii,d]=x.split('|');const it=D(ri,di).items[+ii];it.sets=Math.max(1,Math.min(12,it.sets+ +d));RS()},
   itmv:x=>{const [ri,di,ii]=x.split('|');const a=D(ri,di).items,k=+ii;if(k>0){[a[k-1],a[k]]=[a[k],a[k-1]];RS()}},
   itdel:x=>{const [ri,di,ii]=x.split('|');D(ri,di).items.splice(+ii,1);RS()},
-  itadd:x=>{const [ri,di]=x.split('|');pickExercise(id=>{D(ri,di).items.push({exId:id,sets:3});RS()},D(ri,di).items.map(it=>it.exId))},
+  itadd:x=>{const [ri,di]=x.split('|');pickExercise(id=>{D(ri,di).items.push({exId:id,sets:3});RS()},D(ri,di).items.map(it=>it.exId),ids=>{ids.forEach(id=>D(ri,di).items.push({exId:id,sets:3}));RS()})},
   delr:x=>confirmSheet('Delete this routine?',()=>{S.routines=S.routines.filter(r=>r.id!==x);save();ACT.back()},'Delete'),
   delex:x=>confirmSheet('Delete “'+ex(x).name+'” from your exercise library?',()=>{S.exercises=S.exercises.filter(e=>e.id!==x);S.widgets=S.widgets.filter(w=>w!==x);S.routines.forEach(r=>r.days.forEach(d=>d.items=d.items.filter(i=>i.exId!==x)));RS()},'Delete'),
   delh:x=>confirmSheet('Delete this workout from your log?',()=>{S.history=S.history.filter(h=>h.id!==x);save();ACT.back()},'Delete'),
