@@ -1106,7 +1106,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.54';
+const APPV='1.55';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
@@ -2479,7 +2479,7 @@ EXS['Treadmill Incline Walk']=()=>SP({fn:(u)=>{const P=walkPose(u,{t:84});return
 function bikePose(u,o){o=o||{};const T=o.T||.8,ph=2*Math.PI*u/T;const hip=o.road?[86,74]:[88,72],cr=[hip[0]+18,hip[1]+42],r=12;
   const p0=fp(cr,-ph/FD,r),p1=fp(cr,-ph/FD+180,r);const t=o.road?36:70,sh=PSH(hip,t);const bar=o.road?[sh[0]+30,sh[1]+18]:[sh[0]+24,sh[1]+12];
   const P={hip,t,F:[p0,p1],ks:[1,1],ta:[-10,-10],H:H2(bar),es:[-1,-1]};
-  if(o.arms){const hb=[sh[0]+26+10*Math.cos(ph),sh[1]+8];const hb2=[sh[0]+26-10*Math.cos(ph),sh[1]+8];P.H=[hb,hb2]}
+  if(o.arms){const hb=[sh[0]+26-10*Math.cos(ph),sh[1]+8];const hb2=[sh[0]+26+10*Math.cos(ph),sh[1]+8];P.H=[hb,hb2]}
   return P}
 const BIKE=(o)=>(j,P)=>{const hip=P.hip,cr=[hip[0]+18,hip[1]+42];let g=Q.ln([hip[0]-4,hip[1]+6],[hip[0]+10,hip[1]+6],FB,5)+Q.ln([hip[0]+2,hip[1]+8],cr,FS,4)+Q.ci(cr,3,FB);
   if(o&&o.road)g+=`<circle cx="${hip[0]-18}" cy="${FG-17}" r="17" fill="none" stroke="${FS}" stroke-width="3"/><circle cx="${hip[0]+62}" cy="${FG-17}" r="17" fill="none" stroke="${FS}" stroke-width="3"/>`+Q.ln(cr,[hip[0]-18,FG-17],FS,3)+Q.ln(cr,[hip[0]+56,hip[1]+2],FS,3.5)+Q.ln([hip[0]+56,hip[1]+2],[hip[0]+62,FG-17],FS,3)+Q.ln([hip[0]+2,hip[1]+8],[hip[0]-18,FG-17],FS,3);
@@ -2491,18 +2491,22 @@ EXS['Rowing Machine']=()=>{const ft=[146,FG-15],seatY=FG-15;const mk=(hx,t,kn,h)
   const sC=PSH([112,seatY],68),sF=PSH([80,seatY],102);
   const K=[mk(112,68,0,fp(sC,-4,44.3)),mk(80,102,0,fp(fp([80,seatY],102,14),12,9)),mk(96,74,0,fp(PSH([96,seatY],74),-4,44.3))];
   return SP({K,seq:[1,2,0],tm:[[.75,.1],[.6,0],[.55,.05]],bg:[()=>Q.ln([24,FG-6],[188,FG-6],FS,4)+`<circle cx="176" cy="${FG-22}" r="14" fill="none" stroke="${FS}" stroke-width="3.5"/>`+Q.ln([ft[0]-2,ft[1]+8],[ft[0]+6,ft[1]-10],FB,4),(j)=>Q.rect(j.hip[0]-10,FG-10,20,4,2,FB)],fg:[(j)=>Q.cable([170,FG-24],j.wr[0])],hiOnly:['quad','back']})};
-EXS['Stair Climber']=()=>{const k=(a,b,hx)=>({hip:[hx,0],t:84,F:[a,b],ks:[1,1],H:H2([hx+22,58]),es:[-1,-1]});
-  const lo=[104,AY-6],hi_=[118,AY-20];const K=[k(hi_,lo,104),k(lo,hi_,104)].map(p=>{const j=fJ(fK(Object.assign({},p,{hip:[p.hip[0],SY]})));p.hip=[p.hip[0],Math.min(p.F[0][1],p.F[1][1])-56];return p});
-  return SP({K,seq:[1,0],tm:[[.5,.1],[.5,.1]],bg:[()=>Q.pl([[80,FG],[80,FG-6+3],[110,FG-3],[110,FG-17],[132,FG-17],[132,FG-31],[150,FG-31]],FS,4)+Q.ln([146,FG],[146,40],FS,4)+Q.ln([146,48],[126,52],FS,3)],hiOnly:['quad','glute']})};
+EXS['Stair Climber']=()=>{const T=1.3,hS=15,dS=15,x0=94,y0=AY-4;
+  const foot=(p)=>{p=((p%1)+1)%1;if(p<.5){const f=p/.5;return [x0+dS-dS*f,y0-hS+hS*f]}const f=(p-.5)/.5;return [x0+dS*f,y0-hS*f-10*Math.sin(Math.PI*f)]};
+  return SP({fn:(u)=>{const p=u/T,a=foot(p),b=foot(p+.5);const hy=Math.min(a[1],b[1])-50;const hip=[x0+2,hy],t=84,sh=PSH(hip,t);
+      const P={hip,t,F:[a,b],ks:[1,1],ta:[0,0],H:H2([sh[0]+20,sh[1]+30]),es:[-1,-1]};P.u=u;return P},
+    bg:[(j,P)=>{const fr_=((P.u||0)/(T/2))%1;let g='';for(let k=-1;k<4;k++){const sx=x0-4+dS*(k-fr_),sy=y0+3.2-hS*(k-fr_);if(sy>FG-1||sy<y0-3*hS)continue;g+=Q.ln([sx-dS/2-1,sy],[sx+dS/2+1,sy],FB,3.5)+Q.ln([sx+dS/2+1,sy],[sx+dS/2+1,Math.min(FG,sy+hS)],FS,3)}
+      return g+Q.ln([x0+50,FG],[x0+50,26],FS,4)+Q.ln([x0+50,j.hip[1]-6],[x0+20,j.hip[1]-6],FS,3)+Q.ln([x0-30,FG],[x0+56,FG],FS,4)}],hiOnly:['quad','glute']})};
 EXS['Elliptical']=()=>SP({fn:(u)=>{const ph=2*Math.PI*u/1;const c=[100,FG-16];const p0=[c[0]+16*Math.cos(ph),c[1]+5*Math.sin(ph)],p1=[c[0]-16*Math.cos(ph),c[1]-5*Math.sin(ph)];
   const hip=[96,c[1]-57.5],t=86,sh=PSH(hip,t);const P={hip,t,F:[p0,p1],ks:[1,1],ta:[0,0],H:[[sh[0]+28-10*Math.cos(ph),sh[1]+6],[sh[0]+28+10*Math.cos(ph),sh[1]+6]],es:[-1,-1]};return P},
   bg:[(j)=>Q.ln([60,FG],[160,FG],FS,4)+Q.ln([150,FG],[150,30],FS,4)+Q.ln(j.an[1],[150,40],FS,2.5)],fg:[(j)=>Q.ln([j.an[0][0]-8,j.an[0][1]+4],[j.an[0][0]+12,j.an[0][1]+4],FB,4)+Q.lever([150,FG-20],j.wr[0])],hiOnly:['quad','glute']});
 EXS['Ski Erg']=()=>{const pul=[150,6];const mk=(hip,t,h)=>({hip,t,F:F2([100,AY]),ks:[1,1],H:H2(h),es:[-1,-1]});
   const s0=PSH([100,SY],92),h1=[96,AY-56];const K=[mk([100,SY],92,fp(s0,70,44)),mk([88,AY-50],44,[PSH([88,AY-50],44)[0]+6,PSH([88,AY-50],44)[1]+40])];
   return SP({K,seq:[1,0],tm:[[.55,.1],[.75,.1]],bg:[()=>Q.ln([158,FG],[158,0],FS,5)],fg:[(j)=>Q.cable(pul,j.wr[0])],hiOnly:['back','core']})};
-EXS['Jump Rope']=()=>SP({fn:(u)=>{const T=.42,ph=2*Math.PI*u/T;const air=Math.max(0,-Math.cos(ph));const hy=SY+2-6*air;const P={hip:[100,hy],t:90,F:F2([100,AY-6*air],2),ks:[1,1],ta:[-20*air,-20*air],UA:[-100,-100],FA:[-30+12*Math.sin(ph),-30+12*Math.sin(ph)]};P.ph=ph;return P},
-  fg:[(j,P)=>{const ph=P.ph||0,h=j.wr[0],tip=[j.hip[0]+18*Math.sin(ph),j.hip[1]-6-78*Math.cos(ph)];return `<path d="M${fr(h)}Q${fr([tip[0]+(tip[0]-h[0])*.3,tip[1]])} ${fr(tip)}" fill="none" stroke="${FY}" stroke-width="1.6"/>`}],hiOnly:['calf']});
-EXS['Swimming']=()=>SP({noG:1,fn:(u)=>{const T=1.4,ph=2*Math.PI*u/T;const hip=[80,70],t=2;return {hip,t,UA:[ph/FD,ph/FD+180],FA:[ph/FD+10,ph/FD+190],TA:[180+7*Math.sin(3*ph),180-7*Math.sin(3*ph)],SA:[180+12*Math.sin(3*ph-.6),180-12*Math.sin(3*ph-.6)],ta:[180+12*Math.sin(3*ph-.6)-80,180-12*Math.sin(3*ph-.6)-80],hd:-8}},bg:[()=>Q.water()],hiOnly:['back','shoulder']});
+EXS['Jump Rope']=()=>SP({fn:(u)=>{const T=.42,ph=2*Math.PI*u/T;const air=Math.max(0,-Math.cos(ph));const hy=SY+2-10*air;const P={hip:[100,hy],t:90,F:F2([100,AY-10*air],2),ks:[1,1],ta:[-20*air,-20*air],UA:[-100,-100],FA:[-30+12*Math.sin(ph),-30+12*Math.sin(ph)]};P.ph=ph;return P},
+  fg:[(j,P)=>{const ph=P.ph||0,h=j.wr[0],h1=j.wr[1],tip=[j.hip[0]+2+22*Math.sin(ph),j.hip[1]-8-80*Math.cos(ph)];const c=[tip[0]+(tip[0]-h[0])*.35,tip[1]+(tip[1]-h[1])*.12];return `<path d="M${fr(h)}Q${fr(c)} ${fr(tip)}" fill="none" stroke="${FY}" stroke-width="1.8"/>`+dim(`<path d="M${fr(h1)}Q${fr([c[0]-3,c[1]])} ${fr(tip)}" fill="none" stroke="${FY}" stroke-width="1.6"/>`)}],hiOnly:['calf']});
+EXS['Swimming']=()=>SP({noG:1,fn:(u)=>{const T=1.5,ph=2*Math.PI*u/T;const hip=[80,71],t=1;const arm=(a)=>{const r=a*FD,up=Math.max(0,Math.sin(r)),dn=Math.max(0,-Math.sin(r));return [a,a+12*up+28*dn]};
+  const a0=arm(-ph/FD),a1=arm(-ph/FD+180),k=Math.sin(4*ph);return {hip,t,UA:[a0[0],a1[0]],FA:[a0[1],a1[1]],TA:[180+6*k,180-6*k],SA:[180+10*Math.sin(4*ph-.7),180-10*Math.sin(4*ph-.7)],ta:[184+10*Math.sin(4*ph-.7),176-10*Math.sin(4*ph-.7)],hd:-14}},bg:[()=>`<path class="fgnd" d="M-60,67 Q-45,64 -30,67 T0,67 T30,67 T60,67 T90,67 T120,67 T150,67 T180,67 T210,67 T240,67 T270,67" fill="none" stroke="#3b82f6" stroke-width="1.6" opacity=".7"/>`,()=>`<path class="fgnd" d="M-60,67 L270,67 L270,140 L-60,140 Z" fill="#3b82f6" opacity=".10"/>`],hiOnly:['back','shoulder']});
 /* ================= FULL BODY ================= */
 const RACK=(hip,t)=>{const sh=PSH(hip,t),b=fp(fp(sh,t,1),t-90,7.5);return {H:H2(b),EP:[24,-4,8]}};
 const OVH=(hip,t,dx)=>{const sh=PSH(hip,t),b=[sh[0]+(dx||0),sh[1]-44];return {H:H2(b),EL:ELs(sh,b)}};
