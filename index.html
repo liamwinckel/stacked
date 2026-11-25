@@ -1114,7 +1114,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.57';
+const APPV='1.58';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
@@ -1482,6 +1482,12 @@ function quickHtml(){const sug=liftSug(),last=S.history.find(z=>!z.act),g=G().we
 function openQuick(){V.qedit=false;openSheet(quickHtml());const w=document.getElementById('sheet');if(!w)return;w.classList.add('qpop');const f=document.querySelector('.fab');if(f){const r=f.getBoundingClientRect();const sh=w.querySelector('.sheet');if(sh){const ox=r.left+r.width/2-sh.offsetLeft,oy=r.top+r.height/2-sh.offsetTop;sh.style.transformOrigin=`${ox}px ${oy}px`;sh.style.setProperty('--ox',ox+'px');sh.style.setProperty('--oy',oy+'px')}const x=document.createElement('button');x.className='qx';x.dataset.a='close';x.style.left=r.left+'px';x.style.top=r.top+'px';x.style.width=r.width+'px';x.style.height=r.height+'px';x.innerHTML=ic('x');w.appendChild(x)}}
 
 /* ===== lift & cardio pickers ===== */
+function routineSheet(rid){const r=R(rid);if(!r)return '';const nx=nextDay(r),ws=weekStart(Date.now());
+  let h=`<div class="sh-t">${esc(r.name)}<div class="xs mute" style="font-weight:400;margin-top:2px">Tap a workout to preview it, or ${ic('play',2)} to start.</div></div>`;
+  if(S.session)h+=`<div class="shp"><div class="tnote">You have a workout in progress. Starting another replaces it.</div></div>`;
+  h+=r.days.map((d,k)=>{const dn=S.history.find(x=>x.did===d.id&&x.date>=ws),hi=d.id===nx;return `<div class="li ${hi?'sugrow':''}" data-a="preview" data-x="${r.id}|${d.id}"><span class="wpn ${dn?'ok':''}">${dn?'✓':k+1}</span><div class="g"><div class="tt">${esc(d.name)}${hi?' <span class="xs" style="color:var(--pk);font-weight:700;letter-spacing:.06em">· NEXT</span>':''}</div><div class="sb">${dn?'Done '+new Date(dn.date).toLocaleDateString(undefined,{weekday:'short'})+' · ':''}${d.items.length} exercises · ${esc(d.items.slice(0,3).map(it=>ex(it.exId).name).join(', '))}${d.items.length>3?'…':''}</div></div><button class="ico" data-a="startd" data-x="${r.id}|${d.id}" aria-label="Start ${esc(d.name)}" style="color:${hi?'var(--pk)':'var(--cy)'}">${ic('play')}</button></div>`}).join('');
+  h+=`<button class="cyl" data-a="sugopen" data-x="${r.id}">${ic('edit')} Open routine</button>`;return h}
+
 function liftHtml(){const rs=S.routines.filter(r=>r.days.length).sort((a,b)=>(b.active?1:0)-(a.active?1:0)),sug=liftSug();
   const row=(r,d,hi)=>{const ld=S.history.find(x=>x.did===d.id);return `<div class="li ${hi?'sugrow':''}" data-a="startd" data-x="${r.id}|${d.id}"><span style="color:${hi?'var(--pk)':'var(--cy)'};display:flex">${ic('play')}</span><div class="g"><div class="tt">${esc(d.name)}${hi?'<span class="tag">SUGGESTED</span>':''}</div><div class="sb">${d.items.length} exercise${d.items.length===1?'':'s'}${d.items.length?' · '+esc(d.items.slice(0,3).map(it=>ex(it.exId).name).join(', '))+(d.items.length>3?'…':''):''}${ld?' · last '+dlong(ld.date):''}</div></div><span class="chev">${ic('chev')}</span></div>`};
   let h=`<div class="sh-t">Lift<div class="xs mute" style="font-weight:400;margin-top:2px">${sug?'Your next workout is highlighted. Pick any one.':'Pick any workout to start'}</div></div>`;
@@ -1504,7 +1510,7 @@ function weekPlan(){const r=S.routines.find(x=>x.active),ws=weekStart(Date.now()
   let h=`<div class="h2">This Week<small>${done} / ${S.weekGoal} WORKOUTS</small></div>`;
   if(!r||!r.days.length)h+=`<div class="upn"><div class="upnt">No active routine</div><div class="sm mute">Pick a program or template to plan your week.</div><div class="upnb"><button class="pkb" data-a="sub" data-x="routines">Browse Routines</button><button class="olb" data-a="qlift">Pick a Workout</button></div></div>`;
   else{const nx=nextDay(r),i0=Math.max(0,r.days.findIndex(d=>d.id===nx)),ord=r.days.slice(i0).concat(r.days.slice(0,i0)),d0=ord[0];
-    h+=`<div class="upn"><div class="xs" style="letter-spacing:.1em;color:var(--pk);font-weight:700">SUGGESTED · ${esc(r.name).toUpperCase()}</div><div class="upnt">${esc(d0.name)}</div><div class="sm mute">${d0.items.length} exercises · ${esc(d0.items.slice(0,4).map(it=>ex(it.exId).name).join(', '))}${d0.items.length>4?'…':''}</div><div class="upnb"><button class="pkb" data-a="startd" data-x="${r.id}|${d0.id}">${ic('play')} Start</button><button class="olb" data-a="preview" data-x="${r.id}|${d0.id}">Preview</button></div></div>`;
+    h+=`<div class="upn" data-a="sugr" data-x="${r.id}" style="cursor:pointer"><div class="xs" style="letter-spacing:.1em;color:var(--pk);font-weight:700;display:flex;justify-content:space-between;align-items:center">SUGGESTED · ${esc(r.name).toUpperCase()}<span style="color:var(--mute);display:flex;flex:none">${ic('chev',2)}</span></div><div class="upnt">${esc(d0.name)}</div><div class="sm mute">${d0.items.length} exercises · ${esc(d0.items.slice(0,4).map(it=>ex(it.exId).name).join(', '))}${d0.items.length>4?'…':''}</div><div class="upnb"><button class="pkb" data-a="startd" data-x="${r.id}|${d0.id}">${ic('play')} Start</button><button class="olb" data-a="preview" data-x="${r.id}|${d0.id}">Preview</button></div></div>`;
     h+=`<div class="wplan">${ord.slice(1).map((d,k)=>{const dn2=S.history.find(x=>x.did===d.id&&x.date>=ws);return `<div class="li" data-a="preview" data-x="${r.id}|${d.id}"><span class="wpn ${dn2?'ok':''}">${dn2?'✓':k+2}</span><div class="g"><div class="tt">${esc(d.name)}</div><div class="sb">${dn2?'Done '+new Date(dn2.date).toLocaleDateString(undefined,{weekday:'short'}):d.items.length+' exercises'}</div></div><span class="chev">${ic('chev')}</span></div>`}).join('')}</div>`}
   if(td.length)h+=td.map(c=>clsRow(c,true)).join('');
   h+=`<div class="hrow2"><button data-a="sub" data-x="routines"><span>${ic('log')}</span><div><b>Routines</b><em>${S.routines.length} saved</em></div></button><button data-a="sub" data-x="exercises"><span>${ic('search')}</span><div><b>Exercises</b><em>Look one up</em></div></button></div>`;
@@ -3901,6 +3907,8 @@ const ACT={
   startd:x=>{const [ri,di]=x.split('|');startWorkout(ri,di)},
   plus:()=>openQuick(),
   qlift:()=>{closeSheet();openSheet(liftHtml())},
+  sugr:x=>{openSheet(routineSheet(x))},
+  sugopen:x=>{closeSheet();ACT.sub('routine:'+x)},
   qcar:()=>{closeSheet();openSheet(cardioHtml())},
   hm:x=>{V.hm=x;render()},
   qcheck:()=>{closeSheet();ACT.rdopen()},
