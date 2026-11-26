@@ -756,6 +756,7 @@ html[data-theme="light"] .setscr .sdb,html[data-theme="light"] .smenu{background
 .hpills em{font-style:normal;font-size:12px;font-weight:700;color:var(--mute);background:#2c2c2e;border-radius:999px;padding:2px 7px;font-variant-numeric:tabular-nums}
 @media (max-width:350px){.hpills em{display:none}}
 html[data-theme="light"] .hpills button{background:#fff;border-color:#e5e5ea;color:#111}html[data-theme="light"] .hpills em{background:#f2f2f7}
+.ebin{animation:ebIn .3s cubic-bezier(.2,.8,.2,1)}@keyframes ebIn{from{transform:translateX(var(--ebx,-40px));opacity:.75}}
 /* ===== pill aesthetic, app-wide ===== */
 .pkb,.olb,.tcard .pkb,.bkb,.vopt,.rdo button,.rcban button,.refc button,.pkbar button,.hrow2 button,.rwk button,.rirr button,.prrd,.gychip,.blkchip,.baled,.rolet,.rdx span,.balok span,.tag,.resume,.nccb,.wgfix,.hsplit button,.chw button,.dsbtn,.ovnav{border-radius:999px}
 .seg,.seg button{border-radius:999px}
@@ -1451,8 +1452,9 @@ function ebEl(){return V.tool?document.querySelector('.toolscr'):document.getEle
 document.addEventListener('touchstart',e=>{const t=e.touches[0];if(e.touches.length!==1||t.clientX>28||(e.target.closest&&e.target.closest('.chips2,.tpins,.whl,.rbar,.rbov')))return;const go=ebTarget();if(!go)return;EB={go,x0:t.clientX,y0:t.clientY,t0:Date.now(),dx:0,act:false,el:ebEl()}},{passive:true});
 document.addEventListener('touchmove',e=>{if(!EB)return;const t=e.touches[0],dx=t.clientX-EB.x0,dy=t.clientY-EB.y0;if(!EB.act){if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>8){EB=null;return}if(dx<8)return;EB.act=true;if(EB.el)EB.el.style.transition='none'}EB.dx=Math.max(0,dx);if(EB.el)EB.el.style.transform=`translateX(${EB.dx}px)`;if(e.cancelable)e.preventDefault()},{passive:false});
 document.addEventListener('touchend',()=>{if(!EB)return;const d=EB;EB=null;if(!d.act)return;const v=d.dx/Math.max(1,Date.now()-d.t0),el=d.el;const done=d.dx>window.innerWidth*.33||(v>.45&&d.dx>50);
-  if(el){el.style.transition='transform .2s ease-out';el.style.transform=done?`translateX(${window.innerWidth}px)`:''}
-  setTimeout(()=>{if(el){el.style.transition='';el.style.transform=''}if(done)d.go()},done?180:200)});
+  if(!done){if(el){el.style.transition='transform .22s cubic-bezier(.2,.8,.2,1)';el.style.transform='';setTimeout(()=>{el.style.transition=''},240)}return}
+  if(el){el.style.transition='none';el.style.transform=''}const from=Math.min(60,Math.round(d.dx*.18));d.go();
+  const m=V.tool?document.querySelector('.toolscr'):document.querySelector('#app main');if(m){m.classList.remove('pop','push','fade');m.style.setProperty('--ebx',`-${from}px`);void m.offsetWidth;m.classList.add('ebin');setTimeout(()=>m.classList.remove('ebin'),320)}});
 /* swipe down to dismiss panels & sheets */
 let drag=null;
 document.addEventListener('touchstart',e=>{const p=e.target.closest&&e.target.closest('#sp,.sheet');if(!p||e.target.closest('input,textarea,.chips2,.tpins,.whl,.rbar,.rbov'))return;if(p.scrollTop>0)return;drag={el:p,y0:e.touches[0].clientY,t0:Date.now(),dy:0,act:false}},{passive:true});
@@ -1505,7 +1507,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.85';
+const APPV='1.86';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 
