@@ -72,7 +72,7 @@ textarea.inp{font-size:12px;font-family:ui-monospace,Menlo,monospace}
 .stp.w span{min-width:66px;font-size:15px}
 .ico{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;color:var(--mute);flex:none}
 .ldh{touch-action:none;cursor:grab}
-.vsplit{margin:4px 20px 0;height:6px;border-radius:3px;background:var(--cy);overflow:hidden;display:flex}.vsplit i{background:var(--pk);display:block;height:100%}.vsplt{display:flex;justify-content:space-between;margin:6px 20px 10px;font-size:12px;color:var(--mute)}.vsum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 16px 10px}.vsum div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 10px;text-align:center}.vsum b{display:block;font-size:22px;font-weight:800}.vsum span{font-size:12px;color:var(--mute)}
+.balbtn{display:flex;align-items:center;gap:12px;width:calc(100% - 32px);margin:6px 16px 12px;padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:14px;color:#fff;text-align:left;font:inherit}.balbtn .g{flex:1;display:flex;flex-direction:column}.balbtn b{font-size:15px}.balbtn small{font-size:12px;color:var(--mute)}.balbi{color:var(--pk);display:flex}.balct{background:var(--pk);color:#000;font-weight:800;font-size:12px;border-radius:10px;padding:2px 8px}.balbtn>svg{color:var(--mute)}.vgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 16px 8px}.vcell{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:9px 11px}.vct{display:flex;justify-content:space-between;align-items:baseline;gap:6px}.vct b{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.vct span{font-size:15px;font-weight:800}.vct .lo,.vkey .lo{color:#ff9f43}.vct .hi,.vkey .hi{color:#ff5e5e}.vbar.sm{height:5px;margin:6px 0 5px}.vcs{font-size:11px;color:var(--mute);white-space:nowrap}.balr{align-items:flex-start}.balic{width:26px;height:26px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-weight:800;flex:none;margin-top:2px}.balic.under{background:rgba(255,159,67,.18);color:#ff9f43}.balic.over,.balic.sess,.balic.long{background:rgba(255,94,94,.16);color:#ff5e5e}.balm{font-weight:700;letter-spacing:.04em;margin-bottom:2px}.balm.under{color:#ff9f43}.balm.over,.balm.sess,.balm.long{color:#ff5e5e}.balok{display:flex;flex-wrap:wrap;gap:6px;padding:4px 20px 8px}.balok span{font-size:12px;padding:4px 10px;border-radius:12px;background:rgba(95,227,154,.12);color:#5fe39a}.vsplit{margin:4px 20px 0;height:6px;border-radius:3px;background:var(--cy);overflow:hidden;display:flex}.vsplit i{background:var(--pk);display:block;height:100%}.vsplt{display:flex;justify-content:space-between;margin:6px 20px 10px;font-size:12px;color:var(--mute)}.vsum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 16px 10px}.vsum div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 10px;text-align:center}.vsum b{display:block;font-size:22px;font-weight:800}.vsum span{font-size:12px;color:var(--mute)}
 .vrow{padding:10px 20px;border-bottom:1px solid var(--line)}.vtop{display:flex;justify-content:space-between;align-items:baseline}.vtop b{font-size:15px;font-weight:600}.vtop span{font-size:14px;font-weight:700}.vbar{display:flex;height:8px;border-radius:4px;background:var(--track);overflow:hidden;margin:7px 0 5px}.vbar i,.vkey i{display:block;height:100%;background:var(--pk)}.vbar i.iso,.vkey i.iso{background:var(--cy)}.vbar i.ind,.vkey i.ind{background:var(--pk);opacity:.35}.vsub{font-size:12px;color:var(--mute)}
 .vkey{display:flex;gap:14px;padding:12px 20px 6px;font-size:12px;color:var(--mute)}.vkey span{display:flex;align-items:center;gap:6px}.vkey i{width:10px;height:10px;border-radius:3px}[data-ld]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .li.ldrag{position:relative;z-index:20;background:var(--sh1,#1c1c1f);box-shadow:0 10px 28px rgba(0,0,0,.45);border-radius:12px;transition:box-shadow .15s,border-radius .15s}
@@ -884,14 +884,86 @@ function dayVolume(d){const M={};let sets=0,lift=0,card=0;
     const add=(m,k,v)=>{m=MNORM[m]||m;const o=M[m]=M[m]||{c:0,i:0,x:0};o[k]+=v};
     [...new Set(g.p)].forEach(m=>add(m,cp?'c':'i',n));[...new Set(g.s)].filter(m=>!g.p.includes(m)).forEach(m=>add(m,'x',n))});
   const rows=Object.entries(M).map(([m,o])=>({m,...o,d:o.c+o.i})).sort((a,b)=>(b.d+b.x/2)-(a.d+a.x/2));return {sets,lift,card,rows}}
+/* ===== routine balance check ===== */
+const BTG={'Chest':[10,20],'Back (lats)':[10,20],'Upper back':[8,18],'Quads':[10,20],'Hamstrings':[8,16],'Glutes':[8,20],'Side delts':[8,20],'Rear delts':[6,16],'Front delts':[0,16],'Biceps':[6,16],'Triceps':[6,16],'Calves':[6,16],'Abs':[4,16],'Traps':[0,14],'Forearms':[0,12]};
+const BPRI=['Back (lats)','Chest','Quads','Hamstrings','Side delts','Glutes','Upper back','Rear delts','Triceps','Biceps','Calves','Abs'];
+const BPREF={'Chest':['Incline Dumbbell Press','Machine Chest Press','Barbell Bench Press','Cable Crossover','Pec Deck'],
+ 'Back (lats)':['Lat Pulldown','Chest-Supported Dumbbell Row','Seated Cable Row','Pull-Up','Single-Arm Cable Row'],
+ 'Upper back':['Chest-Supported T-Bar Row','Seated Cable Row','Machine Row','Chest-Supported Dumbbell Row'],
+ 'Quads':['Hack Squat','Leg Press','Barbell Back Squat','Leg Extension','Bulgarian Split Squat'],
+ 'Hamstrings':['Romanian Deadlift','Seated Leg Curl','Lying Leg Curl','Dumbbell Romanian Deadlift'],
+ 'Glutes':['Hip Thrust','Romanian Deadlift','Bulgarian Split Squat','Machine Hip Thrust'],
+ 'Side delts':['Cable Lateral Raise','Lateral Raise','Machine Lateral Raise','Seated Lateral Raise'],
+ 'Rear delts':['Reverse Pec Deck','Face Pull','Cable Rear Delt Fly','Rear Delt Fly'],
+ 'Biceps':['Incline Dumbbell Curl','Bayesian Cable Curl','Hammer Curl','EZ-Bar Curl','Cable Curl'],
+ 'Triceps':['Overhead Cable Extension','Rope Pushdown','Tricep Pushdown','Lying Triceps Extension'],
+ 'Calves':['Standing Calf Raise','Seated Calf Raise','Leg Press Calf Raise','Smith Machine Calf Raise'],
+ 'Abs':['Cable Crunch','Hanging Knee Raise','Hanging Leg Raise','Ab Wheel Rollout']};
+const BAFF={'Chest':['Chest','Triceps','Front delts'],'Back (lats)':['Back (lats)','Upper back','Biceps'],'Upper back':['Upper back','Back (lats)','Rear delts'],'Quads':['Quads','Glutes','Hamstrings'],'Hamstrings':['Hamstrings','Glutes','Quads'],'Glutes':['Glutes','Quads','Hamstrings'],
+ 'Side delts':['Side delts','Front delts','Chest','Rear delts'],'Rear delts':['Rear delts','Upper back','Back (lats)','Side delts'],'Biceps':['Biceps','Back (lats)','Upper back'],'Triceps':['Triceps','Chest','Front delts'],'Calves':['Calves','Quads','Hamstrings'],'Abs':['Abs','Quads','Hamstrings','Glutes']};
+const BCAP_DAY=26,BCAP_MUS=10;
+function balRR(e){return isCompound(e)?'6-10':'10-15'}
+function balStat(r){const all={items:r.days.flatMap(d=>d.items)},v=dayVolume(all),M={};v.rows.forEach(x=>M[x.m]=x);
+  const days=r.days.map(d=>{const dv=dayVolume(d),dm={};dv.rows.forEach(x=>dm[x.m]=x.d);return {d,sets:dv.sets,mins:Math.round(dv.sets*2.6),dm}});
+  const eff=m=>M[m]?M[m].d+M[m].x/2:0;return {v,M,days,eff}}
+function balItems(d,m){return d.items.map((it,k)=>({it,k,e:ex(it.exId)})).filter(o=>o.e&&o.e.type!=='cardio'&&[...new Set(exGuide(o.e).p)].map(z=>MNORM[z]||z).includes(m))}
+function balContrib(e){const g=exGuide(e),p=[...new Set(g.p.map(z=>MNORM[z]||z))];return {p,s:[...new Set(g.s.map(z=>MNORM[z]||z))].filter(z=>!p.includes(z))}}
+function balPickEx(m,r,dayIds,E,add){const used=new Set(r.days.flatMap(d=>d.items.map(it=>it.exId)));
+  const fits=e=>{const c=balContrib(e);return c.p.every(z=>z===m||!BTG[z]||(E[z]||0)+add<=BTG[z][1])};
+  const cand=(BPREF[m]||[]).map(n=>S.exercises.find(e=>e.name===n)).filter(e=>e&&avail(e)&&fits(e));
+  return cand.find(e=>!used.has(e.id))||cand.find(e=>!dayIds.some(id=>r.days.find(d=>d.id===id).items.some(it=>it.exId===e.id)))||null}
+function balPickDays(m,st,n,add){const aff=BAFF[m]||[m];
+  const sc=st.days.filter(x=>x.sets+add<=BCAP_DAY&&x.d.items.length+(x.pend||0)<7).map(x=>{const a=aff.slice(1).reduce((s,z)=>s+(x.dm[z]||0),0),own=x.dm[m]||0;return {x,s:(x.d.items.length?0:30)+(own?6:0)-Math.min(a,8)+x.sets*.9+(x.d.items.length+(x.pend||0))*1.5}}).sort((a,b)=>a.s-b.s);
+  return sc.slice(0,n).map(o=>o.x)}
+function balanceSuggest(r){const st=balStat(r),out=[],nd=r.days.length;if(!nd)return {st,out};
+  // undertrained
+  const E={};Object.keys(BTG).forEach(m=>E[m]=st.eff(m));const NEWD=[];
+  BPRI.forEach(m=>{const [lo]=BTG[m],cur=E[m];if(cur>=lo-1)return;const def=lo-cur,split=def>4&&nd>1,per=Math.max(2,Math.min(4,Math.ceil(split?def/2:def)));
+    const ds=balPickDays(m,st,split?2:1,per);if(!ds.length){NEWD.push([m,per]);return}const tot=per*ds.length,e=balPickEx(m,r,ds.map(x=>x.d.id),E,tot);if(!e)return;
+    const c=balContrib(e);c.p.forEach(z=>E[z]=(E[z]||0)+tot);c.s.forEach(z=>E[z]=(E[z]||0)+tot/2);ds.forEach(x=>{x.sets+=per;x.d.items.length;x.pend=(x.pend||0)+1});
+    const rr=balRR(e),dn=ds.map(x=>x.d.name).join(' & ');
+    out.push({k:'under',m,cur,lo,hi:BTG[m][1],t:`Add ${e.name}`,s:`${per} × ${rr.replace('-','–')} on ${dn}`,a:()=>ds.forEach(x=>{const d=r.days.find(z=>z.id===x.d.id);if(!d.items.some(it=>it.exId===e.id))d.items.push({exId:e.id,sets:per,rr})})})});
+  if(NEWD.length&&nd<6){const used=new Set(r.days.flatMap(d=>d.items.map(it=>it.exId))),pick=[];NEWD.forEach(([m,per])=>{const e=(BPREF[m]||[]).map(n=>S.exercises.find(e=>e.name===n)).find(e=>e&&avail(e)&&!used.has(e.id)&&!pick.some(p=>p.e===e));if(e&&pick.length<6)pick.push({e,m,per:Math.max(3,per)})});
+    if(pick.length){const low=['Quads','Hamstrings','Glutes','Calves'],nl=pick.filter(p=>low.includes(p.m)).length,nm=nl>=pick.length/2?'Legs':nl?'Accessories':'Upper',nn=r.days.some(d=>d.name===nm)?nm+' 2':nm;
+      out.push({k:'under',m:pick.map(p=>p.m).join(', '),cur:0,lo:0,hi:0,nd:1,t:`Add a new day: ${nn}`,s:pick.map(p=>`${p.e.name} ${p.per}×`).join(' · ')+'. Your other days are already full',a:()=>r.days.push({id:uid(),name:nn,items:pick.map(p=>({exId:p.e.id,sets:p.per,rr:balRR(p.e)}))})})}}
+  // overtrained weekly
+  Object.keys(BTG).forEach(m=>{const [lo,hi]=BTG[m],cur=st.eff(m);if(cur<hi+2)return;let ex_=Math.ceil(cur-hi);
+    const its=r.days.flatMap(d=>balItems(d,m).map(o=>({...o,d}))).sort((a,b)=>(isCompound(a.e)-isCompound(b.e))||(b.it.sets-a.it.sets));const o=its[0];if(!o)return;
+    const n=+o.it.sets||0;if(n-ex_>=2)out.push({k:'over',m,cur,lo,hi,t:`Trim ${o.e.name} to ${n-ex_} sets`,s:`on ${o.d.name} · −${ex_} ${m.toLowerCase()} sets`,a:()=>{o.it.sets=n-ex_}});
+    else out.push({k:'over',m,cur,lo,hi,t:`Remove ${o.e.name}`,s:`from ${o.d.name} · −${n} ${m.toLowerCase()} sets`,a:()=>{const i=o.d.items.indexOf(o.it);if(i>=0)o.d.items.splice(i,1)}})});
+  // too much for one muscle in one session
+  st.days.forEach(x=>Object.entries(x.dm).forEach(([m,n])=>{if(n<=BCAP_MUS||out.some(s=>s.m===m&&s.k==='over'))return;const o=balItems(x.d,m).sort((a,b)=>(isCompound(a.e)-isCompound(b.e)))[0];if(!o)return;
+    const to=st.days.filter(y=>y!==x&&!(y.dm[m])&&y.sets+(+o.it.sets||0)<=BCAP_DAY&&y.d.items.length).sort((a,b)=>a.sets-b.sets)[0];
+    if(to)out.push({k:'sess',m,cur:n,t:`Move ${o.e.name} to ${to.d.name}`,s:`${n} ${m.toLowerCase()} sets in one session on ${x.d.name}; past ~10, extra sets add little`,a:()=>{const i=x.d.items.indexOf(o.it);if(i>=0){x.d.items.splice(i,1);to.d.items.push(o.it)}}});
+    else{const c=Math.min(+o.it.sets||0,n-BCAP_MUS);out.push({k:'sess',m,cur:n,t:c>=(+o.it.sets||0)?`Remove ${o.e.name}`:`Trim ${o.e.name} by ${c} set${c===1?'':'s'}`,s:`${n} ${m.toLowerCase()} sets in one session on ${x.d.name}`,a:()=>{if(c>=o.it.sets){const i=x.d.items.indexOf(o.it);if(i>=0)x.d.items.splice(i,1)}else o.it.sets-=c}})}}));
+  // long sessions
+  st.days.forEach(x=>{if(x.sets<=BCAP_DAY)return;const its=x.d.items.map(it=>({it,e:ex(it.exId)})).filter(o=>o.e&&o.e.type!=='cardio'&&!isCompound(o.e));const o=its[its.length-1];if(!o)return;
+    out.push({k:'long',t:`Remove ${o.e.name} from ${x.d.name}`,s:`${x.sets} sets ≈ ${x.mins} min. Most people keep sessions under ~70 min`,a:()=>{const i=x.d.items.indexOf(o.it);if(i>=0)x.d.items.splice(i,1)}})});
+  return {st,out}}
+function balStatus(m,cur){const t=BTG[m];if(!t)return '';return cur<t[0]?'lo':cur>t[1]?'hi':'ok'}
+function balanceHtml(rid){const r=R(rid);if(!r)return '';const {st,out}=balanceSuggest(r);V.balS=out;const nd=r.days.length,tot=st.v.sets,avg=nd?Math.round(tot/nd*2.6):0,lg=st.days.reduce((a,x)=>Math.max(a,x.mins),0);
+  const row=(s,i)=>{const ic2=s.k==='under'?'+':'−',lab=s.nd?`Low: ${esc(s.m)}`:s.k==='under'?`${esc(s.m)} · ${Math.round(s.cur)} of ${s.lo}–${s.hi}/wk`:s.k==='over'?`${esc(s.m)} · ${Math.round(s.cur)} of ${s.lo}–${s.hi}/wk`:s.k==='sess'?`${esc(s.m)} · ${s.cur} sets in one day`:'Session length';
+    return `<div class="li balr" data-a="balgo" data-x="${i}"><span class="balic ${s.k}">${ic2}</span><div class="g"><div class="xs balm ${s.k}">${lab}</div><div class="tt">${esc(s.t)}</div><div class="sb">${esc(s.s)}</div></div><span class="xs" style="color:var(--pk);font-weight:700;letter-spacing:.06em">APPLY</span></div>`};
+  const grp=(k,title)=>{const it=out.map((s,i)=>[s,i]).filter(([s])=>k.includes(s.k));return it.length?`<div class="secl">${title}</div>`+it.map(([s,i])=>row(s,i)).join(''):''};
+  const ok=Object.keys(BTG).filter(m=>BTG[m][0]>0&&balStatus(m,st.eff(m))==='ok');
+  return `<div class="sh-t">Balance check<div class="xs mute" style="font-weight:400;margin-top:2px">${esc(r.name)} · assumes ${nd===1?'it runs':nd===2?'both days run':'all '+nd+' days run'} once a week</div></div>
+  ${V.balUndo&&V.balUndo.rid===rid?`<button class="cyl" data-a="balundo" style="border:0">${ic('rep')} Undo last change</button>`:''}
+  <div class="vsum"><div><b>${tot}</b><span>sets / week</span></div><div><b>~${avg}</b><span>min / session</span></div><div><b>~${lg}</b><span>longest day</span></div></div>
+  ${out.length?grp(['under'],'Undertrained')+grp(['over'],'Overtrained')+grp(['sess','long'],'Session load'):`<div class="empty sm">Looks balanced. Every major muscle is inside its weekly target.</div>`}
+  ${ok.length?`<div class="secl">On target</div><div class="balok">${ok.map(m=>`<span>${esc(m)} ${Math.round(st.eff(m))}</span>`).join('')}</div>`:''}
+  <p class="xs mute" style="padding:8px 20px 20px;margin:0;line-height:1.5">Targets are weekly working sets from hypertrophy research: about 10–20 for big muscles and 6–16 for smaller ones. Assisting muscles count as half a set. Past roughly 10 sets for one muscle in a single session, extra sets add little. Tap a suggestion to apply it.</p>`}
 function dayVolumeHtml(d,rt){const v=dayVolume(d);if(!v.lift&&!v.card)return '';const mx=Math.max(1,...v.rows.map(r=>r.d+r.x/2));const mins=Math.round(v.sets*2.6+v.card*15);
   let h;if(rt){const nd=rt.days.length,cs=d.items.reduce((a,it)=>{const e=ex(it.exId);return a+(e&&e.type!=='cardio'&&e.mg!=='cardio'&&isCompound(e)?+it.sets||0:0)},0),pc=v.sets?Math.round(cs/v.sets*100):0;
     h=`<div class="h2">Breakdown<small>ALL ${nd} DAY${nd===1?'':'S'}</small></div><div class="vsum"><div><b>${v.sets}</b><span>total sets</span></div><div><b>${nd?Math.round(v.sets/nd):0}</b><span>sets / day</span></div><div><b>${pc}%</b><span>compound</span></div></div><div class="vsplit"><i style="width:${pc}%"></i></div><div class="vsplt"><span>${cs} compound</span><span>${v.sets-cs} isolation</span></div>`}
   else h=`<div class="h2">Volume<small>THIS WORKOUT</small></div><div class="vsum"><div><b>${v.sets}</b><span>sets</span></div><div><b>${v.lift}</b><span>lifts${v.card?` + ${v.card} cardio`:''}</span></div><div><b>~${mins}</b><span>min</span></div></div>`;
-  const rows=rt&&!V.rbdAll?v.rows.slice(0,5):v.rows;
+  if(rt){const st=balStat(rt),n=balanceSuggest(rt).out.length,main=v.rows.filter(x=>x.d>0||BTG[x.m]&&BTG[x.m][0]>0),ind=v.rows.filter(x=>!main.includes(x)),mx2=Math.max(1,...main.map(x=>x.d+x.x/2));
+    h+=`<button class="balbtn" data-a="bal" data-x="${rt.id}"><span class="balbi">${ic('target')}</span><span class="g"><b>Balance check</b><small>${n?`${n} suggestion${n===1?'':'s'} to balance your week`:'Looks balanced'}</small></span>${n?`<span class="balct">${n}</span>`:''}${ic('chev')}</button>`;
+    h+=`<div class="vgrid">${main.map(x=>{const e=x.d+x.x/2,stt=balStatus(x.m,e),p=[];if(x.c)p.push(x.c+'C');if(x.i)p.push(x.i+'I');if(x.x)p.push('+'+x.x+' ind');return `<div class="vcell"><div class="vct"><b>${esc(x.m)}</b><span class="${stt}">${Math.round(e)}</span></div><div class="vbar sm"><i style="width:${x.c/mx2*100}%"></i><i class="iso" style="width:${x.i/mx2*100}%"></i><i class="ind" style="width:${x.x/2/mx2*100}%"></i></div><div class="vcs">${p.join(' · ')}</div></div>`}).join('')}</div>`;
+    if(ind.length)h+=`<div class="xs mute" style="padding:2px 20px 8px">Indirect only: ${ind.map(x=>esc(x.m)+' +'+x.x).join(', ')}</div>`;
+    h+=`<div class="vkey"><span><i></i>Compound</span><span><i class="iso"></i>Isolation</span><span><i class="ind"></i>Indirect</span></div><div class="xs mute" style="padding:0 20px 14px">Numbers are weekly sets, with indirect work counted as half. <b class="lo">Orange</b> is under target, <b class="hi">red</b> is over.</div>`;return h}
+  const rows=v.rows;
   h+=rows.map(r=>{const parts=[];if(r.c)parts.push(`${r.c} compound`);if(r.i)parts.push(`${r.i} isolation`);if(r.x)parts.push(`+${r.x} indirect`);
     return `<div class="vrow"><div class="vtop"><b>${esc(r.m)}</b><span>${r.d?`${r.d} set${r.d===1?'':'s'}`:'indirect only'}</span></div><div class="vbar"><i style="width:${r.c/mx*100}%"></i><i class="iso" style="width:${r.i/mx*100}%"></i><i class="ind" style="width:${r.x/2/mx*100}%"></i></div><div class="vsub">${parts.join(' · ')}</div></div>`}).join('');
-  if(rt&&v.rows.length>5)h+=`<button class="cyl" data-a="rbdall" style="border:0">${V.rbdAll?'Show top 5 muscles':`Show all ${v.rows.length} muscles`}</button>`;
   h+=`<div class="vkey"><span><i></i>Compound</span><span><i class="iso"></i>Isolation</span><span><i class="ind"></i>Indirect (½ set)</span></div>${rt?'':`<p class="xs mute" style="padding:2px 20px 20px;margin:0">Sets count fully for the muscles an exercise mainly targets. Muscles that only assist, like triceps in a bench press, show as indirect and count as half a set in the bar.</p>`}`;
   return h}
 function renderExercises(){const f=V.exf=V.exf||{mg:'all',eq:'all'},used={};S.history.forEach(h=>h.entries.forEach(e=>used[e.exId]=(used[e.exId]||0)+1));
@@ -1138,7 +1210,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.63';
+const APPV='1.64';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
@@ -3943,7 +4015,9 @@ const ACT={
   plus:()=>openQuick(),
   qlift:()=>{closeSheet();openSheet(liftHtml())},
   sugr:x=>{openSheet(routineSheet(x))},
-  rbdall:()=>{V.rbdAll=!V.rbdAll;render()},
+  bal:x=>{V.balUndo=null;openSheet(balanceHtml(x))},
+  balgo:x=>{const sg=(V.balS||[])[+x];if(!sg)return;const rid=V.sub.startsWith('routine:')?V.sub.slice(8):null,r=rid&&R(rid);if(!r)return;V.balUndo={rid,days:JSON.stringify(r.days)};sg.a();save();render();refreshSheet(balanceHtml(rid));toast('Done: '+sg.t)},
+  balundo:()=>{const u=V.balUndo,r=u&&R(u.rid);if(!r)return;r.days=JSON.parse(u.days);V.balUndo=null;save();render();refreshSheet(balanceHtml(u.rid));toast('Undone')},
   sugopen:x=>{closeSheet();ACT.sub('routine:'+x)},
   qcar:()=>{closeSheet();openSheet(cardioHtml())},
   hm:x=>{V.hm=x;render()},
