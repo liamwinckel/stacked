@@ -728,6 +728,18 @@ html[data-theme="light"] .setscr .sdb,html[data-theme="light"] .smenu{background
 .rbh{font-size:10px;font-weight:700;letter-spacing:.16em;color:var(--mute);text-align:center;margin:4px 0 0}
 .rbar .whl{height:78px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 16%,#000 84%,transparent);mask-image:linear-gradient(90deg,transparent,#000 16%,#000 84%,transparent)}
 .rbar .whi{height:40px;font-size:16px;min-width:58px}
+.rbar.out{animation:rbOut .2s cubic-bezier(.4,0,1,1) forwards;pointer-events:none}@keyframes rbOut{to{opacity:0;transform:translateY(10px) scale(.95)}}
+
+/* press feedback: uses the independent `scale` property so it never fights existing transforms or transitions */
+.prs{animation:prIn .14s cubic-bezier(.3,0,.5,1) forwards}
+.prl{animation:prOut .46s cubic-bezier(.34,1.56,.64,1)}
+@keyframes prIn{to{scale:var(--ps,.95)}}
+@keyframes prOut{from{scale:var(--ps,.95)}to{scale:1}}
+.li,.rday,.upn,.wcard,.tcard,.vcell,.balbtn,.qtile,.tbig{--ps:.975}
+.lgp button,.pkb,.olb,.sdb{--ps:.96}
+.rirr button,.ppl,.chips2 button,.seg button,.rbr button,.smadd button,.smi,.tag,.shb,.cbtn,.rcb,.rcu,.lgx{--ps:.9}
+.prs.pkb,.prs.lgA,.prs.lgB,.prs.ppl,.rirr button.prs{filter:brightness(.93)}
+@media (prefers-reduced-motion:reduce){.prs,.prl{animation:none}}
 /* ===== pill aesthetic, app-wide ===== */
 .pkb,.olb,.tcard .pkb,.bkb,.vopt,.rdo button,.rcban button,.refc button,.pkbar button,.hrow2 button,.rwk button,.rirr button,.prrd,.gychip,.blkchip,.baled,.rolet,.rdx span,.balok span,.tag,.resume,.nccb,.wgfix,.hsplit button,.chw button,.dsbtn,.ovnav{border-radius:999px}
 .seg,.seg button{border-radius:999px}
@@ -1262,7 +1274,7 @@ function wheelHtml(kind,vals,cur,marks,label,ff){
 const WH={};
 function whInit(){document.querySelectorAll('#sp .whl').forEach(w=>{if(w._wh)return;w._wh=1;
   const tr=w.querySelector('.whs'),kind=w.dataset.wh,items=[...tr.children];if(!items.length)return;
-  const P=kind==='t'?72:Math.max(80,Math.max(...items.map(b=>(b.querySelector('.whv')||b).textContent.length))*11+48);items.forEach((b,i)=>b.style.left=(i*P)+'px');
+  const P=kind==='t'?90:Math.max(80,Math.max(...items.map(b=>(b.querySelector('.whv')||b).textContent.length))*11+48);items.forEach((b,i)=>b.style.left=(i*P)+'px');
   const N=items.length,minX=-(N-1)*P;let idx=Math.max(0,items.findIndex(b=>b.classList.contains('on'))),x=-idx*P,sel=idx,anim=0,user=false,startV=+items[idx].dataset.x;
   const clampI=i=>Math.max(0,Math.min(N-1,i));
   const paint=()=>{tr.style.transform=`translate3d(${x}px,0,0)`;
@@ -1295,7 +1307,10 @@ function whLive(kind,v){const s=S.session;if(!s)return;const it=s.items[s.i],st=
   try{navigator.vibrate&&navigator.vibrate(3)}catch(_){}
   if(kind==='r'){st.r=v;return}
   st.w=v;if(e.type==='barbell'){st.p=greedy(Math.max(0,(v-bar())/2));const bs=$('#sp .barsvg');if(bs)bs.outerHTML=barSvg(st.p);const pl=$('#sp .plates');if(pl){const cnt={};st.p.forEach(x=>cnt[x]=(cnt[x]||0)+1);pl.innerHTML=availPlates().map(p=>octBtn(p,cnt[p])).join('')}const ps=$('#sp .wperside');if(ps)ps.textContent=perSide(st)}}
-function whCommit(kind,v){if(v==null)return;if(kind==='t'){restSet(v);const rs=S.session&&S.session.rest;if(rs){const el=rs.total-(rs.end-Date.now());rs.total=v*1000;rs.end=Date.now()+Math.max(0,rs.total-el);const f=$('#sp .lgf');if(f){const lt=Math.max(0,(rs.end-Date.now())/1000),fr=Math.min(1,lt*1000/rs.total);f.style.transition='none';f.style.width=(fr*100)+'%';requestAnimationFrame(()=>requestAnimationFrame(()=>{f.style.transition=`width ${lt}s linear, opacity .5s ease`;f.style.width='0%'}))}if(typeof tick==='function')tick()}else{const li=$('#sp .lgB .lgI');if(li)li.lastChild.textContent=restFmt(v)}}save()}
+function whCommit(kind,v){if(v==null)return;if(kind==='t'){restSet(v);const rs=S.session&&S.session.rest;if(rs){const el=rs.total-(rs.end-Date.now());rs.total=v*1000;rs.end=Date.now()+Math.max(0,rs.total-el);restFillSync();if(typeof tick==='function')tick()}else{const li=$('#sp .lgB .lgI');if(li)li.lastChild.textContent=restFmt(v)}}save()}
+function restFillSync(){const rs=S.session&&S.session.rest,f=$('#sp .lgf');if(!rs||!f)return;const lt=Math.max(0,(rs.end-Date.now())/1000),fr=Math.min(1,lt*1000/rs.total);f.style.transition='width .35s cubic-bezier(.2,.8,.2,1), opacity .5s ease';f.style.width=(fr*100)+'%';clearTimeout(f._t);f._t=setTimeout(()=>{f.style.transition=`width ${Math.max(0,(rs.end-Date.now())/1000)}s linear, opacity .5s ease`;f.style.width='0%'},360)}
+function rbarOpen(){const lb=$('#sp .logbar');if(!lb||$('#sp .rbar'))return;V.rbar=true;lb.insertAdjacentHTML('afterbegin',rbarHtml(S.session&&S.session.rest));whInit()}
+function rbarClose(){V.rbar=false;const b=$('#sp .rbar'),o=$('#sp .rbov');if(o)o.remove();if(b&&!b.classList.contains('out')){b.classList.add('out');setTimeout(()=>b.remove(),200)}}
 function restFmt(o){return Math.floor(o/60)+':'+String(o%60).padStart(2,'0')}
 function perSide(st){const ps=(st.p||[]).reduce((a,b)=>a+b,0);return `${fmt(bar())} ${U()} bar · ${fmt(ps)} per side`}
 
@@ -1405,6 +1420,7 @@ function render(){syncBars();
   const sp2=$('#sp');if(sp2&&st)sp2.scrollTop=st;
   try{document.body.style.overflow=sp2?'hidden':''}catch(e){}
   if(V.anim){const m=$('#app main');if(m&&m.classList)m.classList.add(V.anim);V.anim=null}
+  if(V.prKey&&Date.now()-V.prKey.t<400){const k=V.prKey;V.prKey=null;const sel=`[data-a="${k.a}"]`+(k.x!=null?`[data-x="${CSS.escape(k.x)}"]`:'');const el=document.querySelector(sel);if(el&&!el.classList.contains('prl')){el.classList.add('prl');setTimeout(()=>el.classList.remove('prl'),480)}}
   if(document.querySelector('#sp .whl')){const fr=V.from;whInit();if(fr&&S.session&&fr.i!==S.session.i){const m=document.querySelector('#sp .setmain');if(m)m.classList.add('xin')}}V.from=null;
   const lp=document.querySelector('#lgp[data-enter]');if(lp){lp.removeAttribute('data-enter');requestAnimationFrame(()=>requestAnimationFrame(()=>lp.classList.add('rest')))}
   const lf=document.querySelector('#sp .lgf[data-left]');if(lf){const lt=+lf.dataset.left;requestAnimationFrame(()=>requestAnimationFrame(()=>{lf.style.transition=`width ${lt}s linear, opacity .5s ease`;lf.style.width='0%'}))}
@@ -1471,7 +1487,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.81';
+const APPV='1.83';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
@@ -1816,10 +1832,16 @@ function ldEnd(){if(!LD)return;const d=LD;LD=null;clearTimeout(d.tm);if(!d.on)re
   else if(d.grp==='rd'){const r=R(d.c.dataset.ld.split('|')[1]);if(r){const x=r.days.splice(d.i0,1)[0];r.days.splice(d.to,0,x);save();render();toast('Day order updated')}}
   else if(d.grp==='ov'){const s=S.session,cur=s.items[s.i];mv(s.items);s.i=Math.max(0,s.items.indexOf(cur));save();render()}}
 
-let LP=null;document.addEventListener('pointerdown',e=>{const el=e.target.closest&&e.target.closest('[data-lp]');if(!el)return;const x0=e.clientX,y0=e.clientY;el.classList.add('lpress');LP={el,x0,y0,t:setTimeout(()=>{V.lpT=Date.now();el.classList.remove('lpress');try{navigator.vibrate&&navigator.vibrate(15)}catch(_){}const f=ACT[el.dataset.lp];if(f)f(el.dataset.x,el);LP=null},480)}},{passive:true});
-const lpEnd=()=>{if(LP){clearTimeout(LP.t);LP.el.classList.remove('lpress');LP=null}};document.addEventListener('pointerup',lpEnd);document.addEventListener('pointercancel',lpEnd);document.addEventListener('pointermove',e=>{if(LP&&Math.hypot(e.clientX-LP.x0,e.clientY-LP.y0)>10)lpEnd()},{passive:true});
+let LP=null;document.addEventListener('pointerdown',e=>{const el=e.target.closest&&e.target.closest('[data-lp]');if(!el)return;const x0=e.clientX,y0=e.clientY;el.classList.add('lpress');LP={el,x0,y0,t:setTimeout(()=>{V.lpT=Date.now();V.lpFired=1;el.classList.remove('lpress');try{navigator.vibrate&&navigator.vibrate(15)}catch(_){}const f=ACT[el.dataset.lp];if(f)f(el.dataset.x,el);LP=null},480)}},{passive:true});
+const lpEnd=()=>{if(V.lpFired){V.lpFired=0;V.lpUp=Date.now()}if(LP){clearTimeout(LP.t);LP.el.classList.remove('lpress');LP=null}};document.addEventListener('pointerup',lpEnd);document.addEventListener('pointercancel',lpEnd);document.addEventListener('pointermove',e=>{if(LP&&Math.hypot(e.clientX-LP.x0,e.clientY-LP.y0)>10)lpEnd()},{passive:true});
 document.addEventListener('contextmenu',e=>{if(e.target.closest&&e.target.closest('[data-lp]'))e.preventDefault()});
 document.addEventListener('touchmove',e=>{if(V.rbar&&e.cancelable&&e.target.closest&&e.target.closest('.rbar,.rbov'))e.preventDefault()},{passive:false});
+
+/* ===== press feedback ===== */
+let PR=null;const prOff=()=>{if(!PR)return;const el=PR.el;PR=null;if(el.dataset&&el.dataset.a)V.prKey={a:el.dataset.a,x:el.dataset.x,t:Date.now()};el.classList.remove('prs');void el.offsetWidth;el.classList.add('prl');clearTimeout(el._prl);el._prl=setTimeout(()=>el.classList.remove('prl'),480)};
+document.addEventListener('pointerdown',e=>{if(e.button>0)return;const el=e.target.closest&&e.target.closest('button,a[href],[data-a],.li');if(!el||el.closest('.whl,.bp')||el.matches('.rbov,.smov,[disabled]'))return;prOff();el.classList.remove('prl');el.classList.add('prs');PR={el,x:e.clientX,y:e.clientY}},{passive:true,capture:true});
+document.addEventListener('pointermove',e=>{if(PR&&Math.hypot(e.clientX-PR.x,e.clientY-PR.y)>12)prOff()},{passive:true});
+['pointerup','pointercancel','dragstart'].forEach(t=>document.addEventListener(t,prOff,{passive:true,capture:true}));
 document.addEventListener('pointerup',ldEnd);document.addEventListener('pointercancel',()=>{if(LD&&LD.on)return;if(LD){clearTimeout(LD.tm);LD=null}});
 document.addEventListener('touchend',()=>{if(LD&&LD.on)ldEnd()});
 
@@ -4369,21 +4391,21 @@ const ACT={
   whtap:(x,el)=>{const b=el&&el.closest?el.closest('.whi'):null;if(!b)return;const w=b.closest('.whl'),kind=w&&w.dataset.wh;if(b.classList.contains('on')){if(kind==='r')ACT.typer();else ACT.typew();return}const k=[...b.parentNode.children].indexOf(b);if(w._go)w._go(k)},
   setautorest:()=>{S.autoRest=!S.autoRest;save();refreshSheet(restSheet())},
   pushon:()=>{if(S.pushOn){S.pushOn=false;save();pushPost('/cancel');render();return}pushSub(true).then(sub=>{if(!sub){toast('Allow notifications for Bars in iPhone Settings, then try again');return}S.pushOn=true;save();render();fetch(PUSH_URL+'/test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sub:sub.toJSON()})}).then(r=>r.json()).then(d=>toast(d.ok?'Rest alerts are on. Test sent':'Couldn’t reach the alert server')).catch(()=>toast('Couldn’t reach the alert server'))}).catch(()=>toast('Notifications aren’t available. Open Bars from your Home Screen'))},
-  rtap:()=>{if(V.lpT&&Date.now()-V.lpT<700)return;const s=S.session;if(!s)return;if(s.rest){V.rbar=!V.rbar;render();return}V.rbar=false;startRest();s.rest.fromLog=false;V.restAnim=true;RS()},
-  rnext:()=>{if(V.lpT&&Date.now()-V.lpT<700)return;const s=S.session;if(!s||!s.rest)return;if(V.rbar){V.rbar=false;const rb=$('#sp .rbar'),ro=$('#sp .rbov');if(rb)rb.remove();if(ro)ro.remove()}restExit(()=>{const st=cur();if(!s.rest.fromLog&&!st.done){V.noRest=true;s.rest=null;ACT.nexts();V.noRest=false}else{s.rest=null;RS()}V.lastLog=null})},
+  rtap:()=>{if(V.lpUp&&Date.now()-V.lpUp<400)return;const s=S.session;if(!s)return;if(V.rbar){rbarClose();return}if(s.rest){rbarOpen();return}startRest();s.rest.fromLog=false;V.restAnim=true;RS()},
+  rnext:()=>{if(V.lpUp&&Date.now()-V.lpUp<400)return;const s=S.session;if(!s||!s.rest)return;if(V.rbar){V.rbar=false;const rb=$('#sp .rbar'),ro=$('#sp .rbov');if(rb)rb.remove();if(ro)ro.remove()}restExit(()=>{const st=cur();if(!s.rest.fromLog&&!st.done){V.noRest=true;s.rest=null;ACT.nexts();V.noRest=false}else{s.rest=null;RS()}V.lastLog=null})},
   restup:x=>{const st=cur();st.w=+x;delete st.p;RS()},
   restundo:()=>{const s=S.session,L=V.lastLog;if(!L)return;s.i=L.i;s.s=L.s;const st=s.items[L.i].sets[L.s];st.done=false;s.rest=null;V.lastLog=null;RS();toast('Set reopened')},
   rlen:x=>{restSet(+x);V.rbar=!!(S.session&&S.session.rest);if(S.session&&S.session.rest){const rs=S.session.rest,el=rs.total-(rs.end-Date.now());rs.total=restCur()*1000;rs.end=Date.now()+Math.max(0,rs.total-el)}save();render()},
   rskip:()=>{const s=S.session;if(s)s.rest=null;V.restEnd=true;closeSheet();RS()},
   rnow:()=>{startRest();V.restAnim=true;closeSheet();RS()},
   rnotify:()=>{if(S.restNotify){S.restNotify=false;save();refreshSheet(restSheet());return}if(!('Notification' in window)){toast('Notifications aren’t available here');return}Notification.requestPermission().then(p=>{S.restNotify=p==='granted';save();refreshSheet(restSheet());toast(p==='granted'?'You’ll get an alert when rest ends':'Notifications are blocked in Settings')})},
-  ropen:()=>{V.rbar=true;render()},
-  rbarx:()=>{V.rbar=false;render()},
+  ropen:()=>{if(V.rbar)rbarClose();else rbarOpen()},
+  rbarx:()=>rbarClose(),
   rskip2:()=>{const s=S.session;V.rbar=false;if(!s||!s.rest)return;const p=$('#sp .rbar');if(p)p.remove();restExit(()=>{s.rest=null;RS()})},
   rclose:()=>{V.restOpen=false;render()},
   rgo:()=>{startRest();RS()},
   rstop:()=>{S.session.rest=null;V.restOpen=false;RS()},
-  radj:x=>{const s=S.session;if(!s.rest){restSet(Math.max(15,Math.min(600,restCur()+ +x)));RS();return}s.rest.end+= +x*1000;const left=s.rest.end-Date.now();if(left<=0){restDone(false);return}s.rest.total=Math.max(s.rest.total,left);save();tick();render()},
+  radj:x=>{const s=S.session;if(!s.rest){restSet(Math.max(15,Math.min(600,restCur()+ +x)));RS();return}s.rest.end+= +x*1000;const left=s.rest.end-Date.now();if(left<=0){restDone(false);return}s.rest.total=Math.max(s.rest.total,left);save();tick();restFillSync()},
   // routines
   newroutine:()=>{const r={id:uid(),name:'New Routine',active:false,days:[{id:uid(),name:'Workout A',items:[]}]};S.routines.push(r);save();ACT.sub('routine:'+r.id);V.rEdit=true;render()},
   redit:()=>{V.rEdit=!V.rEdit;render()},
