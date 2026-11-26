@@ -1,5 +1,6 @@
 name = "bars-push"
 main = "src/index.js"
+account_id = "20e509a0cb8f06a4c7a6eb5e34443211"
 compatibility_date = "2025-06-01"
 workers_dev = true
 

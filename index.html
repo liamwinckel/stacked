@@ -906,7 +906,7 @@ function restDone(b){const s=S.session;if(!s||!s.rest||s.rest.ending)return;cons
 function restExit(fn){const p=$('#lgp');if(!p||!p.classList.contains('rest')){fn();return}const f=p.querySelector('.lgf');if(f){const w=getComputedStyle(f).width;f.style.transition='none';f.style.width=w}p.classList.remove('rest');p.classList.add('leaving');setTimeout(fn,560)}
 
 /* ===== rest alerts via push server ===== */
-const PUSH_URL='',VAPID_PUB='BBBrk82LZLfUuuJJ-8tbLWUMiVeZsOdCl8woNMsguKPsY5t_k6kUB3T8f8WSkdzBGfXoL4BCakLHgym0yT5QEOY';
+const PUSH_URL='https://bars-push.liam-bars.workers.dev',VAPID_PUB='BBBrk82LZLfUuuJJ-8tbLWUMiVeZsOdCl8woNMsguKPsY5t_k6kUB3T8f8WSkdzBGfXoL4BCakLHgym0yT5QEOY';
 function u8(b){b=b.replace(/-/g,'+').replace(/_/g,'/');while(b.length%4)b+='=';const r=atob(b),a=new Uint8Array(r.length);for(let i=0;i<r.length;i++)a[i]=r.charCodeAt(i);return a}
 async function pushSub(ask){if(!PUSH_URL||!('serviceWorker' in navigator)||!('PushManager' in window))return null;const reg=await navigator.serviceWorker.ready;let sub=await reg.pushManager.getSubscription();if(!sub&&ask){const pm=await Notification.requestPermission();if(pm!=='granted')return null;sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID_PUB)})}return sub}
 function pushPost(path,data){return pushSub(false).then(sub=>{if(!sub)return;return fetch(PUSH_URL+path,{method:'POST',keepalive:true,headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({sub:sub.toJSON()},data||{}))})}).catch(()=>{})}
@@ -1468,7 +1468,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.79';
+const APPV='1.80';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
