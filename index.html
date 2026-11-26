@@ -1453,7 +1453,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.76';
+const APPV='1.77';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
@@ -4350,7 +4350,7 @@ const ACT={
   whtap:(x,el)=>{const b=el&&el.closest?el.closest('.whi'):null;if(!b)return;const w=b.closest('.whl'),kind=w&&w.dataset.wh;if(b.classList.contains('on')){if(kind==='r')ACT.typer();else ACT.typew();return}const k=[...b.parentNode.children].indexOf(b);if(w._go)w._go(k)},
   setautorest:()=>{S.autoRest=!S.autoRest;save();refreshSheet(restSheet())},
   rtap:()=>{if(V.lpT&&Date.now()-V.lpT<700)return;const s=S.session;if(!s)return;if(s.rest){V.rbar=!V.rbar;render();return}V.rbar=false;startRest();s.rest.fromLog=false;V.restAnim=true;RS()},
-  rnext:()=>{const s=S.session;if(!s||!s.rest)return;if(V.rbar){V.rbar=false;const rb=$('#sp .rbar'),ro=$('#sp .rbov');if(rb)rb.remove();if(ro)ro.remove()}restExit(()=>{const st=cur();if(!s.rest.fromLog&&!st.done){V.noRest=true;s.rest=null;ACT.nexts();V.noRest=false}else{s.rest=null;RS()}V.lastLog=null})},
+  rnext:()=>{if(V.lpT&&Date.now()-V.lpT<700)return;const s=S.session;if(!s||!s.rest)return;if(V.rbar){V.rbar=false;const rb=$('#sp .rbar'),ro=$('#sp .rbov');if(rb)rb.remove();if(ro)ro.remove()}restExit(()=>{const st=cur();if(!s.rest.fromLog&&!st.done){V.noRest=true;s.rest=null;ACT.nexts();V.noRest=false}else{s.rest=null;RS()}V.lastLog=null})},
   restup:x=>{const st=cur();st.w=+x;delete st.p;RS()},
   restundo:()=>{const s=S.session,L=V.lastLog;if(!L)return;s.i=L.i;s.s=L.s;const st=s.items[L.i].sets[L.s];st.done=false;s.rest=null;V.lastLog=null;RS();toast('Set reopened')},
   rlen:x=>{S.rest=+x;V.rbar=!!(S.session&&S.session.rest);if(S.session&&S.session.rest){const rs=S.session.rest,el=rs.total-(rs.end-Date.now());rs.total=S.rest*1000;rs.end=Date.now()+Math.max(0,rs.total-el)}save();render()},
@@ -4389,7 +4389,7 @@ const ACT={
   export:()=>openSheet(`<div class="sh-t">Backup</div><div class="shp"><p class="sm mute" style="margin-top:0">Copy this text and keep it somewhere safe (Notes, email). Paste it into “Restore from backup” to bring everything back.</p><textarea class="inp" id="bk" rows="6" readonly>${esc(JSON.stringify(S))}</textarea></div><button class="pkb" data-a="copybk">Copy to Clipboard</button>`),
   copybk:()=>{const t=$('#bk').value;const fb=()=>{const b=$('#bk');b.focus();b.select();toast('Select all and copy manually')};try{navigator.clipboard.writeText(t).then(()=>{S.lastBackup=Date.now();save();toast('Backup copied')},fb)}catch(e){fb()}},
   import:()=>openSheet(`<div class="sh-t">Restore from Backup</div><div class="shp"><p class="sm mute" style="margin-top:0">Paste your backup text. This replaces everything currently in the app.</p><textarea class="inp" id="rb" rows="6"></textarea></div><button class="pkb" data-a="dorestore">Restore</button>`),
-  dorestore:()=>{try{const o=JSON.parse($('#rb').value);if(!o||!Array.isArray(o.exercises)||!Array.isArray(o.history)||!Array.isArray(o.routines))throw 0;S=o;save();closeSheet();V={tab:'home',sub:null,stack:[],inSession:!!S.session,ov:false,restOpen:false,calc:null};render();toast('Backup restored')}catch(e){toast('That doesn’t look like a valid backup')}},
+  dorestore:()=>{try{const o=JSON.parse($('#rb').value);if(!o||!Array.isArray(o.exercises)||!Array.isArray(o.history)||!Array.isArray(o.routines))throw 0;S=o;if(!S.body)S.body=[];if(!S.weekGoal)S.weekGoal=3;if(S.libv!==LIBV)mergeLib();save();closeSheet();V={tab:'home',sub:null,stack:[],inSession:!!S.session,ov:false,restOpen:false,calc:null};render();toast('Backup restored')}catch(e){toast('That doesn’t look like a valid backup')}},
   reset:()=>confirmSheet('Reset everything? All workouts, routines and settings will be erased.',()=>{S=seed();V={tab:'home',sub:null,stack:[],inSession:false,ov:false,restOpen:false,calc:null};RS()},'Reset'),
 };
 
