@@ -712,6 +712,17 @@ html[data-theme="light"] .setscr .sdb,html[data-theme="light"] .smenu{background
 .lgp.back .lgm{animation:lgGrow .5s cubic-bezier(.2,.8,.2,1)}@keyframes lgGrow{from{transform:translateX(28%);opacity:.2}}
 .lgp.back .lgr{animation:lgFade .4s .15s both}
 [data-lp]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+
+.logbar{position:relative}
+.rbov{position:fixed;inset:0;z-index:40}
+.rbar{position:absolute;left:16px;right:16px;bottom:calc(100% + 10px);z-index:41;background:rgba(28,28,30,.96);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border:1px solid #2c2c2e;border-radius:28px;padding:8px;box-shadow:0 14px 40px rgba(0,0,0,.55);animation:rbIn .34s cubic-bezier(.2,.9,.25,1.1);transform-origin:80% 100%}
+@keyframes rbIn{from{opacity:0;transform:translateY(12px) scale(.94)}}
+.rbr{display:flex;gap:6px;margin-bottom:6px}.rbr button{flex:1;height:44px;border-radius:999px;border:0;background:#2c2c2e;color:#f4f4f5;font-size:14px;font-weight:700}.rbr .sk{background:var(--pk);color:#000;font-weight:800;flex:1.3}
+.rbl{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}.rbl::-webkit-scrollbar{display:none}
+.rbl button{flex:none;height:40px;min-width:58px;padding:0 12px;border-radius:999px;border:1.5px solid #3a3a3c;background:none;color:#f4f4f5;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}.rbl button.on{background:var(--pk);border-color:var(--pk);color:#000;font-weight:800}
+.setmain.xin>*{animation:xin .45s cubic-bezier(.2,.8,.2,1) both}.setmain.xin>*:nth-child(2){animation-delay:.05s}.setmain.xin>*:nth-child(3){animation-delay:.1s}
+@keyframes xin{from{opacity:0;transform:translateX(26px)}}
+.sdb b,.sdb span{transition:opacity .2s}
 /* ===== pill aesthetic, app-wide ===== */
 .pkb,.olb,.tcard .pkb,.bkb,.vopt,.rdo button,.rcban button,.refc button,.pkbar button,.hrow2 button,.rwk button,.rirr button,.prrd,.gychip,.blkchip,.baled,.rolet,.rdx span,.balok span,.tag,.resume,.nccb,.wgfix,.hsplit button,.chw button,.dsbtn,.ovnav{border-radius:999px}
 .seg,.seg button{border-radius:999px}
@@ -1247,6 +1258,7 @@ function whInit(){document.querySelectorAll('#sp .whl').forEach(w=>{if(w._wh)ret
   const go=(to,dur)=>{cancelAnimationFrame(anim);const x0=x,t0=performance.now();dur=dur||Math.max(320,Math.min(1100,260+Math.abs(to-x0)*.75));
     const st=now=>{const t=Math.min(1,(now-t0)/dur);x=x0+(to-x0)*ease(t);paint();if(t<1)anim=requestAnimationFrame(st);else{anim=0;settle()}};anim=requestAnimationFrame(st)};
   w._go=i=>{user=true;go(-clampI(i)*P)};w._sel=()=>sel;
+  if(V.from&&V.from.i===S.session.i){const pv=kind==='r'?V.from.r:V.from.w,pi=items.reduce((bi,b,k)=>Math.abs(+b.dataset.x-pv)<Math.abs(+items[bi].dataset.x-pv)?k:bi,0);if(pi>=0&&pi!==idx){const tgt=-idx*P;x=-pi*P;sel=pi;items.forEach(b=>b.classList.remove('on'));items[pi].classList.add('on');paint();setTimeout(()=>{cancelAnimationFrame(anim);const x0=x,t0=performance.now(),dur=Math.min(900,420+Math.abs(tgt-x0)*.35);const stp=now=>{const t=Math.min(1,(now-t0)/dur);x=x0+(tgt-x0)*(1-Math.pow(1-t,3)*(1-t));paint();if(t<1)anim=requestAnimationFrame(stp);else{anim=0;const b=items[sel];b.classList.remove('whpop');void b.offsetWidth;b.classList.add('whpop')}};anim=requestAnimationFrame(stp)},140)}}
   let d=null;
   w.addEventListener('pointerdown',e=>{if(e.button>0)return;cancelAnimationFrame(anim);anim=0;d={x0:e.clientX,y0:e.clientY,sx:x,ax:null,s:[[performance.now(),x]],moved:false,id:e.pointerId}});
   w.addEventListener('pointermove',e=>{if(!d||e.pointerId!==d.id)return;const dx=e.clientX-d.x0,dy=e.clientY-d.y0;
@@ -1268,12 +1280,15 @@ function whLive(kind,v){const s=S.session;if(!s)return;const it=s.items[s.i],st=
 function whCommit(kind,v){if(v==null)return;save()}
 function perSide(st){const ps=(st.p||[]).reduce((a,b)=>a+b,0);return `${fmt(bar())} ${U()} bar · ${fmt(ps)} per side`}
 
+function rbarHtml(rs){const opts=[45,60,90,120,150,180,240],f=o=>Math.floor(o/60)+':'+String(o%60).padStart(2,'0');
+  const lens=`<div class="rbl">${opts.map(o=>`<button class="${S.rest===o?'on':''}" data-a="rlen" data-x="${o}">${f(o)}</button>`).join('')}</div>`;
+  return `<div class="rbov" data-a="rbarx"></div><div class="rbar" role="dialog" aria-label="Rest options">${rs?`<div class="rbr"><button data-a="radj" data-x="-15">−15s</button><button data-a="radj" data-x="30">+30s</button><button class="sk" data-a="rskip2">Skip rest</button></div>`:''}${lens}</div>`}
 function logBar(s,it,st,lab,work){const rs=s.rest,enter=!!(rs&&V.restAnim);V.restAnim=false;V.restEnd=false;const t=S.rest||90;
   const chk=`<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>`,arr=`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>`;
   const sh=x=>x.wu?'WARM-UP':x.ds?'DROP SET':'SET '+(work.indexOf(x)+1);let up=sh(st),idle=lab;
   if(rs&&!rs.fromLog&&!st.done){const L=seqList(),k=seqIdx(),nx=L[k+1];if(nx&&nx[0]===s.i){const x=it.sets[nx[1]];up=sh(x);idle='LOG '+up}else{up='NEXT';idle='LOG SET'}}
   const left=rs?Math.max(0,(rs.end-Date.now())/1000):t,frac=rs?Math.min(1,left*1000/rs.total):1,tt=rs?mmss(Math.ceil(left)).replace(/^0(\d:)/,'$1'):`${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}`;
-  return `<div class="logbar"><div class="lgp ${rs&&!enter?'rest':''}" id="lgp" ${enter?'data-enter="1"':''}>
+  return `<div class="logbar">${V.rbar?rbarHtml(rs):''}<div class="lgp ${rs&&!enter?'rest':''}" id="lgp" ${enter?'data-enter="1"':''}>
   <span class="lgf" style="width:${(frac*100).toFixed(2)}%" ${rs?`data-left="${left.toFixed(2)}"`:''}></span>
   <button class="lgA" data-a="${rs?'rtap':'nexts'}" aria-label="${rs?`Rest, ${tt} left. Tap for options`:idle}"><span class="lgI">${chk}<span>${idle}</span></span><span class="lgR">${ic('watch',2)}<b id="rt2">${tt}</b><small>REST</small></span></button>
   <span class="lgx" data-a="radj" data-x="30" role="button" aria-label="Add 30 seconds">+30</span><i class="lgd"></i>
@@ -1372,7 +1387,7 @@ function render(){syncBars();
   const sp2=$('#sp');if(sp2&&st)sp2.scrollTop=st;
   try{document.body.style.overflow=sp2?'hidden':''}catch(e){}
   if(V.anim){const m=$('#app main');if(m&&m.classList)m.classList.add(V.anim);V.anim=null}
-  if(document.querySelector('#sp .whl'))whInit();
+  if(document.querySelector('#sp .whl')){const fr=V.from;whInit();if(fr&&S.session&&fr.i!==S.session.i){const m=document.querySelector('#sp .setmain');if(m)m.classList.add('xin')}}V.from=null;
   const lp=document.querySelector('#lgp[data-enter]');if(lp){lp.removeAttribute('data-enter');requestAnimationFrame(()=>requestAnimationFrame(()=>lp.classList.add('rest')))}
   const lf=document.querySelector('#sp .lgf[data-left]');if(lf){const lt=+lf.dataset.left;requestAnimationFrame(()=>requestAnimationFrame(()=>{lf.style.transition=`width ${lt}s linear, opacity .5s ease`;lf.style.width='0%'}))}
 }
@@ -1438,7 +1453,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.75';
+const APPV='1.76';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
@@ -4310,7 +4325,7 @@ const ACT={
   minimize:()=>{V.inSession=false;V.ov=false;V.restOpen=false;V.anim='fade';render()},
   discard:()=>confirmSheet('Discard this workout? Nothing from it will be saved.',()=>{S.session=null;V.inSession=false;V.ov=false;V.restOpen=false;RS()},'Discard'),
   finish:()=>{const s=S.session,done=sum(s.items.map(it=>it.sets.filter(x=>(x.done&&!x.wu)||(x.dur!=null&&(cEl(x)>0||x.dist>0))).length));if(!done){confirmSheet('No sets logged yet. Discard this workout?',()=>{S.session=null;V.inSession=false;V.ov=false;RS()},'Discard');return}const left=sum(s.items.map(it=>it.sets.filter(x=>!x.done&&!x.wu&&!(x.dur!=null&&(cEl(x)>0||x.dist>0))).length));confirmSheet(left?`Finish workout? ${left} unlogged set${left>1?'s':''} will be marked skipped.`:'Finish workout?',finishNow,'Finish',true)},
-  nexts:()=>{const s=S.session,st=cur(),it=s.items[s.i];if(st.run){st.dur=cEl(st);st.run=null}if(isCardio(it.exId)&&!cEl(st)&&!st.dist){toast('Start the timer or enter a time first');return}const wasDone=st.done;st.done=true;if(!wasDone&&!st.wu)checkPR(it,st);V.lastLog={i:s.i,s:s.s,w:st.w,r:st.r,rir:st.rir,wu:!!st.wu,lab:(()=>{const wk=it.sets.filter(x=>!x.wu&&!x.ds);return st.wu?'Warm-up':st.ds?'Drop set':'Set '+(wk.indexOf(st)+1)})()};const L=seqList(),k=seqIdx(),nx=L[k+1];const midSS=nx&&nx[1]===s.s&&nx[0]!==s.i&&grp(nx[0])[0]===grp(s.i)[0];if(S.autoRest&&S.rest>0&&!midSS&&!V.noRest){startRest();S.session.rest.fromLog=true;V.restAnim=true}if(isLast()){save();render();closePanel();toast('All sets done. Tap Finish when ready');return}move(1);save();render();const sp=$('#sp');if(sp)sp.scrollTop=0},
+  nexts:()=>{const s=S.session,st=cur(),it=s.items[s.i];if(st.run){st.dur=cEl(st);st.run=null}if(isCardio(it.exId)&&!cEl(st)&&!st.dist){toast('Start the timer or enter a time first');return}V.from={i:s.i,w:st.w,r:st.r};const wasDone=st.done;st.done=true;if(!wasDone&&!st.wu)checkPR(it,st);V.lastLog={i:s.i,s:s.s,w:st.w,r:st.r,rir:st.rir,wu:!!st.wu,lab:(()=>{const wk=it.sets.filter(x=>!x.wu&&!x.ds);return st.wu?'Warm-up':st.ds?'Drop set':'Set '+(wk.indexOf(st)+1)})()};const L=seqList(),k=seqIdx(),nx=L[k+1];const midSS=nx&&nx[1]===s.s&&nx[0]!==s.i&&grp(nx[0])[0]===grp(s.i)[0];if(S.autoRest&&S.rest>0&&!midSS&&!V.noRest){startRest();S.session.rest.fromLog=true;V.restAnim=true}if(isLast()){save();render();closePanel();toast('All sets done. Tap Finish when ready');return}move(1);save();render();const sp=$('#sp');if(sp)sp.scrollTop=0},
   prevs:()=>{move(-1);RS()},
   unlog:()=>{cur().done=false;RS()},
   w:x=>{const st=cur();st.w=Math.max(0,Math.round((st.w+ +x*step())*100)/100);RS()},
@@ -4325,7 +4340,7 @@ const ACT={
   tbarset:x=>{S.bar[U()]=+x;save();closeSheet();render();toast(`Bar set to ${x} ${U()}`)},
   editbar:()=>numSheet('Bar weight ('+U()+')',bar(),v=>{S.bar[U()]=Math.max(0,v);setW(cur())}),
   smenu:()=>{V.smenu=!V.smenu;render()},
-  gotoset:x=>{const s=S.session;s.s=+x;V.smenu=false;RS()},
+  gotoset:x=>{const s=S.session,st0=cur();V.from={i:s.i,w:st0.w,r:st0.r};s.s=+x;V.smenu=false;RS()},
   smadd:()=>{const s=S.session;ACT.ovsets(s.i+'|1');V.smenu=true;render()},
   smdrop:()=>{V.smenu=false;ACT.dropset()},
   smwu:()=>{V.smenu=false;render();ACT.warmup()},
@@ -4334,15 +4349,17 @@ const ACT={
   smnote:()=>{closeSheet();setTimeout(()=>ACT.exnote(),250)},
   whtap:(x,el)=>{const b=el&&el.closest?el.closest('.whi'):null;if(!b)return;const w=b.closest('.whl'),kind=w&&w.dataset.wh;if(b.classList.contains('on')){if(kind==='r')ACT.typer();else ACT.typew();return}const k=[...b.parentNode.children].indexOf(b);if(w._go)w._go(k)},
   setautorest:()=>{S.autoRest=!S.autoRest;save();refreshSheet(restSheet())},
-  rtap:()=>{if(V.lpT&&Date.now()-V.lpT<700)return;const s=S.session;if(!s)return;if(s.rest){ACT.ropen();return}startRest();s.rest.fromLog=false;V.restAnim=true;RS()},
+  rtap:()=>{if(V.lpT&&Date.now()-V.lpT<700)return;const s=S.session;if(!s)return;if(s.rest){V.rbar=!V.rbar;render();return}V.rbar=false;startRest();s.rest.fromLog=false;V.restAnim=true;RS()},
   rnext:()=>{const s=S.session;if(!s||!s.rest)return;restExit(()=>{const st=cur();if(!s.rest.fromLog&&!st.done){V.noRest=true;s.rest=null;ACT.nexts();V.noRest=false}else{s.rest=null;RS()}V.lastLog=null})},
   restup:x=>{const st=cur();st.w=+x;delete st.p;RS()},
   restundo:()=>{const s=S.session,L=V.lastLog;if(!L)return;s.i=L.i;s.s=L.s;const st=s.items[L.i].sets[L.s];st.done=false;s.rest=null;V.lastLog=null;RS();toast('Set reopened')},
-  rlen:x=>{S.rest=+x;if(S.session&&S.session.rest){const rs=S.session.rest,el=rs.total-(rs.end-Date.now());rs.total=S.rest*1000;rs.end=Date.now()+Math.max(0,rs.total-el)}save();refreshSheet(restSheet());render()},
+  rlen:x=>{S.rest=+x;V.rbar=!!(S.session&&S.session.rest);if(S.session&&S.session.rest){const rs=S.session.rest,el=rs.total-(rs.end-Date.now());rs.total=S.rest*1000;rs.end=Date.now()+Math.max(0,rs.total-el)}save();render()},
   rskip:()=>{const s=S.session;if(s)s.rest=null;V.restEnd=true;closeSheet();RS()},
   rnow:()=>{startRest();V.restAnim=true;closeSheet();RS()},
   rnotify:()=>{if(S.restNotify){S.restNotify=false;save();refreshSheet(restSheet());return}if(!('Notification' in window)){toast('Notifications aren’t available here');return}Notification.requestPermission().then(p=>{S.restNotify=p==='granted';save();refreshSheet(restSheet());toast(p==='granted'?'You’ll get an alert when rest ends':'Notifications are blocked in Settings')})},
-  ropen:()=>openSheet(restSheet()),
+  ropen:()=>{V.rbar=true;render()},
+  rbarx:()=>{V.rbar=false;render()},
+  rskip2:()=>{const s=S.session;V.rbar=false;if(!s||!s.rest)return;const p=$('#sp .rbar');if(p)p.remove();restExit(()=>{s.rest=null;RS()})},
   rclose:()=>{V.restOpen=false;render()},
   rgo:()=>{startRest();RS()},
   rstop:()=>{S.session.rest=null;V.restOpen=false;RS()},
