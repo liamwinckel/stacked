@@ -915,7 +915,10 @@ document.addEventListener('visibilitychange',pushSync);window.addEventListener('
 function restNotify(){try{if(!S.restNotify||!('Notification' in window)||Notification.permission!=='granted'||!document.hidden)return;const s=S.session,it=s&&s.items[s.i],t='Rest is over',body=it?`Time for ${ex(it.exId).name}`:'Time for your next set';if(navigator.serviceWorker)navigator.serviceWorker.ready.then(r=>r.showNotification(t,{body,tag:'bars-rest',icon:'icon-bars-192.png',renotify:true})).catch(()=>{});else new Notification(t,{body})}catch(_){}}
 function restSchedule(){try{const s=S.session;if(!s||!s.rest||!S.restNotify||!('Notification' in window)||Notification.permission!=='granted')return;if('showTrigger' in Notification.prototype&&typeof TimestampTrigger!=='undefined'&&navigator.serviceWorker)navigator.serviceWorker.ready.then(r=>r.showNotification('Rest is over',{body:'Time for your next set',tag:'bars-rest',showTrigger:new TimestampTrigger(s.rest.end)})).catch(()=>{})}catch(_){}}
 document.addEventListener('visibilitychange',()=>{const s=S.session;if(document.hidden){restSchedule()}else if(s&&s.rest&&Date.now()>=s.rest.end){restDone(false);toast('Rest finished while you were away')}});
-function startRest(){S.session.rest={end:Date.now()+S.rest*1000,total:S.rest*1000}}
+function restEx(){const s=S.session,it=s&&s.items[s.i];return it?ex(it.exId):null}
+function restCur(){const e=restEx();return (e&&e.restT)||S.restDef||120}
+function restSet(v){const e=restEx();if(e)e.restT=v}
+function startRest(){const t=restCur();S.session.rest={end:Date.now()+t*1000,total:t*1000}}
 function convertAll(to){const f=to==='kg'?1/2.20462:2.20462,r=x=>Math.round(x*f*2)/2,fm=to==='kg'?2.54:1/2.54;(S.body||[]).forEach(b=>{if(b.bw)b.bw=Math.round(b.bw*f*10)/10;['waist','chest','arm','thigh'].forEach(k=>{if(b[k])b[k]=Math.round(b[k]*fm*10)/10})});S.history.forEach(h=>h.entries.forEach(e=>e.sets.forEach(st=>{if(!st.skip)st.w=r(st.w)})));if(S.session)S.session.items.forEach(it=>it.sets.forEach(st=>{st.w=r(st.w);delete st.p}))}
 
 let AC=null;
@@ -1208,7 +1211,7 @@ function renderMore(){
   <div class="h2">Settings</div>
   ${themeSettings()}
   <div class="li" style="cursor:default"><div class="g">Units</div><div class="seg" style="width:150px">${['lb','kg'].map(u=>`<button class="${U()===u?'on':''}" data-a="units" data-x="${u}">${u.toUpperCase()}</button>`).join('')}</div></div>
-  <div class="li" style="cursor:default"><div class="g">Rest timer</div><div class="stp w"><button data-a="rest" data-x="-15">${ic('minusc')}</button><span>${mmss(S.rest)}</span><button data-a="rest" data-x="15">${ic('plusc')}</button></div></div>
+  <div class="li" style="cursor:default"><div class="g"><div class="tt">Default rest</div><div class="sb">For exercises you haven’t set a rest for yet</div></div><div class="stp w"><button data-a="rest" data-x="-15">${ic('minusc')}</button><span>${mmss(S.restDef||120)}</span><button data-a="rest" data-x="15">${ic('plusc')}</button></div></div>
   <div class="li" style="cursor:default"><div class="g">Auto-start rest timer after each set</div><button class="tog ${S.autoRest?'on':''}" data-a="auto"></button></div>
   ${PUSH_URL?`<div class="li" style="cursor:default"><div class="g"><div class="tt">Rest alerts outside the app</div><div class="sb">Get a notification when rest ends, even with Bars closed</div></div><button class="tog ${S.pushOn?'on':''}" data-a="pushon" aria-label="Rest alerts outside the app"></button></div>`:''}
   <div class="li" style="cursor:default"><div class="g"><div class="tt">Progression suggestions</div><div class="sb">Suggests +1 rep, then more weight at the top of your range</div></div><button class="tog ${S.autoProg!==false?'on':''}" data-a="autoprog"></button></div>
@@ -1292,13 +1295,13 @@ function whLive(kind,v){const s=S.session;if(!s)return;const it=s.items[s.i],st=
   try{navigator.vibrate&&navigator.vibrate(3)}catch(_){}
   if(kind==='r'){st.r=v;return}
   st.w=v;if(e.type==='barbell'){st.p=greedy(Math.max(0,(v-bar())/2));const bs=$('#sp .barsvg');if(bs)bs.outerHTML=barSvg(st.p);const pl=$('#sp .plates');if(pl){const cnt={};st.p.forEach(x=>cnt[x]=(cnt[x]||0)+1);pl.innerHTML=availPlates().map(p=>octBtn(p,cnt[p])).join('')}const ps=$('#sp .wperside');if(ps)ps.textContent=perSide(st)}}
-function whCommit(kind,v){if(v==null)return;if(kind==='t'){S.rest=v;const rs=S.session&&S.session.rest;if(rs){const el=rs.total-(rs.end-Date.now());rs.total=v*1000;rs.end=Date.now()+Math.max(0,rs.total-el);const f=$('#sp .lgf');if(f){const lt=Math.max(0,(rs.end-Date.now())/1000),fr=Math.min(1,lt*1000/rs.total);f.style.transition='none';f.style.width=(fr*100)+'%';requestAnimationFrame(()=>requestAnimationFrame(()=>{f.style.transition=`width ${lt}s linear, opacity .5s ease`;f.style.width='0%'}))}if(typeof tick==='function')tick()}else{const li=$('#sp .lgB .lgI');if(li)li.lastChild.textContent=restFmt(v)}}save()}
+function whCommit(kind,v){if(v==null)return;if(kind==='t'){restSet(v);const rs=S.session&&S.session.rest;if(rs){const el=rs.total-(rs.end-Date.now());rs.total=v*1000;rs.end=Date.now()+Math.max(0,rs.total-el);const f=$('#sp .lgf');if(f){const lt=Math.max(0,(rs.end-Date.now())/1000),fr=Math.min(1,lt*1000/rs.total);f.style.transition='none';f.style.width=(fr*100)+'%';requestAnimationFrame(()=>requestAnimationFrame(()=>{f.style.transition=`width ${lt}s linear, opacity .5s ease`;f.style.width='0%'}))}if(typeof tick==='function')tick()}else{const li=$('#sp .lgB .lgI');if(li)li.lastChild.textContent=restFmt(v)}}save()}
 function restFmt(o){return Math.floor(o/60)+':'+String(o%60).padStart(2,'0')}
 function perSide(st){const ps=(st.p||[]).reduce((a,b)=>a+b,0);return `${fmt(bar())} ${U()} bar · ${fmt(ps)} per side`}
 
-function rbarHtml(rs){const opts=[15,30,45,60,75,90,105,120,135,150,165,180,210,240,270,300,360,420,480,600],cur=S.rest||90;if(!opts.includes(cur)){opts.push(cur);opts.sort((a,b)=>a-b)}
+function rbarHtml(rs){const opts=[15,30,45,60,75,90,105,120,135,150,165,180,210,240,270,300,360,420,480,600],cur=restCur();if(!opts.includes(cur)){opts.push(cur);opts.sort((a,b)=>a-b)}
   return `<div class="rbov" data-a="rbarx"></div><div class="rbar" role="dialog" aria-label="Rest options">${rs?`<div class="rbr"><button data-a="radj" data-x="-15">−15s</button><button data-a="radj" data-x="30">+30s</button><button class="sk" data-a="rskip2">Skip rest</button></div>`:''}<div class="rbh">REST LENGTH</div>${wheelHtml('t',opts,cur,{},'Rest length',restFmt)}</div>`}
-function logBar(s,it,st,lab,work){const rs=s.rest,enter=!!(rs&&V.restAnim);V.restAnim=false;V.restEnd=false;const t=S.rest||90;
+function logBar(s,it,st,lab,work){const rs=s.rest,enter=!!(rs&&V.restAnim);V.restAnim=false;V.restEnd=false;const t=restCur();
   const chk=`<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>`,arr=`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>`;
   const sh=x=>x.wu?'WARM-UP':x.ds?'DROP SET':'SET '+(work.indexOf(x)+1);let up=sh(st),idle=lab;
   if(rs&&!rs.fromLog&&!st.done){const L=seqList(),k=seqIdx(),nx=L[k+1];if(nx&&nx[0]===s.i){const x=it.sets[nx[1]];up=sh(x);idle='LOG '+up}else{up='NEXT';idle='LOG SET'}}
@@ -1319,7 +1322,7 @@ function restCard(s,it,st,e){const L=V.lastLog,an=V.restAnim?'anim':'';const pi=
   return `<div class="rcard ${an}"><div class="rc1"><span class="rck"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></span><b>${L.lab} logged</b><span>${fmt(L.w)} × ${L.r}${L.rir!=null?` · ${L.rir===3?'3+':L.rir} left`:''}</span><button class="rcu" data-a="restundo">Undo</button></div><div class="rc2"><span>${tip}</span>${btn}</div></div>`}
 
 function restSheet(){const s=S.session,rs=s&&s.rest,opts=[30,45,60,90,120,150,180,240,300];
-  return `<div class="sh-t">Rest</div><div class="shp"><div class="lblx">Rest length</div><div class="rlens">${opts.map(o=>`<button class="${S.rest===o?'on':''}" data-a="rlen" data-x="${o}">${Math.floor(o/60)}:${String(o%60).padStart(2,'0')}</button>`).join('')}</div>
+  return `<div class="sh-t">Rest</div><div class="shp"><div class="lblx">Rest length</div><div class="rlens">${opts.map(o=>`<button class="${restCur()===o?'on':''}" data-a="rlen" data-x="${o}">${Math.floor(o/60)}:${String(o%60).padStart(2,'0')}</button>`).join('')}</div>
   <div class="li" style="cursor:default;margin-top:10px"><div class="g"><div class="tt">Start rest when I log a set</div></div><button class="tog ${S.autoRest?'on':''}" data-a="setautorest" aria-label="Auto rest"></button></div>
   <div class="li" style="cursor:default"><div class="g"><div class="tt">Alert me when rest ends</div><div class="sb">Shows a notification if you’ve left the app</div></div><button class="tog ${S.restNotify?'on':''}" data-a="rnotify" aria-label="Rest alerts"></button></div></div>
   ${rs?`<div class="rbtns"><button class="olb" data-a="radj" data-x="-15">− 15 sec</button><button class="olb" data-a="radj" data-x="30">+ 30 sec</button><button class="pkb" data-a="rskip">Skip rest</button></div>`:`<button class="pkb" data-a="rnow">Start rest now</button>`}`}
@@ -1343,7 +1346,7 @@ function renderSet(){
   if(st.wu){sb='Warm-up';ss=`${wus.indexOf(st)+1} of ${wus.length}`}else if(st.ds){sb='Drop set';ss=rr?rr+' reps':'to failure'}else{sb=`Set ${work.indexOf(st)+1}`;ss=`of ${work.length}${rr?' · '+rr+' reps':''}`}
   const nm=s.items.length,ssn=inSS(s.i)?(()=>{const L=seqList(),k=seqIdx(),nx=L[k+1];return 'Superset'+(nx&&nx[0]!==s.i&&inSS(nx[0])&&grp(nx[0])[0]===grp(s.i)[0]?' · next: '+esc(ex(s.items[nx[0]].exId).name):'')})():'';
   const rs=s.rest,lab=st.done?'NEXT SET':st.wu?'LOG WARM-UP':st.ds?'LOG DROP SET':'LOG SET '+(work.indexOf(st)+1);
-  const restTxt=rs?`<span id="rt2">${mmss(Math.ceil((rs.end-Date.now())/1000))}</span>`:(()=>{const t=S.rest||90;return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')})();
+  const restTxt=rs?`<span id="rt2">${mmss(Math.ceil((rs.end-Date.now())/1000))}</span>`:(()=>{const t=restCur();return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')})();
   const menu=V.smenu?`<div class="smov" data-a="smenu"></div><div class="smenu" role="menu">${it.sets.map((x,j)=>{const nm2=x.wu?'Warm-up':x.ds?'Drop set':'Set '+(work.indexOf(x)+1),cls=j===s.s?'cur':x.done?'done':'';return `<button role="menuitem" class="smi ${cls}" data-a="gotoset" data-x="${j}"><i></i><b>${nm2}</b><span>${x.skip?'skipped':`${fmt(x.w)} × ${x.r}`}</span></button>`}).join('')}<div class="smadd"><button data-a="smadd">+ Set</button><button data-a="smdrop">+ Drop set</button>${e.type!=='bodyweight'&&!wus.length?`<button data-a="smwu">+ Warm-up</button>`:''}</div></div>`:'';
   return `<div class="setscr">
   <div class="setmain"><div><div class="grab2"></div>
@@ -1468,7 +1471,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.80';
+const APPV='1.81';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
@@ -4341,7 +4344,7 @@ const ACT={
   minimize:()=>{V.inSession=false;V.ov=false;V.restOpen=false;V.anim='fade';render()},
   discard:()=>confirmSheet('Discard this workout? Nothing from it will be saved.',()=>{S.session=null;V.inSession=false;V.ov=false;V.restOpen=false;RS()},'Discard'),
   finish:()=>{const s=S.session,done=sum(s.items.map(it=>it.sets.filter(x=>(x.done&&!x.wu)||(x.dur!=null&&(cEl(x)>0||x.dist>0))).length));if(!done){confirmSheet('No sets logged yet. Discard this workout?',()=>{S.session=null;V.inSession=false;V.ov=false;RS()},'Discard');return}const left=sum(s.items.map(it=>it.sets.filter(x=>!x.done&&!x.wu&&!(x.dur!=null&&(cEl(x)>0||x.dist>0))).length));confirmSheet(left?`Finish workout? ${left} unlogged set${left>1?'s':''} will be marked skipped.`:'Finish workout?',finishNow,'Finish',true)},
-  nexts:()=>{const s=S.session,st=cur(),it=s.items[s.i];if(st.run){st.dur=cEl(st);st.run=null}if(isCardio(it.exId)&&!cEl(st)&&!st.dist){toast('Start the timer or enter a time first');return}V.from={i:s.i,w:st.w,r:st.r};const wasDone=st.done;st.done=true;if(!wasDone&&!st.wu)checkPR(it,st);V.lastLog={i:s.i,s:s.s,w:st.w,r:st.r,rir:st.rir,wu:!!st.wu,lab:(()=>{const wk=it.sets.filter(x=>!x.wu&&!x.ds);return st.wu?'Warm-up':st.ds?'Drop set':'Set '+(wk.indexOf(st)+1)})()};const L=seqList(),k=seqIdx(),nx=L[k+1];const midSS=nx&&nx[1]===s.s&&nx[0]!==s.i&&grp(nx[0])[0]===grp(s.i)[0];if(S.autoRest&&S.rest>0&&!midSS&&!V.noRest){startRest();S.session.rest.fromLog=true;V.restAnim=true}if(isLast()){save();render();closePanel();toast('All sets done. Tap Finish when ready');return}move(1);save();render();const sp=$('#sp');if(sp)sp.scrollTop=0},
+  nexts:()=>{const s=S.session,st=cur(),it=s.items[s.i];if(st.run){st.dur=cEl(st);st.run=null}if(isCardio(it.exId)&&!cEl(st)&&!st.dist){toast('Start the timer or enter a time first');return}V.from={i:s.i,w:st.w,r:st.r};const wasDone=st.done;st.done=true;if(!wasDone&&!st.wu)checkPR(it,st);V.lastLog={i:s.i,s:s.s,w:st.w,r:st.r,rir:st.rir,wu:!!st.wu,lab:(()=>{const wk=it.sets.filter(x=>!x.wu&&!x.ds);return st.wu?'Warm-up':st.ds?'Drop set':'Set '+(wk.indexOf(st)+1)})()};const L=seqList(),k=seqIdx(),nx=L[k+1];const midSS=nx&&nx[1]===s.s&&nx[0]!==s.i&&grp(nx[0])[0]===grp(s.i)[0];if(S.autoRest&&restCur()>0&&!midSS&&!V.noRest){startRest();S.session.rest.fromLog=true;V.restAnim=true}if(isLast()){save();render();closePanel();toast('All sets done. Tap Finish when ready');return}move(1);save();render();const sp=$('#sp');if(sp)sp.scrollTop=0},
   prevs:()=>{move(-1);RS()},
   unlog:()=>{cur().done=false;RS()},
   w:x=>{const st=cur();st.w=Math.max(0,Math.round((st.w+ +x*step())*100)/100);RS()},
@@ -4370,7 +4373,7 @@ const ACT={
   rnext:()=>{if(V.lpT&&Date.now()-V.lpT<700)return;const s=S.session;if(!s||!s.rest)return;if(V.rbar){V.rbar=false;const rb=$('#sp .rbar'),ro=$('#sp .rbov');if(rb)rb.remove();if(ro)ro.remove()}restExit(()=>{const st=cur();if(!s.rest.fromLog&&!st.done){V.noRest=true;s.rest=null;ACT.nexts();V.noRest=false}else{s.rest=null;RS()}V.lastLog=null})},
   restup:x=>{const st=cur();st.w=+x;delete st.p;RS()},
   restundo:()=>{const s=S.session,L=V.lastLog;if(!L)return;s.i=L.i;s.s=L.s;const st=s.items[L.i].sets[L.s];st.done=false;s.rest=null;V.lastLog=null;RS();toast('Set reopened')},
-  rlen:x=>{S.rest=+x;V.rbar=!!(S.session&&S.session.rest);if(S.session&&S.session.rest){const rs=S.session.rest,el=rs.total-(rs.end-Date.now());rs.total=S.rest*1000;rs.end=Date.now()+Math.max(0,rs.total-el)}save();render()},
+  rlen:x=>{restSet(+x);V.rbar=!!(S.session&&S.session.rest);if(S.session&&S.session.rest){const rs=S.session.rest,el=rs.total-(rs.end-Date.now());rs.total=restCur()*1000;rs.end=Date.now()+Math.max(0,rs.total-el)}save();render()},
   rskip:()=>{const s=S.session;if(s)s.rest=null;V.restEnd=true;closeSheet();RS()},
   rnow:()=>{startRest();V.restAnim=true;closeSheet();RS()},
   rnotify:()=>{if(S.restNotify){S.restNotify=false;save();refreshSheet(restSheet());return}if(!('Notification' in window)){toast('Notifications aren’t available here');return}Notification.requestPermission().then(p=>{S.restNotify=p==='granted';save();refreshSheet(restSheet());toast(p==='granted'?'You’ll get an alert when rest ends':'Notifications are blocked in Settings')})},
@@ -4380,7 +4383,7 @@ const ACT={
   rclose:()=>{V.restOpen=false;render()},
   rgo:()=>{startRest();RS()},
   rstop:()=>{S.session.rest=null;V.restOpen=false;RS()},
-  radj:x=>{const s=S.session;if(!s.rest){S.rest=Math.max(15,Math.min(600,S.rest+ +x));RS();return}s.rest.end+= +x*1000;const left=s.rest.end-Date.now();if(left<=0){restDone(false);return}s.rest.total=Math.max(s.rest.total,left);save();tick();render()},
+  radj:x=>{const s=S.session;if(!s.rest){restSet(Math.max(15,Math.min(600,restCur()+ +x)));RS();return}s.rest.end+= +x*1000;const left=s.rest.end-Date.now();if(left<=0){restDone(false);return}s.rest.total=Math.max(s.rest.total,left);save();tick();render()},
   // routines
   newroutine:()=>{const r={id:uid(),name:'New Routine',active:false,days:[{id:uid(),name:'Workout A',items:[]}]};S.routines.push(r);save();ACT.sub('routine:'+r.id);V.rEdit=true;render()},
   redit:()=>{V.rEdit=!V.rEdit;render()},
@@ -4399,7 +4402,7 @@ const ACT={
   delwid0:x=>{S.widgets=S.widgets.filter(w=>w!==x);RS()},
   // settings
   units:x=>{if(x===U())return;convertAll(x);S.units=x;RS()},
-  rest:x=>{S.rest=Math.max(0,Math.min(600,S.rest+ +x));RS()},
+  rest:x=>{S.restDef=Math.max(15,Math.min(600,(S.restDef||120)+ +x));RS()},
   auto:()=>{S.autoRest=!S.autoRest;RS()},
   barw:x=>{S.bar[U()]=Math.max(0,S.bar[U()]+ +x*step());RS()},
   dbm:x=>{S.dbMode=x;RS()},
