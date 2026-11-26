@@ -71,7 +71,10 @@ textarea.inp{font-size:12px;font-family:ui-monospace,Menlo,monospace}
 .stp span{min-width:28px;text-align:center;font-size:17px;color:#fff}
 .stp.w span{min-width:66px;font-size:15px}
 .ico{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;color:var(--mute);flex:none}
-.ldh{touch-action:none;cursor:grab}[data-ld]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.ldh{touch-action:none;cursor:grab}
+.vsum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 16px 10px}.vsum div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 10px;text-align:center}.vsum b{display:block;font-size:22px;font-weight:800}.vsum span{font-size:12px;color:var(--mute)}
+.vrow{padding:10px 20px;border-bottom:1px solid var(--line)}.vtop{display:flex;justify-content:space-between;align-items:baseline}.vtop b{font-size:15px;font-weight:600}.vtop span{font-size:14px;font-weight:700}.vbar{display:flex;height:8px;border-radius:4px;background:var(--track);overflow:hidden;margin:7px 0 5px}.vbar i,.vkey i{display:block;height:100%;background:var(--pk)}.vbar i.iso,.vkey i.iso{background:var(--cy)}.vbar i.ind,.vkey i.ind{background:var(--pk);opacity:.35}.vsub{font-size:12px;color:var(--mute)}
+.vkey{display:flex;gap:14px;padding:12px 20px 6px;font-size:12px;color:var(--mute)}.vkey span{display:flex;align-items:center;gap:6px}.vkey i{width:10px;height:10px;border-radius:3px}[data-ld]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .li.ldrag{position:relative;z-index:20;background:var(--sh1,#1c1c1f);box-shadow:0 10px 28px rgba(0,0,0,.45);border-radius:12px;transition:box-shadow .15s,border-radius .15s}
 .ldon [data-ld]:not(.ldrag){transition:transform .18s ease}
 .pk{display:flex;align-items:center;justify-content:center;min-width:26px;height:26px}.pk b{width:24px;height:24px;border-radius:50%;background:var(--pk);color:#121212;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
@@ -868,8 +871,23 @@ function renderDay(x){
   let h=`<div class="shp" style="padding-top:16px"><input class="inp" data-in="dname" data-x="${ri}|${di}" value="${esc(d.name)}"><div class="lblx">Notes</div><textarea class="inp notes" rows="3" data-in="dnotes" data-x="${ri}|${di}" placeholder="Cues, tempo, form reminders, warm-up plan…">${esc(d.notes||'')}</textarea></div><div class="h2">Exercises<small>SETS</small></div>`;
   d.items.forEach((it,ii)=>{h+=`<div class="li" data-sw="it|${ri}|${di}|${ii}" data-ld="day|${ri}|${di}|${ii}" style="cursor:default"><div class="g">${esc(ex(it.exId).name)}<div class="sb" data-a="itrr" data-x="${ri}|${di}|${ii}" style="color:var(--cy);cursor:pointer">${it.rr?esc(String(it.rr)).replace('-','–')+' reps ✎':'+ rep target'}</div>${(it.sn||(ii>0&&d.items[ii-1].sn))?'<div><span class="sstag sm2">SUPERSET</span></div>':''}</div><div class="stp"><button data-a="its" data-x="${ri}|${di}|${ii}|-1">${ic('back',2)}</button><span>${it.sets}</span><button data-a="its" data-x="${ri}|${di}|${ii}|1">${ic('chev',2)}</button></div>${ii<d.items.length-1?`<button class="ico ${it.sn?'lon':''}" data-a="itss" data-x="${ri}|${di}|${ii}">${ic('link')}</button>`:'<span class="ico" aria-hidden="true"></span>'}<button class="ico" data-a="itdel" data-x="${ri}|${di}|${ii}">${ic('x')}</button><span class="ico ldh" aria-label="Hold and drag to reorder">${ic('grip')}</span></div>`});
   h+=`<button class="cyl" data-a="itadd" data-x="${ri}|${di}">${ic('plusc')} Add Exercise</button><p class="xs mute" style="padding:10px 20px;margin:0">Press and hold an exercise, then drag to reorder. Tap ${ic('link')} to superset an exercise with the one below it. You'll alternate between them set by set.</p>`;
+  h+=dayVolumeHtml(d);
   return hd('Edit Workout',back())+`<main class="pg">${h}</main>`;
 }
+const ISO_RE=/Curl|Extension|Raise|Fly|Pec Deck|Kickback|Pushdown|Shrug|Calf|Crunch|Abduction|Adduction|Pullover|Wrist|Plank|Side Bend|Face Pull|Pull-Apart|Crossover|Tibialis|Hollow|Dead Bug|Sit-Up|V-Up|Twist|Woodchopper|Pallof|Rotation|Windmill|Dragon|Plate Pinch|Dead Hang|Rear Delt/;
+const isCompound=e=>!(e.type==='cardio'||e.mg==='cardio')&&!ISO_RE.test(e.name);
+const MNORM={'Upper chest':'Chest','Lats':'Back (lats)','Upper back':'Upper back'};
+function dayVolume(d){const M={};let sets=0,lift=0,card=0;
+  d.items.forEach(it=>{const e=ex(it.exId);if(!e)return;const n=+it.sets||0;if(e.type==='cardio'||e.mg==='cardio'){card++;return}lift++;sets+=n;const g=exGuide(e),cp=isCompound(e);
+    const add=(m,k,v)=>{m=MNORM[m]||m;const o=M[m]=M[m]||{c:0,i:0,x:0};o[k]+=v};
+    [...new Set(g.p)].forEach(m=>add(m,cp?'c':'i',n));[...new Set(g.s)].filter(m=>!g.p.includes(m)).forEach(m=>add(m,'x',n))});
+  const rows=Object.entries(M).map(([m,o])=>({m,...o,d:o.c+o.i})).sort((a,b)=>(b.d+b.x/2)-(a.d+a.x/2));return {sets,lift,card,rows}}
+function dayVolumeHtml(d){const v=dayVolume(d);if(!v.lift&&!v.card)return '';const mx=Math.max(1,...v.rows.map(r=>r.d+r.x/2));const mins=Math.round(v.sets*2.6+v.card*15);
+  let h=`<div class="h2">Volume<small>THIS WORKOUT</small></div><div class="vsum"><div><b>${v.sets}</b><span>sets</span></div><div><b>${v.lift}</b><span>lifts${v.card?` + ${v.card} cardio`:''}</span></div><div><b>~${mins}</b><span>min</span></div></div>`;
+  h+=v.rows.map(r=>{const parts=[];if(r.c)parts.push(`${r.c} compound`);if(r.i)parts.push(`${r.i} isolation`);if(r.x)parts.push(`+${r.x} indirect`);
+    return `<div class="vrow"><div class="vtop"><b>${esc(r.m)}</b><span>${r.d?`${r.d} set${r.d===1?'':'s'}`:'indirect only'}</span></div><div class="vbar"><i style="width:${r.c/mx*100}%"></i><i class="iso" style="width:${r.i/mx*100}%"></i><i class="ind" style="width:${r.x/2/mx*100}%"></i></div><div class="vsub">${parts.join(' · ')}</div></div>`}).join('');
+  h+=`<div class="vkey"><span><i></i>Compound</span><span><i class="iso"></i>Isolation</span><span><i class="ind"></i>Indirect (½ set)</span></div><p class="xs mute" style="padding:2px 20px 20px;margin:0">Sets count fully for the muscles an exercise mainly targets. Muscles that only assist, like triceps in a bench press, show as indirect and count as half a set in the bar.</p>`;
+  return h}
 function renderExercises(){const f=V.exf=V.exf||{mg:'all',eq:'all'},used={};S.history.forEach(h=>h.entries.forEach(e=>used[e.exId]=(used[e.exId]||0)+1));
   const eqs=[...new Set(S.exercises.map(e=>e.eq).filter(q=>EQN[q]))];
   let h=`<div class="srch exs">${ic('search')}<input data-in="exq" placeholder="Search ${S.exercises.length} exercises" value=""></div>
@@ -1114,7 +1132,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.59';
+const APPV='1.61';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
@@ -1588,6 +1606,13 @@ function pgHtml(){const c=pgCfg(),sps=SPLITS[c.days];if(!sps.find(x=>x[0]===c.sp
 
 /* ===== exercise guide: muscles + technique ===== */
 const EXF=[
+ [/Rear Delt Fly|Reverse Pec Deck|Cable Rear Delt Fly/,['Rear delts'],['Upper back','Traps'],['Set up with your arms in front of you, elbows slightly bent and locked in that angle.','Sweep your arms out and back in a wide arc, leading with your elbows.','Squeeze your rear shoulders when your arms are in line with your body.','Return slowly to the start without letting the weight stack touch.'],'Keep your shoulders down and away from your ears so your traps don\'t take over.'],
+ [/Seated Dumbbell Press/,['Front delts'],['Triceps','Side delts','Upper chest'],['Sit on an upright bench with the dumbbells at shoulder height, palms forward.','Brace your core and keep your back against the pad.','Press the dumbbells up until your arms are straight overhead.','Lower under control back to shoulder height.'],'Keep your forearms vertical at the bottom and don\'t let your lower back arch off the pad.'],
+ [/Front Raise/,['Front delts'],['Side delts','Upper chest'],['Stand tall with the weight in front of your thighs, arms straight.','Raise it straight in front of you to shoulder height.','Pause briefly at the top.','Lower slowly back to your thighs.'],'Don\'t swing. If you need your hips to start it, the weight is too heavy.'],
+ [/Pike Push-Up|Handstand Push-Up/,['Front delts','Triceps'],['Upper chest','Core'],['Set your hands about shoulder width with your hips high (or feet against the wall for handstand).','Bend your elbows and lower the top of your head toward the floor between your hands.','Keep your elbows angled slightly back rather than flared wide.','Press back up until your arms are straight.'],'Lower only as far as you can control. Your head should come close to the floor, not crash into it.'],
+ [/Wrist Curl/,['Forearms'],[],['Sit with your forearms resting on your thighs and your wrists just past your knees.','Let the weight roll down toward your fingertips.','Curl your wrists up as far as they go.','Lower slowly and repeat.'],'Use a light weight and a full range. Forearms respond well to higher reps.'],
+ [/Tibialis Raise/,['Shins'],[],['Lean your back against a wall with your heels about a foot in front of you.','Keep your legs straight and heels on the floor.','Pull your toes up toward your shins as high as you can.','Lower slowly and repeat.'],'Go for high reps with control. This builds resilience for runners and helps knee health.'],
+
  [/Push-Up/,['Chest','Triceps'],['Front delts','Core'],['Hands just wider than your shoulders, body in one straight line from head to heels.','Brace your abs and squeeze your glutes.','Lower your chest toward the floor, elbows about 45° from your body.','Press the floor away until your arms are straight.'],'Drop to your knees or raise your hands on a bench to make it easier.'],
  [/Dip/,['Triceps','Chest'],['Front delts'],['Support yourself with straight arms, shoulders down away from your ears.','Lean slightly forward for more chest, stay upright for more triceps.','Bend your elbows and lower until your upper arms are about level with the floor.','Press back up to straight arms without shrugging.'],'Stop the descent short if your shoulders complain.'],
  [/Fly|Pec Deck|Crossover/,['Chest'],['Front delts'],['Set up with a slight, fixed bend in your elbows.','Open your arms wide in an arc until you feel a stretch across your chest.','Bring your hands back together by squeezing your chest, like hugging a big tree.','Pause briefly, then lower under control.'],'Keep the elbow angle the same the whole time. This is not a press.'],
@@ -1618,8 +1643,12 @@ const EXF=[
  [/Swing|Clean|Snatch|Thruster|Burpee|Wall Ball|Slam/,['Glutes','Full body'],['Hamstrings','Shoulders','Core'],['Set a strong hinge or squat position with a flat back.','Drive explosively with your hips.','Let the weight float or move it overhead using that hip power, not your arms.','Absorb the weight on the way down and reset.'],'Power comes from the hips. Arms just guide.'],
  [/Wrist/,['Forearms'],[],['Rest your forearms on your thighs or a bench.','Let the weight roll down to your fingertips.','Curl your wrist up as far as you can.','Lower slowly.'],'Light weight, higher reps.']];
 const MGWORD={chest:'Chest',shoulders:'Shoulders',triceps:'Triceps','rear delts':'Rear delts',back:'Back',traps:'Traps',biceps:'Biceps',forearms:'Forearms',quads:'Quads',hamstrings:'Hamstrings',glutes:'Glutes',adductors:'Adductors',calves:'Calves',abs:'Abs','full body':'Full body',cardio:'Heart & lungs'};
+const GFIX=[[/Close-Grip Bench Press|Close-Grip Press/,['Triceps','Chest'],['Front delts']],[/JM Press/,['Triceps'],['Chest']],
+ [/Pushdown|Triceps Kickback|Kickback \(Triceps\)|Triceps Extension|Overhead Cable Extension|Skull Crusher|Tate Press|EZ-Bar Overhead Extension/,['Triceps'],[]],
+ [/Trap Bar Deadlift/,['Quads','Glutes'],['Hamstrings','Lower back','Traps','Grip']],[/Sissy Squat|Wall Sit/,['Quads'],[]],
+ [/Russian Twist|Woodchopper|Landmine Rotation|Side Bend|Windmill/,['Obliques'],['Abs']],[/Mountain Climber/,['Core'],['Hip flexors','Shoulders']],[/Single-Arm Cable Press/,['Chest'],['Triceps','Front delts']]];
 function exGuide(e){if(e.type==='cardio'||e.mg==='cardio')return {p:['Heart & lungs'],s:['Legs'],steps:['Warm up for 3–5 minutes at an easy pace.','Settle into your target effort. For steady work you should be able to talk in short sentences.','Keep good posture: tall chest, relaxed shoulders.','Cool down for a few minutes before stopping.'],tip:'Most cardio should feel easy. Save the hard efforts for one or two sessions a week.'};
-  const f=EXF.find(([re])=>re.test(e.name));if(f)return {p:f[1],s:f[2],steps:f[3],tip:f[4]};
+  const f=EXF.find(([re])=>re.test(e.name));if(f){const fx=GFIX.find(([re])=>re.test(e.name));return {p:fx?fx[1]:f[1],s:fx?fx[2]:f[2],steps:f[3],tip:f[4]}}
   return {p:[MGWORD[e.mg]||'Full body'],s:[],steps:['Set up in a stable position and brace your core.','Move through the full range you can control.','Pause briefly at the hardest point.','Return slowly. Aim for about two seconds on the way down.'],tip:'Pick a weight you can control for every rep.'}}
 function exGuideHtml(e){const g=exGuide(e);return `<div class="exm">${g.p.map(m=>`<span class="p">${m}</span>`).join('')}${g.s.map(m=>`<span>${m}</span>`).join('')}</div><div class="secl">How To Do It</div><ol class="exsteps">${g.steps.map(t=>`<li>${t}</li>`).join('')}</ol>${g.tip?`<div class="shp"><div class="tnote"><b>Tip</b> · ${g.tip}</div></div>`:''}`}
 function addToRtHtml(id){const e=ex(id),rs=S.routines.filter(r=>r.days.length);
@@ -1743,7 +1772,7 @@ function fSpec(key){if(FSPEC[key])return FSPEC[key];let S=null;try{const g=EXS[k
   if(!S)S=EXS['Bodyweight Squat']();if(S.K)S.K=S.K.map(fK);
   if(!S.hi){let e=null;try{e=(typeof S_EX==='function'&&S_EX(key))||null}catch(_){}S.hi=fHi(e||{name:key,mg:''})}
   return FSPEC[key]=S}
-const HIMAP={Chest:'chest','Upper chest':'chest',Triceps:'triceps','Front delts':'shoulder','Side delts':'shoulder',Shoulders:'shoulder','Rear delts':'reardelt',Lats:'back','Upper back':'back',Back:'back',Biceps:'biceps',Forearms:'forearm',Grip:'forearm',Quads:'quad',Hamstrings:'ham',Glutes:'glute',Calves:'calf',Core:'core',Abs:'core',Traps:'traps','Lower back':'lback',Adductors:'add','Full body':'glute','Heart & lungs':'quad','Hip stabilizers':'abd'};
+const HIMAP={Chest:'chest','Upper chest':'chest',Triceps:'triceps','Front delts':'shoulder','Side delts':'shoulder',Shoulders:'shoulder','Rear delts':'reardelt',Lats:'back','Upper back':'back',Back:'back',Biceps:'biceps',Forearms:'forearm',Grip:'forearm',Quads:'quad',Hamstrings:'ham',Glutes:'glute',Calves:'calf',Core:'core',Abs:'core',Traps:'traps','Lower back':'lback',Adductors:'add','Full body':'glute','Heart & lungs':'quad','Hip stabilizers':'abd',Obliques:'core',Shins:'calf'};
 function fHi(e){try{const g=exGuide(e);return g.p.map(m=>HIMAP[m]).filter(Boolean)}catch(_){return []}}
 function fAlt(j,c,P){let g='';const e=c.eq;
   if(j.cam==='f')g+=`<line class="fgnd" x1="-300" x2="500" y1="${FG+1}" y2="${FG+1}" stroke="var(--fg)" stroke-width="1.5"/>`;
