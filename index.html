@@ -72,7 +72,7 @@ textarea.inp{font-size:12px;font-family:ui-monospace,Menlo,monospace}
 .stp.w span{min-width:66px;font-size:15px}
 .ico{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;color:var(--mute);flex:none}
 .ldh{touch-action:none;cursor:grab}
-.vsum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 16px 10px}.vsum div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 10px;text-align:center}.vsum b{display:block;font-size:22px;font-weight:800}.vsum span{font-size:12px;color:var(--mute)}
+.vsplit{margin:4px 20px 0;height:6px;border-radius:3px;background:var(--cy);overflow:hidden;display:flex}.vsplit i{background:var(--pk);display:block;height:100%}.vsplt{display:flex;justify-content:space-between;margin:6px 20px 10px;font-size:12px;color:var(--mute)}.vsum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 16px 10px}.vsum div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 10px;text-align:center}.vsum b{display:block;font-size:22px;font-weight:800}.vsum span{font-size:12px;color:var(--mute)}
 .vrow{padding:10px 20px;border-bottom:1px solid var(--line)}.vtop{display:flex;justify-content:space-between;align-items:baseline}.vtop b{font-size:15px;font-weight:600}.vtop span{font-size:14px;font-weight:700}.vbar{display:flex;height:8px;border-radius:4px;background:var(--track);overflow:hidden;margin:7px 0 5px}.vbar i,.vkey i{display:block;height:100%;background:var(--pk)}.vbar i.iso,.vkey i.iso{background:var(--cy)}.vbar i.ind,.vkey i.ind{background:var(--pk);opacity:.35}.vsub{font-size:12px;color:var(--mute)}
 .vkey{display:flex;gap:14px;padding:12px 20px 6px;font-size:12px;color:var(--mute)}.vkey span{display:flex;align-items:center;gap:6px}.vkey i{width:10px;height:10px;border-radius:3px}[data-ld]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .li.ldrag{position:relative;z-index:20;background:var(--sh1,#1c1c1f);box-shadow:0 10px 28px rgba(0,0,0,.45);border-radius:12px;transition:box-shadow .15s,border-radius .15s}
@@ -845,7 +845,7 @@ function renderHome(){
   return `<main class="pg">${h}</main>`;
 }
 function histRow(x){if(x.act)return `<div class="li" data-sw="h|${x.id}" data-a="sub" data-x="hist:${x.id}"><span style="display:flex;color:var(--pk)">${ic('heart')}</span><div class="g"><div class="tt">${esc(x.name)}</div><div class="sb">${dlong(x.date)} · ${x.act.min} min · ${EFF[x.act.eff]}${x.act.note?' · '+esc(x.act.note):''}</div></div><span class="chev">${ic('chev')}</span></div>`;return `<div class="li" data-sw="h|${x.id}" data-a="sub" data-x="hist:${x.id}"><span class="mute" style="display:flex">${ic('clock')}</span><div class="g"><div class="tt">${esc(x.name)}</div><div class="sb">${dlong(x.date)} · ${mmss(x.dur)} · ${volOf(x)?fmt(Math.round(volOf(x)))+' '+U():'cardio'}</div></div><span class="chev">${ic('chev')}</span></div>`}
-function previewHtml(ri,di){const r=R(ri),d=D(ri,di);return `<div class="sh-t">${esc(d.name)}<div class="xs mute" style="font-weight:400;margin-top:2px">${esc(r.name)}</div></div>${d.notes?`<div class="shp" style="padding-bottom:12px"><div class="tnote">${esc(d.notes)}</div></div>`:''}<div style="border-top:1px solid var(--line)">${d.items.map(it=>`<div class="setrow"><span style="font-size:15px;color:#fff;letter-spacing:0">${esc(ex(it.exId).name)}</span><span class="mute sm">${it.sets} × ${it.rr?esc(String(it.rr)).replace('-','–'):'sets'}</span></div>`).join('')||'<div class="empty sm">No exercises in this workout yet.</div>'}</div><button class="pkb" data-a="startd" data-x="${ri}|${di}">Start Workout</button><button class="olb" data-a="shsub" data-x="day:${ri}|${di}">Edit Workout</button>`}
+function previewHtml(ri,di){const r=R(ri),d=D(ri,di);return `<div class="sh-t">${esc(d.name)}<div class="xs mute" style="font-weight:400;margin-top:2px">${esc(r.name)} · ${exSets(d)}</div></div>${d.notes?`<div class="shp" style="padding-bottom:12px"><div class="tnote">${esc(d.notes)}</div></div>`:''}<div style="border-top:1px solid var(--line)">${d.items.map(it=>`<div class="setrow"><span style="font-size:15px;color:#fff;letter-spacing:0">${esc(ex(it.exId).name)}</span><span class="mute sm">${it.rr?`${it.sets} × ${esc(String(it.rr)).replace('-','–')}`:`${it.sets} set${it.sets==1?'':'s'}`}</span></div>`).join('')||'<div class="empty sm">No exercises in this workout yet.</div>'}</div><button class="pkb" data-a="startd" data-x="${ri}|${di}">Start Workout</button><button class="olb" data-a="shsub" data-x="day:${ri}|${di}">Edit Workout</button>`}
 
 /* routines */
 function renderRoutines(){
@@ -857,6 +857,7 @@ function exSets(d){const n=d.items.length,t=d.items.reduce((a,it)=>a+(+it.sets||
 function renderRoutine(id){
   const r=R(id);if(!r){V.sub='routines';return renderRoutines()}
   let h='';
+  if(!V.rEdit)h+=dayVolumeHtml({items:r.days.flatMap(d=>d.items)},r);
   if(V.rEdit)h+=`<div class="shp" style="padding-top:16px"><input class="inp" data-in="rname" data-x="${r.id}" value="${esc(r.name)}"></div>`;
   r.days.forEach((d,k)=>{h+=`<div class="h2">Day ${k+1}${V.rEdit?`<button class="lnk" data-a="deld" data-x="${r.id}|${d.id}" style="display:flex">${ic('minusc')}</button>`:''}</div><div class="li" data-a="sub" data-x="day:${r.id}|${d.id}"><div class="g"><div class="tt">${esc(d.name)}</div><div class="sb">${exSets(d)}</div></div><span class="chev">${ic('chev')}</span></div>`});
   h+=`<button class="cyl" data-a="addd" data-x="${r.id}">${ic('plusc')} Add Day</button>`;
@@ -883,11 +884,15 @@ function dayVolume(d){const M={};let sets=0,lift=0,card=0;
     const add=(m,k,v)=>{m=MNORM[m]||m;const o=M[m]=M[m]||{c:0,i:0,x:0};o[k]+=v};
     [...new Set(g.p)].forEach(m=>add(m,cp?'c':'i',n));[...new Set(g.s)].filter(m=>!g.p.includes(m)).forEach(m=>add(m,'x',n))});
   const rows=Object.entries(M).map(([m,o])=>({m,...o,d:o.c+o.i})).sort((a,b)=>(b.d+b.x/2)-(a.d+a.x/2));return {sets,lift,card,rows}}
-function dayVolumeHtml(d){const v=dayVolume(d);if(!v.lift&&!v.card)return '';const mx=Math.max(1,...v.rows.map(r=>r.d+r.x/2));const mins=Math.round(v.sets*2.6+v.card*15);
-  let h=`<div class="h2">Volume<small>THIS WORKOUT</small></div><div class="vsum"><div><b>${v.sets}</b><span>sets</span></div><div><b>${v.lift}</b><span>lifts${v.card?` + ${v.card} cardio`:''}</span></div><div><b>~${mins}</b><span>min</span></div></div>`;
-  h+=v.rows.map(r=>{const parts=[];if(r.c)parts.push(`${r.c} compound`);if(r.i)parts.push(`${r.i} isolation`);if(r.x)parts.push(`+${r.x} indirect`);
+function dayVolumeHtml(d,rt){const v=dayVolume(d);if(!v.lift&&!v.card)return '';const mx=Math.max(1,...v.rows.map(r=>r.d+r.x/2));const mins=Math.round(v.sets*2.6+v.card*15);
+  let h;if(rt){const nd=rt.days.length,cs=d.items.reduce((a,it)=>{const e=ex(it.exId);return a+(e&&e.type!=='cardio'&&e.mg!=='cardio'&&isCompound(e)?+it.sets||0:0)},0),pc=v.sets?Math.round(cs/v.sets*100):0;
+    h=`<div class="h2">Breakdown<small>ALL ${nd} DAY${nd===1?'':'S'}</small></div><div class="vsum"><div><b>${v.sets}</b><span>total sets</span></div><div><b>${nd?Math.round(v.sets/nd):0}</b><span>sets / day</span></div><div><b>${pc}%</b><span>compound</span></div></div><div class="vsplit"><i style="width:${pc}%"></i></div><div class="vsplt"><span>${cs} compound</span><span>${v.sets-cs} isolation</span></div>`}
+  else h=`<div class="h2">Volume<small>THIS WORKOUT</small></div><div class="vsum"><div><b>${v.sets}</b><span>sets</span></div><div><b>${v.lift}</b><span>lifts${v.card?` + ${v.card} cardio`:''}</span></div><div><b>~${mins}</b><span>min</span></div></div>`;
+  const rows=rt&&!V.rbdAll?v.rows.slice(0,5):v.rows;
+  h+=rows.map(r=>{const parts=[];if(r.c)parts.push(`${r.c} compound`);if(r.i)parts.push(`${r.i} isolation`);if(r.x)parts.push(`+${r.x} indirect`);
     return `<div class="vrow"><div class="vtop"><b>${esc(r.m)}</b><span>${r.d?`${r.d} set${r.d===1?'':'s'}`:'indirect only'}</span></div><div class="vbar"><i style="width:${r.c/mx*100}%"></i><i class="iso" style="width:${r.i/mx*100}%"></i><i class="ind" style="width:${r.x/2/mx*100}%"></i></div><div class="vsub">${parts.join(' · ')}</div></div>`}).join('');
-  h+=`<div class="vkey"><span><i></i>Compound</span><span><i class="iso"></i>Isolation</span><span><i class="ind"></i>Indirect (½ set)</span></div><p class="xs mute" style="padding:2px 20px 20px;margin:0">Sets count fully for the muscles an exercise mainly targets. Muscles that only assist, like triceps in a bench press, show as indirect and count as half a set in the bar.</p>`;
+  if(rt&&v.rows.length>5)h+=`<button class="cyl" data-a="rbdall" style="border:0">${V.rbdAll?'Show top 5 muscles':`Show all ${v.rows.length} muscles`}</button>`;
+  h+=`<div class="vkey"><span><i></i>Compound</span><span><i class="iso"></i>Isolation</span><span><i class="ind"></i>Indirect (½ set)</span></div>${rt?'':`<p class="xs mute" style="padding:2px 20px 20px;margin:0">Sets count fully for the muscles an exercise mainly targets. Muscles that only assist, like triceps in a bench press, show as indirect and count as half a set in the bar.</p>`}`;
   return h}
 function renderExercises(){const f=V.exf=V.exf||{mg:'all',eq:'all'},used={};S.history.forEach(h=>h.entries.forEach(e=>used[e.exId]=(used[e.exId]||0)+1));
   const eqs=[...new Set(S.exercises.map(e=>e.eq).filter(q=>EQN[q]))];
@@ -1133,7 +1138,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.62';
+const APPV='1.63';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
@@ -3938,6 +3943,7 @@ const ACT={
   plus:()=>openQuick(),
   qlift:()=>{closeSheet();openSheet(liftHtml())},
   sugr:x=>{openSheet(routineSheet(x))},
+  rbdall:()=>{V.rbdAll=!V.rbdAll;render()},
   sugopen:x=>{closeSheet();ACT.sub('routine:'+x)},
   qcar:()=>{closeSheet();openSheet(cardioHtml())},
   hm:x=>{V.hm=x;render()},
