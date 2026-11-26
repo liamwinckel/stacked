@@ -740,6 +740,14 @@ html[data-theme="light"] .setscr .sdb,html[data-theme="light"] .smenu{background
 .rirr button,.ppl,.chips2 button,.seg button,.rbr button,.smadd button,.smi,.tag,.shb,.cbtn,.rcb,.rcu,.lgx{--ps:.9}
 .prs.pkb,.prs.lgA,.prs.lgB,.prs.ppl,.rirr button.prs{filter:brightness(.93)}
 @media (prefers-reduced-motion:reduce){.prs,.prl{animation:none}}
+
+.showcel{position:fixed;left:50%;top:calc(var(--sat,0px) + 14px);z-index:200;display:flex;align-items:center;gap:12px;padding:10px 18px 10px 10px;border-radius:999px;background:#1c1c1e;border:1px solid rgba(255,214,10,.45);box-shadow:0 12px 34px rgba(0,0,0,.55),0 0 0 6px rgba(255,214,10,.08);color:#f4f4f5;transform:translateX(-50%);animation:scIn .6s cubic-bezier(.34,1.56,.64,1);pointer-events:none}
+.showcel .scd{width:32px;height:32px;border-radius:16px;background:var(--pk);color:#000;display:flex;align-items:center;justify-content:center;animation:scPop .7s .15s cubic-bezier(.34,1.56,.64,1) both}
+.showcel span:last-child{display:flex;flex-direction:column;line-height:1.2}.showcel b{font-size:14px;white-space:nowrap}.showcel small{font-size:11px;color:var(--mute)}
+.showcel.out{animation:scOut .45s ease forwards}
+@keyframes scIn{from{opacity:0;transform:translate(-50%,-24px) scale(.9)}}
+@keyframes scPop{from{transform:scale(0) rotate(-30deg)}}
+@keyframes scOut{to{opacity:0;transform:translate(-50%,-16px) scale(.96)}}
 /* ===== pill aesthetic, app-wide ===== */
 .pkb,.olb,.tcard .pkb,.bkb,.vopt,.rdo button,.rcban button,.refc button,.pkbar button,.hrow2 button,.rwk button,.rirr button,.prrd,.gychip,.blkchip,.baled,.rolet,.rdx span,.balok span,.tag,.resume,.nccb,.wgfix,.hsplit button,.chw button,.dsbtn,.ovnav{border-radius:999px}
 .seg,.seg button{border-radius:999px}
@@ -1171,7 +1179,7 @@ function renderLog(){return hd('Log')+`<main class="pg">${streakStrip()}${calend
 function renderHist(id){
   const h=S.history.find(x=>x.id===id);if(!h){V.sub=null;return renderLog()}
   const reps=sum(h.entries.map(e=>sum(dn(e).map(x=>x.r))));
-  if(h.act){const A=ACTS[h.act.k]||['Activity','oth'];return hd(esc(h.name),back())+`<main class="pg"><div class="h2">${dlong(h.date)}<small>${h.act.min} MIN</small></div><div class="cyins" style="margin:14px 16px 0">${[['Duration',h.act.min+' min'],['Effort',EFF[h.act.eff]],['Counts as',{mob:'Mobility',car:'Cardio',mind:'Mindful',oth:'Training'}[A[1]]],['Started',new Date(h.date).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})]].map(([l,v])=>`<div><span>${l}</span><b>${v}</b></div>`).join('')}</div>${h.act.note?`<div class="shp" style="padding-top:14px"><div class="tnote">${esc(h.act.note)}</div></div>`:''}<p class="xs mute center" style="padding:14px 24px">${A[1]==='mind'?'Counts toward your Mindful bar.':`Counts toward Show Up, ${A[1]==='car'?'Cardio, ':A[1]==='mob'?'Mobility, ':''}Move and Train.`}</p></main>`}
+  if(h.act){const A=ACTS[h.act.k]||['Activity','oth'];return hd(esc(h.name),back())+`<main class="pg"><div class="h2">${dlong(h.date)}<small>${h.act.min} MIN</small></div><div class="cyins" style="margin:14px 16px 0">${[['Duration',h.act.min+' min'],['Effort',EFF[h.act.eff]],['Counts as',{mob:'Mobility',car:'Cardio',mind:'Mindful',oth:'Training'}[A[1]]],['Started',new Date(h.date).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})]].map(([l,v])=>`<div><span>${l}</span><b>${v}</b></div>`).join('')}</div>${h.act.note?`<div class="shp" style="padding-top:14px"><div class="tnote">${esc(h.act.note)}</div></div>`:''}<p class="xs mute center" style="padding:14px 24px">${A[1]==='mind'?'Counts toward Show Up and your Mindful bar.':`Counts toward Show Up, ${A[1]==='car'?'Cardio, ':A[1]==='mob'?'Mobility, ':''}Move and Train.`}</p></main>`}
   let b=`<div class="h2">${dlong(h.date)}<small>${mmss(h.dur)}</small></div>`+(h.note?`<div class="shp" style="padding-top:14px"><div class="tnote">${esc(h.note)}</div></div>`:'')+statsGrid(h.entries.length,sum(h.entries.map(e=>dn(e).length)),reps,fmt(Math.round(volOf(h))));
   for(const e of h.entries)b+=`<div class="h2" style="font-size:17px">${esc(ex(e.exId).name)}</div>`+e.sets.map((x,j)=>`<div class="setrow"><span>${x.wu?'WARM-UP':x.ds?'DROP SET':'SET '+(e.sets.filter(z=>!z.wu&&!z.ds).indexOf(x)+1)}</span><span>${x.skip?'<span class="mute">Skipped</span>':x.dur!=null?cfmt(x):`${fmt(x.w)} ${U()} × ${x.r}`}</span></div>`).join('');
   b+=`<button class="pkb" data-a="share" data-x="${h.id}">Share Workout Card</button><button class="dng" data-a="delh" data-x="${h.id}">Delete workout</button>`;
@@ -1421,6 +1429,7 @@ function render(){syncBars();
   try{document.body.style.overflow=sp2?'hidden':''}catch(e){}
   if(V.anim){const m=$('#app main');if(m&&m.classList)m.classList.add(V.anim);V.anim=null}
   if(V.prKey&&Date.now()-V.prKey.t<400){const k=V.prKey;V.prKey=null;const sel=`[data-a="${k.a}"]`+(k.x!=null?`[data-x="${CSS.escape(k.x)}"]`:'');const el=document.querySelector(sel);if(el&&!el.classList.contains('prl')){el.classList.add('prl');setTimeout(()=>el.classList.remove('prl'),480)}}
+  if(S.showCel!==ymd(Date.now()))setTimeout(showCheck,250);
   if(document.querySelector('#sp .whl')){const fr=V.from;whInit();if(fr&&S.session&&fr.i!==S.session.i){const m=document.querySelector('#sp .setmain');if(m)m.classList.add('xin')}}V.from=null;
   const lp=document.querySelector('#lgp[data-enter]');if(lp){lp.removeAttribute('data-enter');requestAnimationFrame(()=>requestAnimationFrame(()=>lp.classList.add('rest')))}
   const lf=document.querySelector('#sp .lgf[data-left]');if(lf){const lt=+lf.dataset.left;requestAnimationFrame(()=>requestAnimationFrame(()=>{lf.style.transition=`width ${lt}s linear, opacity .5s ease`;lf.style.width='0%'}))}
@@ -1487,14 +1496,18 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.83';
+const APPV='1.84';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
+
+function showCheck(){try{const t=ymd(Date.now());if(S.showCel===t||!SBARS.some(b=>b[0]==='show'))return;const st=dayStats(dayStart(Date.now()));if(!st.show||st.rest)return;S.showCel=t;save();
+  const el=document.createElement('div');el.className='showcel';el.setAttribute('role','status');el.innerHTML=`<span class="scd"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></span><span><b>You showed up today</b><small>Show Up bar closed</small></span>`;document.body.appendChild(el);try{navigator.vibrate&&navigator.vibrate([12,40,18])}catch(_){}setTimeout(()=>el.classList.add('out'),2600);setTimeout(()=>el.remove(),3100)}catch(_){}}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
 function dayStats0(d0){const d1=d0+864e5,now=Date.now();let sets=0,move=0,cardio=0,beat=false,show=false,mob=0,mind=0;
   S.history.forEach(h=>{if(h.date<d0||h.date>=d1)return;const ac=actCat(h);if(ac==='mind'){mind+=h.act.min;return}show=true;move+=(h.dur||0)/60;if(ac==='car')cardio+=h.act.min;if(ac==='mob')mob+=h.act.min;if(h.beat)beat=true;h.entries.forEach(e=>{if(isCardio(e.exId))dn(e).forEach(x=>cardio+=(x.dur||0)/60);else sets+=dn(e).length})});
   const s=S.session;if(s&&now>=d0&&now<d1){let any=false;s.items.forEach(it=>{const c=isCardio(it.exId);it.sets.forEach(x=>{if(c){const m=cEl(x)/60;if(m>0){cardio+=m;any=true}}else if(x.done&&!x.wu){sets++;any=true}})});if(any){show=true;move+=(now-s.start)/60000}}
   const g=G(),rf=readyFactor(d0),dl=(S.daily||{})[ymd(d0)]||{},steps=(S.steps||{})[ymd(d0)]||0;mind+=dl.mindful||0;
+  if(!show){const dk=ymd(d0),rd=(S.ready||{})[dk];if(mind>0||(rd&&rd.score)||['water','sleep','mindful'].some(x=>(dl[x]||0)>0)||(S.logged&&S.logged[dk])||(S.body||[]).some(b=>b.date>=d0&&b.date<d1&&b.src!=='health'))show=true}
   return {show:show?1:0,lift:Math.min(1,sets/(g.sets*rf)),move:Math.min(1,move/(g.move*rf)),cardio:Math.min(1,cardio/(g.cardio*rf)),beat:beat?1:0,train:Math.min(1,move/(g.train*rf)),mobility:Math.min(1,mob/g.mobility),steps:Math.min(1,steps/g.steps),water:Math.min(1,(dl.water||0)/g.water),sleep:Math.min(1,(dl.sleep||0)/g.sleep),mindful:Math.min(1,mind/g.mindful),raw:{sets,move,cardio,mob,mind,steps,water:dl.water||0,sleep:dl.sleep||0}}}
 const dayStart=t=>{const d=new Date(t);d.setHours(0,0,0,0);return d.getTime()};
 const closedCount=st=>SBARS.filter(([k])=>st[k]>=1).length;
@@ -1544,7 +1557,7 @@ function stackInfoHtml(){const g=G(),bk=barKeys(),bd=V.bd||bk;const row=(k,l,v,u
   <p class="xs mute center" style="padding:10px 20px 0">Rest days are part of training. You don't need to close it every day.</p>`}
 
 /* ===== bar catalog & training style ===== */
-const BARCAT={show:['Show Up','Log any workout or activity today'],lift:['Lift','Working sets today'],move:['Move','Total minutes training today'],cardio:['Cardio','Cardio minutes today, from lifting sessions or activities'],beat:['Beat It','Finish a workout with a PR or more volume than last time'],train:['Train','Minutes of any workout, class or activity'],steps:['Steps','Steps today, synced from Apple Health or logged here'],mobility:['Mobility','Yoga, Pilates, barre and stretching minutes'],water:['Water','Glasses of water today'],sleep:['Sleep','Hours slept last night'],mindful:['Mindful','Minutes of breathwork or meditation']};
+const BARCAT={show:['Show Up','Log anything today: a workout, activity, check-in, weight or habit'],lift:['Lift','Working sets today'],move:['Move','Total minutes training today'],cardio:['Cardio','Cardio minutes today, from lifting sessions or activities'],beat:['Beat It','Finish a workout with a PR or more volume than last time'],train:['Train','Minutes of any workout, class or activity'],steps:['Steps','Steps today, synced from Apple Health or logged here'],mobility:['Mobility','Yoga, Pilates, barre and stretching minutes'],water:['Water','Glasses of water today'],sleep:['Sleep','Hours slept last night'],mindful:['Mindful','Minutes of breathwork or meditation']};
 const STYLES={lift:{n:'Lifting',d:'Weights come first',bars:['show','lift','move','cardio','beat']},hybrid:{n:'Hybrid',d:'Lifting plus classes',bars:['show','lift','cardio','mobility','beat']},classes:{n:'Classes & cardio',d:'Yoga, Pilates, spin, runs',bars:['show','train','cardio','mobility','steps']}};
 function barKeys(){const b=S.barSel;return b&&b.length===5&&b.every(k=>BARCAT[k])?b:STYLES[S.style||'lift'].bars}
 function syncBars(){SBARS=barKeys().map(k=>[k,BARCAT[k][0]])}
@@ -4113,7 +4126,7 @@ const ACT={
   tstyle:x=>{S.style=x;S.barSel=null;V.bd=null;save();if(V.ob!=null&&$('#obw')){render();return}render();toast(`Bars set for ${STYLES[x].n}`)},
   barpick:x=>{let b=(V.bd||barKeys()).slice();if(b.includes(x))b=b.filter(k=>k!==x);else if(b.length<5)b.push(x);else{toast('Tap a bar to remove it first');return}V.bd=b;if(b.length===5){S.barSel=b.join()===STYLES[S.style||'lift'].bars.join()?null:b;V.bd=null;save();render()}refreshSheet(stackInfoHtml())},
   barreset:()=>{S.barSel=null;V.bd=null;save();render();refreshSheet(stackInfoHtml())},
-  dlog:x=>{const [k,d]=x.split('|');if(k==='steps'){S.steps=S.steps||{};const t=ymd(Date.now());S.steps[t]=Math.max(0,(S.steps[t]||0)+ +d*500)}else{const dl=daily(Date.now()),st={water:1,sleep:.5,mindful:5}[k];dl[k]=Math.max(0,(dl[k]||0)+ +d*st)}save();render();refreshSheet(stackInfoHtml())},
+  dlog:x=>{const [k,d]=x.split('|');if(k==='steps'){S.steps=S.steps||{};const t=ymd(Date.now());S.steps[t]=Math.max(0,(S.steps[t]||0)+ +d*500)}else{const dl=daily(Date.now()),st={water:1,sleep:.5,mindful:5}[k];dl[k]=Math.max(0,(dl[k]||0)+ +d*st)}if(+d>0){S.logged=S.logged||{};S.logged[ymd(Date.now())]=1}save();render();refreshSheet(stackInfoHtml())},
   cycinfo:()=>openSheet(cycHtml()),
   cyctog:()=>{const c=CY();c.on=!c.on;S.cycle=c;save();render()},
   cyclog:()=>{const c=CY(),t=dayStart(Date.now());if(!c.starts.includes(t))c.starts.push(t);S.cycle=c;save();render();refreshSheet(cycHtml());toast('Period start logged')},
