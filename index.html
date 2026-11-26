@@ -631,10 +631,13 @@ html[data-theme="light"] .qh.car{background:#18181b;color:#fff}html[data-theme="
 .whr{font-size:12px;font-weight:500;letter-spacing:0;color:var(--mute);text-transform:none;background:none;border:0;padding:0;font-family:inherit}
 button.whr{color:var(--soft)}
 .whl{position:relative;height:clamp(84px,11.5vh,100px);-webkit-mask-image:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent);mask-image:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent)}
-.whs{display:flex;align-items:center;gap:10px;height:100%;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x;scrollbar-width:none;padding:0 calc(50% - 32px);box-sizing:border-box}
-.whs::-webkit-scrollbar{display:none}
-.whi{position:relative;flex:none;scroll-snap-align:center;min-width:62px;height:46px;padding:0 14px;border-radius:999px;border:1.5px solid #3a3a3c;background:transparent;color:#f4f4f5;font-size:18px;font-weight:500;font-variant-numeric:tabular-nums;will-change:transform,opacity;transform-origin:50% 50%;transition:background-color .22s ease,border-color .22s ease,color .22s ease,font-weight .22s;box-sizing:border-box}
-.whi.on{background:var(--pk);border-color:var(--pk);color:#000;font-weight:800}
+.whs{position:absolute;left:50%;top:0;bottom:0;width:0;will-change:transform}
+.whl{overflow:hidden;touch-action:pan-y;outline:none;cursor:grab}
+.whi{position:absolute;top:50%;left:0;min-width:62px;height:46px;padding:0 14px;border-radius:999px;border:1.5px solid #3a3a3c;background:transparent;color:#f4f4f5;font-size:18px;font-weight:500;font-variant-numeric:tabular-nums;will-change:transform,opacity;transform:translate(-50%,-50%);transition:background-color .28s cubic-bezier(.2,.8,.2,1),border-color .28s cubic-bezier(.2,.8,.2,1),color .28s cubic-bezier(.2,.8,.2,1);box-sizing:border-box;white-space:nowrap;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+.whv{display:inline-block}
+.whi.on{background:var(--pk);border-color:var(--pk);color:#000;font-weight:800;box-shadow:0 6px 22px rgba(255,214,10,.22)}
+.whi.pop .whv{animation:whpop .42s cubic-bezier(.34,1.56,.64,1)}
+@keyframes whpop{0%{transform:scale(1)}40%{transform:scale(1.09)}100%{transform:scale(1)}}
 .whm{position:absolute;left:50%;top:-15px;transform:translateX(-50%);font-style:normal;font-size:8.5px;font-weight:800;letter-spacing:.1em;white-space:nowrap;color:var(--mute)}
 .whm.g{color:#5fe39a}.whi.on .whm{top:-14px}
 .barwrap{display:flex;justify-content:center;padding:0 14px}
@@ -667,6 +670,37 @@ html[data-theme="light"] .setscr .sdb,html[data-theme="light"] .smenu{background
 
 .smi b{text-align:left}
 @media (max-height:740px){.setscr .whl{height:84px}.whi{height:40px;font-size:17px}.setscr .barsvg{max-height:9vh}.setscr .plates{margin-top:6px}.ppl{height:calc(30px + 24px * var(--k))}.setscr .rirr button{height:38px}.lgp{height:56px}.setdd{margin-top:4px}.sdb{height:36px}.wsec{gap:2px}.setscr .shd .shb{height:38px}}
+
+/* ===== rest mode in the log pill ===== */
+.lgp{position:relative;transition:background-color .5s cubic-bezier(.2,.8,.2,1)}
+.lgm span{display:inline-block}
+.lgp.rest{background:#1c1c1e;box-shadow:inset 0 0 0 1.5px #2c2c2e}
+.lgt{flex:1;position:relative;overflow:hidden;border:0;background:none;color:#f4f4f5;display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 20px;border-radius:999px}
+.lgf{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,rgba(255,214,10,.30),rgba(255,214,10,.16));border-radius:999px 0 0 999px;pointer-events:none}
+.lgtt{position:relative;display:flex;align-items:baseline;gap:8px}.lgtt .i{width:18px;height:18px;align-self:center;color:var(--pk)}
+.lgtt b{font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em}.lgtt small{font-size:10px;font-weight:700;letter-spacing:.16em;color:var(--mute)}
+.lgx{position:relative;height:36px;padding:0 12px;border-radius:999px;background:rgba(255,255,255,.1);font-size:13px;font-weight:700;display:flex;align-items:center}
+.lgn{flex:none;width:118px;margin:6px;border:0;border-radius:999px;background:var(--pk);color:#000;font-size:15px;font-weight:800;letter-spacing:.05em;display:flex;align-items:center;justify-content:center;gap:6px}
+.lgp.rest.anim{animation:lgDark .6s cubic-bezier(.2,.8,.2,1)}
+.lgp.rest.anim .lgn{animation:lgSlide .62s cubic-bezier(.2,.9,.25,1.12)}
+.lgp.rest.anim .lgtt,.lgp.rest.anim .lgx{animation:lgFade .5s .18s both}
+.lgp.rest.anim .lgf{animation:lgFill .7s .1s cubic-bezier(.2,.8,.2,1) both}
+@keyframes lgDark{from{background:var(--pk);box-shadow:inset 0 0 0 0 transparent}}
+@keyframes lgSlide{from{transform:translateX(calc(-100vw + 220px));width:calc(100vw - 32px)}to{transform:none}}
+@keyframes lgFade{from{opacity:0;transform:translateY(6px)}}
+@keyframes lgFill{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+.lgp.back{animation:lgBack .55s cubic-bezier(.2,.8,.2,1)}.lgp.back .lgm span{animation:lgFade .45s .1s both}
+@keyframes lgBack{0%{background:#1c1c1e}60%{box-shadow:0 0 0 0 rgba(255,214,10,.5)}100%{box-shadow:0 0 0 14px rgba(255,214,10,0)}}
+.rcard{margin:clamp(8px,1.4vh,12px) 16px 0;background:#1c1c1e;border:1px solid #2c2c2e;border-radius:22px;padding:10px 12px;text-align:left}
+.rcard.anim{animation:rcIn .5s .1s cubic-bezier(.2,.8,.2,1) both}@keyframes rcIn{from{opacity:0;transform:translateY(-8px) scale(.98)}}
+.rc1{display:flex;align-items:center;gap:8px;font-size:14px}.rc1 b{font-weight:700}.rc1>span:not(.rck){color:var(--mute);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}.rc1 b{white-space:nowrap}
+.rck{width:22px;height:22px;border-radius:11px;background:rgba(95,227,154,.16);color:#5fe39a;display:flex;align-items:center;justify-content:center;flex:none}
+.rcu{height:30px;padding:0 12px;border-radius:999px;border:0;background:#2c2c2e;color:var(--pk);font-size:12px;font-weight:700}
+.rc2{display:flex;align-items:center;gap:10px;margin-top:8px;font-size:13px;color:#d1d1d6;line-height:1.35}.rc2 span{flex:1}.rc2 b{color:#fff}
+.rcb{flex:none;height:32px;padding:0 14px;border-radius:999px;border:0;background:var(--pk);color:#000;font-size:12px;font-weight:800}
+.rlens{display:flex;flex-wrap:wrap;gap:8px}.rlens button{height:40px;min-width:64px;padding:0 14px;border-radius:999px;border:1.5px solid #3a3a3c;background:none;color:#f4f4f5;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}.rlens button.on{background:var(--pk);border-color:var(--pk);color:#000;font-weight:800}
+.rbtns{display:flex;gap:8px;padding:0 16px 8px}.rbtns>*{flex:1;margin:0!important}
+@media (prefers-reduced-motion:reduce){.lgp.rest.anim,.lgp.rest.anim *,.lgp.back,.rcard.anim{animation:none!important}}
 /* ===== pill aesthetic, app-wide ===== */
 .pkb,.olb,.tcard .pkb,.bkb,.vopt,.rdo button,.rcban button,.refc button,.pkbar button,.hrow2 button,.rwk button,.rirr button,.prrd,.gychip,.blkchip,.baled,.rolet,.rdx span,.balok span,.tag,.resume,.nccb,.wgfix,.hsplit button,.chw button,.dsbtn,.ovnav{border-radius:999px}
 .seg,.seg button{border-radius:999px}
@@ -841,7 +875,10 @@ function wuPlan(w,t){const b=t==='barbell'?bar():0,inc=t==='barbell'?(U()==='lb'
   for(const [p,rp] of pct){const x=r(w*p);if(x>0&&x<w&&x>(out.length?out[out.length-1].w:0))out.push({w:x,r:rp})}return out}
 function weekStart(ts){const d=new Date(ts);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime()}
 function prTimeline(exId){const out=[];let be=0;for(let k=S.history.length-1;k>=0;k--){const h=S.history[k],e=h.entries.find(x=>x.exId===exId);if(!e)continue;let best=null;for(const x of dn(e)){const v=x.w>0?e1(x.w,x.r):x.r;if(v>be+.01&&(!best||v>best.v))best={v,w:x.w,r:x.r}}if(best){be=best.v;out.push({date:h.date,...best})}}return out}
-function restDone(b){const s=S.session;if(!s||!s.rest)return;s.rest=null;V.restOpen=false;if(b)beep();save();if(V.inSession)render()}
+function restDone(b){const s=S.session;if(!s||!s.rest)return;s.rest=null;V.restOpen=false;if(b){beep();try{navigator.vibrate&&navigator.vibrate([60,40,60])}catch(_){}V.restEnd=true;restNotify()}save();if(V.inSession)render()}
+function restNotify(){try{if(!S.restNotify||!('Notification' in window)||Notification.permission!=='granted'||!document.hidden)return;const s=S.session,it=s&&s.items[s.i],t='Rest is over',body=it?`Time for ${ex(it.exId).name}`:'Time for your next set';if(navigator.serviceWorker)navigator.serviceWorker.ready.then(r=>r.showNotification(t,{body,tag:'bars-rest',icon:'icon-bars-192.png',renotify:true})).catch(()=>{});else new Notification(t,{body})}catch(_){}}
+function restSchedule(){try{const s=S.session;if(!s||!s.rest||!S.restNotify||!('Notification' in window)||Notification.permission!=='granted')return;if('showTrigger' in Notification.prototype&&typeof TimestampTrigger!=='undefined'&&navigator.serviceWorker)navigator.serviceWorker.ready.then(r=>r.showNotification('Rest is over',{body:'Time for your next set',tag:'bars-rest',showTrigger:new TimestampTrigger(s.rest.end)})).catch(()=>{})}catch(_){}}
+document.addEventListener('visibilitychange',()=>{const s=S.session;if(document.hidden){restSchedule()}else if(s&&s.rest&&Date.now()>=s.rest.end){restDone(false);toast('Rest finished while you were away')}});
 function startRest(){S.session.rest={end:Date.now()+S.rest*1000,total:S.rest*1000}}
 function convertAll(to){const f=to==='kg'?1/2.20462:2.20462,r=x=>Math.round(x*f*2)/2,fm=to==='kg'?2.54:1/2.54;(S.body||[]).forEach(b=>{if(b.bw)b.bw=Math.round(b.bw*f*10)/10;['waist','chest','arm','thigh'].forEach(k=>{if(b[k])b[k]=Math.round(b[k]*fm*10)/10})});S.history.forEach(h=>h.entries.forEach(e=>e.sets.forEach(st=>{if(!st.skip)st.w=r(st.w)})));if(S.session)S.session.items.forEach(it=>it.sets.forEach(st=>{st.w=r(st.w);delete st.p}))}
 
@@ -1181,28 +1218,65 @@ function whVals(kind,e,cur){const out=[];
   const base=lo+Math.round((cur-lo)/st)*st;for(let k=-48;k<=48;k++){const v=Math.round((base+k*st)*100)/100;if(v>=lo&&v<=(U()==='lb'?1500:700))out.push(v)}
   if(!out.some(v=>Math.abs(v-cur)<1e-6)){out.push(cur);out.sort((a,b)=>a-b)}return out}
 function wheelHtml(kind,vals,cur,marks,label){
-  return `<div class="whl" data-wh="${kind}"><div class="whs" role="listbox" aria-label="${label}">${vals.map(v=>{const m=marks[v];const on=Math.abs(v-cur)<1e-6;return `<button class="whi${on?' on':''}" data-a="whtap" data-x="${v}" role="option" aria-selected="${on}">${fmt(v)}${m?`<em class="whm ${m[1]}">${m[0]}</em>`:''}</button>`}).join('')}</div></div>`}
+  return `<div class="whl" data-wh="${kind}" tabindex="0" role="listbox" aria-label="${label}"><div class="whs">${vals.map(v=>{const m=marks[v];const on=Math.abs(v-cur)<1e-6;return `<button class="whi${on?' on':''}" data-a="whtap" data-x="${v}" role="option" aria-selected="${on}"><span class="whv">${fmt(v)}</span>${m?`<em class="whm ${m[1]}">${m[0]}</em>`:''}</button>`}).join('')}</div></div>`}
 const WH={};
-function whInit(){document.querySelectorAll('#sp .whl').forEach(w=>{const sc=w.querySelector('.whs'),kind=w.dataset.wh;if(!sc||sc._wh)return;sc._wh=1;
-  const items=[...sc.children];let raf=0,tmo=0,sel=sc.querySelector('.on'),lastV=sel?+sel.dataset.x:null;
-  const center=el=>el.offsetLeft+el.offsetWidth/2;
-  const paint=()=>{raf=0;const c=sc.scrollLeft+sc.clientWidth/2;let best=null,bd=1e9;
-    for(const el of items){const d=center(el)-c,a=Math.abs(d)/74;if(Math.abs(d)<bd){bd=Math.abs(d);best=el}
-      if(a>5.5){if(el._v!==0){el.style.opacity='0';el._v=0}continue}
-      const s=a<1?1.2-0.24*a*a*(3-2*a):Math.max(.84,.96-(a-1)*.05),o=Math.max(0,1-Math.pow(a/3.4,1.6));
-      el.style.transform=`scale(${s.toFixed(3)})`;el.style.opacity=o.toFixed(3);el._v=1}
-    if(best&&best!==sel){if(sel){sel.classList.remove('on');sel.setAttribute('aria-selected','false')}sel=best;sel.classList.add('on');sel.setAttribute('aria-selected','true');const v=+sel.dataset.x;if(v!==lastV){lastV=v;if(user)whLive(kind,v)}}};
-  let startV=lastV;const settle=()=>{if(!user)return;if(kind==='w'&&lastV!==startV){const ss=S.session,it=ss.items[ss.i],st=it.sets[ss.s];if(!st.wu&&typeof carryW==='function')carryW(it,st,startV);startV=lastV}whCommit(kind,lastV)};
-  sc.addEventListener('scroll',()=>{if(!raf)raf=requestAnimationFrame(paint);clearTimeout(tmo);tmo=setTimeout(settle,160)},{passive:true});
-  let user=false;const mark=()=>{user=true};sc.addEventListener('touchstart',mark,{passive:true});sc.addEventListener('pointerdown',mark,{passive:true});sc.addEventListener('wheel',mark,{passive:true});sc._user=()=>user=true;
-  const place=()=>{if(sel)sc.scrollLeft=center(sel)-sc.clientWidth/2};place();paint0();requestAnimationFrame(()=>{if(!user){place();paint0()}});
-  function paint0(){const keep=lastV;paint();if(!user&&lastV!==keep){lastV=keep;const k=items.find(x=>+x.dataset.x===keep);if(k){if(sel)sel.classList.remove('on');sel=k;k.classList.add('on')}}}})}
+function whInit(){document.querySelectorAll('#sp .whl').forEach(w=>{if(w._wh)return;w._wh=1;
+  const tr=w.querySelector('.whs'),kind=w.dataset.wh,items=[...tr.children];if(!items.length)return;
+  const P=Math.max(74,Math.max(...items.map(b=>(b.querySelector('.whv')||b).textContent.length))*11+40);items.forEach((b,i)=>b.style.left=(i*P)+'px');
+  const N=items.length,minX=-(N-1)*P;let idx=Math.max(0,items.findIndex(b=>b.classList.contains('on'))),x=-idx*P,sel=idx,anim=0,user=false,startV=+items[idx].dataset.x;
+  const clampI=i=>Math.max(0,Math.min(N-1,i));
+  const paint=()=>{tr.style.transform=`translate3d(${x}px,0,0)`;
+    for(let i=0;i<N;i++){const b=items[i],a=Math.abs((i*P+x)/P);if(a>5){if(b._h!==1){b.style.visibility='hidden';b._h=1}continue}if(b._h){b.style.visibility='';b._h=0}
+      const s=a<1?1.22-(1.22-.94)*(a*a*(3-2*a)):Math.max(.82,.94-(a-1)*.05),o=Math.max(0,1-Math.pow(a/3.3,1.7));
+      b.style.transform=`translate(-50%,-50%) scale(${s.toFixed(4)})`;b.style.opacity=o.toFixed(3)}
+    const n=clampI(Math.round(-x/P));if(n!==sel){items[sel].classList.remove('on');items[sel].setAttribute('aria-selected','false');sel=n;items[sel].classList.add('on');items[sel].setAttribute('aria-selected','true');if(user)whLive(kind,+items[sel].dataset.x)}};
+  const settle=()=>{const b=items[sel];b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop');const v=+b.dataset.x;if(kind==='w'&&v!==startV){const ss=S.session,it=ss.items[ss.i],st=it.sets[ss.s];if(!st.wu&&typeof carryW==='function')carryW(it,st,startV);startV=v}whCommit(kind,v)};
+  const ease=t=>1-Math.pow(1-t,4);
+  const go=(to,dur)=>{cancelAnimationFrame(anim);const x0=x,t0=performance.now();dur=dur||Math.max(320,Math.min(1100,260+Math.abs(to-x0)*.75));
+    const st=now=>{const t=Math.min(1,(now-t0)/dur);x=x0+(to-x0)*ease(t);paint();if(t<1)anim=requestAnimationFrame(st);else{anim=0;settle()}};anim=requestAnimationFrame(st)};
+  w._go=i=>{user=true;go(-clampI(i)*P)};w._sel=()=>sel;
+  let d=null;
+  w.addEventListener('pointerdown',e=>{if(e.button>0)return;cancelAnimationFrame(anim);anim=0;d={x0:e.clientX,y0:e.clientY,sx:x,ax:null,s:[[performance.now(),x]],moved:false,id:e.pointerId}});
+  w.addEventListener('pointermove',e=>{if(!d||e.pointerId!==d.id)return;const dx=e.clientX-d.x0,dy=e.clientY-d.y0;
+    if(!d.ax){if(Math.abs(dx)>6&&Math.abs(dx)>Math.abs(dy)*1.1){d.ax='x';user=true;try{w.setPointerCapture(e.pointerId)}catch(_){}}else if(Math.abs(dy)>8){d.ax='y';return}else return}
+    if(d.ax!=='x')return;d.moved=true;let nx=d.sx+dx;if(nx>0)nx=nx*.35;else if(nx<minX)nx=minX+(nx-minX)*.35;x=nx;const t=performance.now();d.s.push([t,x]);if(d.s.length>6)d.s.shift();paint()});
+  const end=e=>{if(!d||(e&&e.pointerId!==d.id))return;const dd=d;d=null;if(dd.ax!=='x'){if(!anim&&Math.abs(x+sel*P)>.5)go(-sel*P,280);return}
+    w._moved=performance.now();const s=dd.s,a=s[0],b=s[s.length-1],dt=Math.max(16,b[0]-a[0]);let v=(b[1]-a[1])/dt;if(performance.now()-b[0]>80)v=0;
+    let to=x+v*340;to=Math.round(to/P)*P;to=Math.max(minX,Math.min(0,to));go(to)};
+  w.addEventListener('pointerup',end);w.addEventListener('pointercancel',end);
+  w.addEventListener('touchmove',e=>{if(d&&d.ax==='x'&&e.cancelable)e.preventDefault()},{passive:false});
+  w.addEventListener('click',e=>{if(w._moved&&performance.now()-w._moved<350){e.stopPropagation();e.preventDefault()}},true);
+  let wacc=0,wt=0;w.addEventListener('wheel',e=>{const dl=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:0;if(!dl)return;e.preventDefault();wacc+=dl;const now=performance.now();if(Math.abs(wacc)>30&&now-wt>60){wt=now;const st=wacc>0?1:-1;wacc=0;user=true;go(-clampI(sel+st)*P,300)}},{passive:false});
+  w.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();user=true;go(-clampI(sel+(e.key==='ArrowRight'?1:-1))*P,300)}});
+  paint()})}
 function whLive(kind,v){const s=S.session;if(!s)return;const it=s.items[s.i],st=it.sets[s.s],e=ex(it.exId);
   try{navigator.vibrate&&navigator.vibrate(3)}catch(_){}
   if(kind==='r'){st.r=v;return}
   st.w=v;if(e.type==='barbell'){st.p=greedy(Math.max(0,(v-bar())/2));const bs=$('#sp .barsvg');if(bs)bs.outerHTML=barSvg(st.p);const pl=$('#sp .plates');if(pl){const cnt={};st.p.forEach(x=>cnt[x]=(cnt[x]||0)+1);pl.innerHTML=availPlates().map(p=>octBtn(p,cnt[p])).join('')}const ps=$('#sp .wperside');if(ps)ps.textContent=perSide(st)}}
 function whCommit(kind,v){if(v==null)return;save()}
 function perSide(st){const ps=(st.p||[]).reduce((a,b)=>a+b,0);return `${fmt(bar())} ${U()} bar · ${fmt(ps)} per side`}
+
+function logBar(s,it,st,lab,work){const rs=s.rest,chk=`<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>`;
+  if(rs){const left=Math.max(0,(rs.end-Date.now())/1000),frac=Math.min(1,left*1000/rs.total),an=V.restAnim?'anim':'';V.restAnim=false;
+    const short=st.done?'NEXT':st.wu?'WARM-UP':st.ds?'DROP':'SET '+(work.indexOf(st)+1);
+    return `<div class="logbar"><div class="lgp rest ${an}"><button class="lgt" data-a="ropen" aria-label="Rest timer, ${mmss(Math.ceil(left))} left"><span class="lgf" style="width:${(frac*100).toFixed(2)}%" data-left="${left.toFixed(2)}"></span><span class="lgtt">${ic('watch',2)}<b id="rt2">${mmss(Math.ceil(left)).replace(/^0(\d:)/,'$1')}</b><small>REST</small></span><span class="lgx" data-a="radj" data-x="30" role="button" aria-label="Add 30 seconds">+30</span></button><button class="lgn" data-a="nexts">${chk}${short}</button></div></div>`}
+  const an=V.restEnd?'back':'';V.restEnd=false;const t=S.rest||90;
+  return `<div class="logbar"><div class="lgp ${an}"><button class="lgm" data-a="nexts">${chk}<span>${lab}</span></button><i></i><button class="lgr" data-a="ropen" aria-label="Rest timer">${ic('watch',2)}${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}</button></div></div>`}
+function restCard(s,it,st,e){const L=V.lastLog,an=V.restAnim?'anim':'';const pi=s.items[L.i],pe=ex(pi.exId);
+  const rr=String(pi.rr||'').split(/[-–]/).map(Number),lo=rr[0]||0,hi=rr[1]||rr[0]||0;let tip='',btn='';
+  if(L.i!==s.i){tip=`Up next: <b>${esc(e.name)}</b> · ${it.sets.filter(x=>!x.wu).length} sets. Set it up while you rest.`}
+  else if(L.wu){tip=`Warm-up done. Next: <b>${fmt(st.w)} × ${st.r}</b>.`}
+  else{const inc=pe.type==='barbell'?2*Math.min(...(availPlates().length?availPlates():[U()==='lb'?2.5:1.25])):incFor(pe.type);
+    if(L.rir===0||(lo&&L.r<lo))tip=`That one was a grind. Stay at <b>${fmt(st.w)}</b> and aim for ${Math.max(lo||L.r,1)}${lo?'+':''}.`;
+    else if((L.rir!=null&&L.rir>=3)||(hi&&L.r>=hi)){const nw=Math.round((L.w+inc)*100)/100;if(st.w>=nw)tip=`Plenty left in the tank. <b>${fmt(st.w)}</b> it is.`;else{tip=`Plenty left in the tank. Try <b>${fmt(nw)}</b> this set.`;btn=`<button class="rcb" data-a="restup" data-x="${nw}">Use ${fmt(nw)}</button>`}}
+    else tip=`Right on target. Same again: <b>${fmt(st.w)} × ${st.r}</b>.`}
+  return `<div class="rcard ${an}"><div class="rc1"><span class="rck"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></span><b>${L.lab} logged</b><span>${fmt(L.w)} × ${L.r}${L.rir!=null?` · ${L.rir===3?'3+':L.rir} left`:''}</span><button class="rcu" data-a="restundo">Undo</button></div><div class="rc2"><span>${tip}</span>${btn}</div></div>`}
+
+function restSheet(){const s=S.session,rs=s&&s.rest,opts=[30,45,60,90,120,150,180,240,300];
+  return `<div class="sh-t">Rest</div><div class="shp"><div class="lblx">Rest length</div><div class="rlens">${opts.map(o=>`<button class="${S.rest===o?'on':''}" data-a="rlen" data-x="${o}">${Math.floor(o/60)}:${String(o%60).padStart(2,'0')}</button>`).join('')}</div>
+  <div class="li" style="cursor:default;margin-top:10px"><div class="g"><div class="tt">Start rest when I log a set</div></div><button class="tog ${S.autoRest?'on':''}" data-a="setautorest" aria-label="Auto rest"></button></div>
+  <div class="li" style="cursor:default"><div class="g"><div class="tt">Alert me when rest ends</div><div class="sb">Shows a notification if you’ve left the app</div></div><button class="tog ${S.restNotify?'on':''}" data-a="rnotify" aria-label="Rest alerts"></button></div></div>
+  ${rs?`<div class="rbtns"><button class="olb" data-a="radj" data-x="-15">− 15 sec</button><button class="olb" data-a="radj" data-x="30">+ 30 sec</button><button class="pkb" data-a="rskip">Skip rest</button></div>`:`<button class="pkb" data-a="rnow">Start rest now</button>`}`}
 function renderSet(){
   const s=S.session,it=s.items[s.i],e=ex(it.exId),st=it.sets[s.s];
   if(e.type==='cardio')return renderCardio(s,it,e,st);
@@ -1229,9 +1303,9 @@ function renderSet(){
   <div class="setmain"><div><div class="grab2"></div>
   <div class="shd"><button class="shb" data-a="ovopen" aria-label="Workout overview">${ic('down',2)}</button><div class="shn"><div class="exn">${esc(e.name)}</div><div class="shs">Exercise ${s.i+1} of ${nm}${ssn?` · <span class="sstag">${ssn}</span>`:''}</div></div><button class="shb" data-a="exinfo" aria-label="How to do this exercise">${ic('fig')}</button><button class="shb" data-a="smore" aria-label="More: warm-up, swap, note">${ic('more',2)}</button></div>
   <div class="setdd"><button class="sdb ${V.smenu?'open':''}" data-a="smenu" aria-haspopup="menu" aria-expanded="${!!V.smenu}"><b>${sb}</b><span>${ss}</span><i>${ic('down',2.4)}</i></button></div>
-  ${coachPill(it,st)+exNoteHtml(e)}</div>
+  ${s.rest&&V.lastLog?restCard(s,it,st,e):coachPill(it,st)}${exNoteHtml(e)}</div>
   <div class="mid">${wsec}${rsec}${rir}</div>
-  <div class="logbar"><div class="lgp"><button class="lgm" data-a="nexts"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>${lab}</button><i></i><button class="lgr ${rs?'run':''}" data-a="ropen" aria-label="Rest timer">${ic('watch',2)}${restTxt}</button></div></div>${menu}</div>
+  ${logBar(s,it,st,lab,work)}${menu}</div>
   <div class="lw"><div class="lwh"><b>Last workout</b><span>${ic('cal')}${lastFor(it.exId)?dlong(lastFor(it.exId).date):'—'}</span></div>
   ${(()=>{const last=lastFor(it.exId);return last?last.sets.map(x=>`<div class="setrow"><span>${x.wu?'WARM-UP':x.ds?'DROP SET':'SET '+(last.sets.filter(z=>!z.wu&&!z.ds).indexOf(x)+1)}</span><span>${x.skip?'<span class="mute">Skipped</span>':`${fmt(x.w)} ${U()} × ${x.r}`}</span></div>`).join(''):'<div class="setrow"><span>FIRST TIME</span><span class="mute sm">Set a baseline!</span></div>'})()}
   ${b.n?`<div class="setrow"><span>PERSONAL BEST</span><span style="color:var(--pk)">${fmt(b.w)} ${U()} × ${b.wr} · e1RM ${fmt(Math.round(b.e))}</span></div>`:''}</div>
@@ -1283,6 +1357,7 @@ function render(){syncBars();
   try{document.body.style.overflow=sp2?'hidden':''}catch(e){}
   if(V.anim){const m=$('#app main');if(m&&m.classList)m.classList.add(V.anim);V.anim=null}
   if(document.querySelector('#sp .whl'))whInit();
+  const lf=document.querySelector('#sp .lgf');if(lf){const lt=+lf.dataset.left;requestAnimationFrame(()=>requestAnimationFrame(()=>{lf.style.transition=`width ${lt}s linear`;lf.style.width='0%'}))}
 }
 
 /* ===== swipe from left edge to go back ===== */
@@ -1346,7 +1421,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.71';
+const APPV='1.72';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
@@ -4214,7 +4289,7 @@ const ACT={
   minimize:()=>{V.inSession=false;V.ov=false;V.restOpen=false;V.anim='fade';render()},
   discard:()=>confirmSheet('Discard this workout? Nothing from it will be saved.',()=>{S.session=null;V.inSession=false;V.ov=false;V.restOpen=false;RS()},'Discard'),
   finish:()=>{const s=S.session,done=sum(s.items.map(it=>it.sets.filter(x=>(x.done&&!x.wu)||(x.dur!=null&&(cEl(x)>0||x.dist>0))).length));if(!done){confirmSheet('No sets logged yet. Discard this workout?',()=>{S.session=null;V.inSession=false;V.ov=false;RS()},'Discard');return}const left=sum(s.items.map(it=>it.sets.filter(x=>!x.done&&!x.wu&&!(x.dur!=null&&(cEl(x)>0||x.dist>0))).length));confirmSheet(left?`Finish workout? ${left} unlogged set${left>1?'s':''} will be marked skipped.`:'Finish workout?',finishNow,'Finish',true)},
-  nexts:()=>{const s=S.session,st=cur(),it=s.items[s.i];if(st.run){st.dur=cEl(st);st.run=null}if(isCardio(it.exId)&&!cEl(st)&&!st.dist){toast('Start the timer or enter a time first');return}const wasDone=st.done;st.done=true;if(!wasDone&&!st.wu)checkPR(it,st);const L=seqList(),k=seqIdx(),nx=L[k+1];const midSS=nx&&nx[1]===s.s&&nx[0]!==s.i&&grp(nx[0])[0]===grp(s.i)[0];if(S.autoRest&&S.rest>0&&!midSS){startRest();V.restOpen=true}if(isLast()){save();render();closePanel();toast('All sets done. Tap Finish when ready');return}move(1);save();render();const sp=$('#sp');if(sp)sp.scrollTop=0},
+  nexts:()=>{const s=S.session,st=cur(),it=s.items[s.i];if(st.run){st.dur=cEl(st);st.run=null}if(isCardio(it.exId)&&!cEl(st)&&!st.dist){toast('Start the timer or enter a time first');return}const wasDone=st.done;st.done=true;if(!wasDone&&!st.wu)checkPR(it,st);V.lastLog={i:s.i,s:s.s,w:st.w,r:st.r,rir:st.rir,wu:!!st.wu,lab:(()=>{const wk=it.sets.filter(x=>!x.wu&&!x.ds);return st.wu?'Warm-up':st.ds?'Drop set':'Set '+(wk.indexOf(st)+1)})()};const L=seqList(),k=seqIdx(),nx=L[k+1];const midSS=nx&&nx[1]===s.s&&nx[0]!==s.i&&grp(nx[0])[0]===grp(s.i)[0];if(S.autoRest&&S.rest>0&&!midSS){startRest();V.restAnim=true}if(isLast()){save();render();closePanel();toast('All sets done. Tap Finish when ready');return}move(1);save();render();const sp=$('#sp');if(sp)sp.scrollTop=0},
   prevs:()=>{move(-1);RS()},
   unlog:()=>{cur().done=false;RS()},
   w:x=>{const st=cur();st.w=Math.max(0,Math.round((st.w+ +x*step())*100)/100);RS()},
@@ -4236,12 +4311,19 @@ const ACT={
   smore:()=>{const s=S.session,it=s.items[s.i],e=ex(it.exId),wu=e.type!=='bodyweight'&&e.type!=='cardio'&&!it.sets.some(x=>x.wu);openSheet(`<div class="sh-t">${esc(e.name)}</div>${wu?`<div class="li" data-a="smwu"><span class="lic">${ic('ramp')}</span><div class="g"><div class="tt">Add warm-up sets</div><div class="sb">Ramp up to your working weight</div></div></div>`:''}<div class="li" data-a="smtaken"><span class="lic">${ic('rep')}</span><div class="g"><div class="tt">Equipment taken</div><div class="sb">Swap to a similar exercise</div></div></div><div class="li" data-a="smnote"><span class="lic">${ic('note')}</span><div class="g"><div class="tt">${e.note?'Edit note':'Add a note'}</div><div class="sb">${e.note?esc(e.note):'Seat height, grip, cues'}</div></div></div>`)},
   smtaken:()=>{closeSheet();setTimeout(()=>ACT.taken(),250)},
   smnote:()=>{closeSheet();setTimeout(()=>ACT.exnote(),250)},
-  whtap:(x,el)=>{const b=el&&el.closest?el.closest('.whi'):null;if(!b)return;const w=b.closest('.whl'),kind=w&&w.dataset.wh;if(b.classList.contains('on')){if(kind==='r')ACT.typer();else ACT.typew();return}const sc=b.parentNode;if(sc._user)sc._user();sc.scrollTo({left:b.offsetLeft+b.offsetWidth/2-sc.clientWidth/2,behavior:'smooth'})},
-  ropen:()=>{V.restOpen=true;render()},
+  whtap:(x,el)=>{const b=el&&el.closest?el.closest('.whi'):null;if(!b)return;const w=b.closest('.whl'),kind=w&&w.dataset.wh;if(b.classList.contains('on')){if(kind==='r')ACT.typer();else ACT.typew();return}const k=[...b.parentNode.children].indexOf(b);if(w._go)w._go(k)},
+  setautorest:()=>{S.autoRest=!S.autoRest;save();refreshSheet(restSheet())},
+  restup:x=>{const st=cur();st.w=+x;delete st.p;RS()},
+  restundo:()=>{const s=S.session,L=V.lastLog;if(!L)return;s.i=L.i;s.s=L.s;const st=s.items[L.i].sets[L.s];st.done=false;s.rest=null;V.lastLog=null;RS();toast('Set reopened')},
+  rlen:x=>{S.rest=+x;if(S.session&&S.session.rest){const rs=S.session.rest,el=rs.total-(rs.end-Date.now());rs.total=S.rest*1000;rs.end=Date.now()+Math.max(0,rs.total-el)}save();refreshSheet(restSheet());render()},
+  rskip:()=>{const s=S.session;if(s)s.rest=null;V.restEnd=true;closeSheet();RS()},
+  rnow:()=>{startRest();V.restAnim=true;closeSheet();RS()},
+  rnotify:()=>{if(S.restNotify){S.restNotify=false;save();refreshSheet(restSheet());return}if(!('Notification' in window)){toast('Notifications aren’t available here');return}Notification.requestPermission().then(p=>{S.restNotify=p==='granted';save();refreshSheet(restSheet());toast(p==='granted'?'You’ll get an alert when rest ends':'Notifications are blocked in Settings')})},
+  ropen:()=>openSheet(restSheet()),
   rclose:()=>{V.restOpen=false;render()},
   rgo:()=>{startRest();RS()},
   rstop:()=>{S.session.rest=null;V.restOpen=false;RS()},
-  radj:x=>{const s=S.session;if(!s.rest){S.rest=Math.max(15,Math.min(600,S.rest+ +x));RS();return}s.rest.end+= +x*1000;const left=s.rest.end-Date.now();if(left<=0){restDone(false);return}s.rest.total=Math.max(s.rest.total,left);save();tick()},
+  radj:x=>{const s=S.session;if(!s.rest){S.rest=Math.max(15,Math.min(600,S.rest+ +x));RS();return}s.rest.end+= +x*1000;const left=s.rest.end-Date.now();if(left<=0){restDone(false);return}s.rest.total=Math.max(s.rest.total,left);save();tick();render()},
   // routines
   newroutine:()=>{const r={id:uid(),name:'New Routine',active:false,days:[{id:uid(),name:'Workout A',items:[]}]};S.routines.push(r);save();ACT.sub('routine:'+r.id);V.rEdit=true;render()},
   redit:()=>{V.rEdit=!V.rEdit;render()},
@@ -4310,7 +4392,7 @@ document.addEventListener('input',e=>{const el=e.target,k=el.dataset.in;if(!k)re
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='numin')ACT.numok()});
 
 function tick(){const s=S.session;if(!s)return;try{const it=s.items[s.i],st=it&&it.sets[s.s];if(st&&st.run){const el=cEl(st),c=$('#cdur');if(c)c.textContent=mmss(el);const pc=$('#cpace');if(pc)pc.textContent=paceTxt(el,st.dist)}}catch(e){}const t=mmss((Date.now()-s.start)/1000);const el=$('#el');if(el)el.textContent=t;const e2=$('#el2');if(e2)e2.textContent=t;const e3=$('#el3');if(e3)e3.textContent=t+' elapsed';
-  if(s.rest){const left=(s.rest.end-Date.now())/1000;if(left<=0){restDone(true);return}const txt=mmss(Math.ceil(left));const rt=$('#rt');if(rt)rt.textContent=txt;const r2=$('#rt2');if(r2)r2.textContent=txt;const rr=$('#rring');if(rr){const C=2*Math.PI*88;rr.setAttribute('stroke-dashoffset',C*(1-left*1000/s.rest.total))}}}
+  if(s.rest){const left=(s.rest.end-Date.now())/1000;if(left<=0){restDone(true);return}const txt=mmss(Math.ceil(left));const rt=$('#rt');if(rt)rt.textContent=txt;const r2=$('#rt2');if(r2)r2.textContent=txt.replace(/^0(\d:)/,'$1');const rr=$('#rring');if(rr){const C=2*Math.PI*88;rr.setAttribute('stroke-dashoffset',C*(1-left*1000/s.rest.total))}}}
 setInterval(tick,250);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()});
 
