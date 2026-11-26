@@ -617,7 +617,7 @@ html[data-theme="light"] .qh.car{background:#18181b;color:#fff}html[data-theme="
 .shb{width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;color:var(--mute);border-radius:999px}
 .shb .i{width:22px;height:22px}
 .shn{flex:1;min-width:0}
-.setscr .shn .exn{font-size:clamp(19px,2.8vh,24px);font-weight:700;margin:0;padding:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.setscr .shn .exn{font-size:clamp(19px,2.8vh,24px);font-weight:700;margin:0;padding:0;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;line-height:1.12;text-wrap:balance}.setscr .shn .exn.l2{font-size:clamp(18px,2.5vh,21px)}.setscr .shn .exn.l3{font-size:clamp(16px,2.2vh,19px)}
 .shs{font-size:12px;color:var(--mute);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .shs .sstag{font-size:10px;padding:1px 7px;vertical-align:1px}
 .setdd{display:flex;justify-content:center;margin-top:clamp(6px,1.4vh,14px)}
@@ -632,7 +632,7 @@ html[data-theme="light"] .qh.car{background:#18181b;color:#fff}html[data-theme="
 button.whr{color:var(--soft)}
 .whl{position:relative;height:clamp(84px,11.5vh,100px);-webkit-mask-image:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent);mask-image:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent)}
 .whs{position:absolute;left:50%;top:0;bottom:0;width:0;will-change:transform}
-.whl{overflow:hidden;touch-action:pan-y;outline:none;cursor:grab}
+.whl{overflow:hidden;touch-action:none;outline:none;cursor:grab}
 .whi{position:absolute;top:50%;left:0;min-width:62px;height:46px;padding:0 14px;border-radius:999px;border:1.5px solid #3a3a3c;background:transparent;color:#f4f4f5;font-size:18px;font-weight:500;font-variant-numeric:tabular-nums;will-change:transform,opacity;transform:translate(-50%,-50%);transition:background-color .14s ease-out,border-color .14s ease-out,color .14s ease-out;box-sizing:border-box;white-space:nowrap;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 .whv{display:inline-block}
 .whi.on{background:var(--pk);border-color:var(--pk);color:#000;font-weight:800;box-shadow:0 6px 22px rgba(255,214,10,.22)}
@@ -669,7 +669,7 @@ button.whr{color:var(--soft)}
 html[data-theme="light"] .setscr .sdb,html[data-theme="light"] .smenu{background:#1c1c1e}
 
 .smi b{text-align:left}
-@media (max-height:740px){.setscr .whl{height:84px}.whi{height:40px;font-size:17px}.setscr .barsvg{max-height:9vh}.setscr .plates{margin-top:6px}.ppl{height:calc(30px + 24px * var(--k))}.setscr .rirr button{height:38px}.lgp{height:56px}.setdd{margin-top:4px}.sdb{height:36px}.wsec{gap:2px}.setscr .shd .shb{height:38px}}
+@media (max-height:740px){.setscr .whl{height:90px}.whi{height:40px;font-size:17px}.setscr .barsvg{max-height:9vh}.setscr .plates{margin-top:6px}.ppl{height:calc(30px + 24px * var(--k))}.setscr .rirr button{height:38px}.lgp{height:56px}.setdd{margin-top:4px}.sdb{height:36px}.wsec{gap:2px}.setscr .shd .shb{height:38px}}
 
 /* ===== rest mode in the log pill ===== */
 .lgp{position:relative;isolation:isolate;transition:background-color .6s cubic-bezier(.45,0,.2,1),box-shadow .6s cubic-bezier(.45,0,.2,1)}
@@ -1245,28 +1245,29 @@ function wheelHtml(kind,vals,cur,marks,label){
 const WH={};
 function whInit(){document.querySelectorAll('#sp .whl').forEach(w=>{if(w._wh)return;w._wh=1;
   const tr=w.querySelector('.whs'),kind=w.dataset.wh,items=[...tr.children];if(!items.length)return;
-  const P=Math.max(74,Math.max(...items.map(b=>(b.querySelector('.whv')||b).textContent.length))*11+40);items.forEach((b,i)=>b.style.left=(i*P)+'px');
+  const P=Math.max(80,Math.max(...items.map(b=>(b.querySelector('.whv')||b).textContent.length))*11+48);items.forEach((b,i)=>b.style.left=(i*P)+'px');
   const N=items.length,minX=-(N-1)*P;let idx=Math.max(0,items.findIndex(b=>b.classList.contains('on'))),x=-idx*P,sel=idx,anim=0,user=false,startV=+items[idx].dataset.x;
   const clampI=i=>Math.max(0,Math.min(N-1,i));
   const paint=()=>{tr.style.transform=`translate3d(${x}px,0,0)`;
     for(let i=0;i<N;i++){const b=items[i],a=Math.abs((i*P+x)/P);if(a>5){if(b._h!==1){b.style.visibility='hidden';b._h=1}continue}if(b._h){b.style.visibility='';b._h=0}
-      const s=a<1?1.22-(1.22-.94)*(a*a*(3-2*a)):Math.max(.82,.94-(a-1)*.05),o=Math.max(0,1-Math.pow(a/3.3,1.7));
+      const s=a<1?1.32-(1.32-.92)*(a*a*(3-2*a)):Math.max(.8,.92-(a-1)*.05),o=Math.max(0,1-Math.pow(a/3.3,1.7));
       b.style.transform=`translate(-50%,-50%) scale(${s.toFixed(4)})`;b.style.opacity=o.toFixed(3)}
     const n=clampI(Math.round(-x/P));if(n!==sel){items[sel].classList.remove('on');items[sel].setAttribute('aria-selected','false');sel=n;items[sel].classList.add('on');items[sel].setAttribute('aria-selected','true');if(user)whLive(kind,+items[sel].dataset.x)}};
   const settle=()=>{const b=items[sel];b.classList.remove('whpop');void b.offsetWidth;b.classList.add('whpop');const v=+b.dataset.x;if(kind==='w'&&v!==startV){const ss=S.session,it=ss.items[ss.i],st=it.sets[ss.s];if(!st.wu&&typeof carryW==='function')carryW(it,st,startV);startV=v}whCommit(kind,v)};
   const ease=t=>1-Math.pow(1-t,4);
-  const go=(to,dur)=>{cancelAnimationFrame(anim);const x0=x,t0=performance.now();dur=dur||Math.max(320,Math.min(1100,260+Math.abs(to-x0)*.75));
+  const go=(to,dur)=>{cancelAnimationFrame(anim);const x0=x,t0=performance.now();dur=dur||Math.max(380,Math.min(1300,340+Math.abs(to-x0)*1.0));
     const st=now=>{const t=Math.min(1,(now-t0)/dur);x=x0+(to-x0)*ease(t);paint();if(t<1)anim=requestAnimationFrame(st);else{anim=0;settle()}};anim=requestAnimationFrame(st)};
   w._go=i=>{user=true;go(-clampI(i)*P)};w._sel=()=>sel;
   if(V.from&&V.from.i===S.session.i){const pv=kind==='r'?V.from.r:V.from.w,pi=items.reduce((bi,b,k)=>Math.abs(+b.dataset.x-pv)<Math.abs(+items[bi].dataset.x-pv)?k:bi,0);if(pi>=0&&pi!==idx){const tgt=-idx*P;x=-pi*P;sel=pi;items.forEach(b=>b.classList.remove('on'));items[pi].classList.add('on');paint();setTimeout(()=>{cancelAnimationFrame(anim);const x0=x,t0=performance.now(),dur=Math.min(900,420+Math.abs(tgt-x0)*.35);const stp=now=>{const t=Math.min(1,(now-t0)/dur);x=x0+(tgt-x0)*(1-Math.pow(1-t,3)*(1-t));paint();if(t<1)anim=requestAnimationFrame(stp);else{anim=0;const b=items[sel];b.classList.remove('whpop');void b.offsetWidth;b.classList.add('whpop')}};anim=requestAnimationFrame(stp)},140)}}
   let d=null;
-  w.addEventListener('pointerdown',e=>{if(e.button>0)return;cancelAnimationFrame(anim);anim=0;d={x0:e.clientX,y0:e.clientY,sx:x,ax:null,s:[[performance.now(),x]],moved:false,id:e.pointerId}});
+  w.addEventListener('pointerdown',e=>{if(e.button>0)return;cancelAnimationFrame(anim);anim=0;const scr=w.closest('#sp')||document.scrollingElement;d={x0:e.clientX,y0:e.clientY,sx:x,ax:null,s:[[performance.now(),x]],ys:[],scr,st0:scr.scrollTop,moved:false,id:e.pointerId}});
   w.addEventListener('pointermove',e=>{if(!d||e.pointerId!==d.id)return;const dx=e.clientX-d.x0,dy=e.clientY-d.y0;
-    if(!d.ax){if(Math.abs(dx)>6&&Math.abs(dx)>Math.abs(dy)*1.1){d.ax='x';user=true;try{w.setPointerCapture(e.pointerId)}catch(_){}}else if(Math.abs(dy)>8){d.ax='y';return}else return}
+    if(!d.ax){if(Math.abs(dx)>5&&Math.abs(dx)>Math.abs(dy)*.7){d.ax='x';user=true;try{w.setPointerCapture(e.pointerId)}catch(_){}}else if(Math.abs(dy)>12&&Math.abs(dy)>Math.abs(dx)*1.6){d.ax='y';d.y1=dy;try{w.setPointerCapture(e.pointerId)}catch(_){}}else return}
+    if(d.ax==='y'){const ty=performance.now();d.scr.scrollTop=Math.max(0,d.st0-(dy-d.y1)*.85);d.ys.push([ty,d.scr.scrollTop]);if(d.ys.length>6)d.ys.shift();return}
     if(d.ax!=='x')return;d.moved=true;let nx=d.sx+dx;if(nx>0)nx=nx*.35;else if(nx<minX)nx=minX+(nx-minX)*.35;x=nx;const t=performance.now();d.s.push([t,x]);if(d.s.length>6)d.s.shift();paint()});
-  const end=e=>{if(!d||(e&&e.pointerId!==d.id))return;const dd=d;d=null;if(dd.ax!=='x'){if(!anim&&Math.abs(x+sel*P)>.5)go(-sel*P,280);return}
+  const end=e=>{if(!d||(e&&e.pointerId!==d.id))return;const dd=d;d=null;if(dd.ax==='y'&&dd.ys.length>1){const a=dd.ys[0],b=dd.ys[dd.ys.length-1];let vy=(b[1]-a[1])/Math.max(16,b[0]-a[0]);if(performance.now()-b[0]>80)vy=0;const sc=dd.scr,y0=sc.scrollTop,dist=Math.max(-500,Math.min(500,vy*260)),t0=performance.now();const g=now=>{const t=Math.min(1,(now-t0)/520);sc.scrollTop=y0+dist*(1-Math.pow(1-t,3));if(t<1)requestAnimationFrame(g)};if(Math.abs(dist)>4)requestAnimationFrame(g)}if(dd.ax!=='x'){if(!anim&&Math.abs(x+sel*P)>.5)go(-sel*P,280);return}
     w._moved=performance.now();const s=dd.s,a=s[0],b=s[s.length-1],dt=Math.max(16,b[0]-a[0]);let v=(b[1]-a[1])/dt;if(performance.now()-b[0]>80)v=0;
-    let to=x+v*340;to=Math.round(to/P)*P;to=Math.max(minX,Math.min(0,to));go(to)};
+    v=Math.max(-2.2,Math.min(2.2,v));let to=x+v*190;to=Math.max(x-6*P,Math.min(x+6*P,to));to=Math.round(to/P)*P;to=Math.max(minX,Math.min(0,to));go(to)};
   w.addEventListener('pointerup',end);w.addEventListener('pointercancel',end);
   w.addEventListener('touchmove',e=>{if(d&&d.ax==='x'&&e.cancelable)e.preventDefault()},{passive:false});
   w.addEventListener('click',e=>{if(w._moved&&performance.now()-w._moved<350){e.stopPropagation();e.preventDefault()}},true);
@@ -1332,7 +1333,7 @@ function renderSet(){
   const menu=V.smenu?`<div class="smov" data-a="smenu"></div><div class="smenu" role="menu">${it.sets.map((x,j)=>{const nm2=x.wu?'Warm-up':x.ds?'Drop set':'Set '+(work.indexOf(x)+1),cls=j===s.s?'cur':x.done?'done':'';return `<button role="menuitem" class="smi ${cls}" data-a="gotoset" data-x="${j}"><i></i><b>${nm2}</b><span>${x.skip?'skipped':`${fmt(x.w)} × ${x.r}`}</span></button>`}).join('')}<div class="smadd"><button data-a="smadd">+ Set</button><button data-a="smdrop">+ Drop set</button>${e.type!=='bodyweight'&&!wus.length?`<button data-a="smwu">+ Warm-up</button>`:''}</div></div>`:'';
   return `<div class="setscr">
   <div class="setmain"><div><div class="grab2"></div>
-  <div class="shd"><button class="shb" data-a="ovopen" aria-label="Workout overview">${ic('down',2)}</button><div class="shn"><div class="exn">${esc(e.name)}</div><div class="shs">Exercise ${s.i+1} of ${nm}${ssn?` · <span class="sstag">${ssn}</span>`:''}</div></div><button class="shb" data-a="exinfo" aria-label="How to do this exercise">${ic('fig')}</button><button class="shb" data-a="smore" aria-label="More: warm-up, swap, note">${ic('more',2)}</button></div>
+  <div class="shd"><button class="shb" data-a="ovopen" aria-label="Workout overview">${ic('down',2)}</button><div class="shn"><div class="exn ${e.name.length>30?'l3':e.name.length>20?'l2':''}">${esc(e.name)}</div><div class="shs">Exercise ${s.i+1} of ${nm}${ssn?` · <span class="sstag">${ssn}</span>`:''}</div></div><button class="shb" data-a="exinfo" aria-label="How to do this exercise">${ic('fig')}</button><button class="shb" data-a="smore" aria-label="More: warm-up, swap, note">${ic('more',2)}</button></div>
   <div class="setdd"><button class="sdb ${V.smenu?'open':''}" data-a="smenu" aria-haspopup="menu" aria-expanded="${!!V.smenu}"><b>${sb}</b><span>${ss}</span><i>${ic('down',2.4)}</i></button></div>
   ${s.rest&&V.lastLog?restCard(s,it,st,e):coachPill(it,st)}${exNoteHtml(e)}</div>
   <div class="mid">${wsec}${rsec}${rir}</div>
@@ -1453,7 +1454,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.77';
+const APPV='1.78';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
