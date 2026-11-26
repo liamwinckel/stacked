@@ -701,6 +701,13 @@ html[data-theme="light"] .setscr .sdb,html[data-theme="light"] .smenu{background
 .rlens{display:flex;flex-wrap:wrap;gap:8px}.rlens button{height:40px;min-width:64px;padding:0 14px;border-radius:999px;border:1.5px solid #3a3a3c;background:none;color:#f4f4f5;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}.rlens button.on{background:var(--pk);border-color:var(--pk);color:#000;font-weight:800}
 .rbtns{display:flex;gap:8px;padding:0 16px 8px}.rbtns>*{flex:1;margin:0!important}
 @media (prefers-reduced-motion:reduce){.lgp.rest.anim,.lgp.rest.anim *,.lgp.back,.rcard.anim{animation:none!important}}
+
+.lgt.nudge .lgtt{animation:lgNudge .4s}@keyframes lgNudge{30%{transform:translateX(-4px)}60%{transform:translateX(4px)}}
+.lpress{transition:transform .45s ease;transform:scale(.95)}
+.lgp.out{transition:background-color .26s ease,box-shadow .26s ease}.lgp.out .lgtt,.lgp.out .lgx,.lgp.out .lgf{transition:opacity .2s,transform .26s;opacity:0;transform:translateX(-12px)}.lgp.out .lgn{transition:transform .26s cubic-bezier(.4,0,.2,1),width .26s;transform:scale(1.04)}
+.lgp.back .lgm{animation:lgGrow .5s cubic-bezier(.2,.8,.2,1)}@keyframes lgGrow{from{transform:translateX(28%);opacity:.2}}
+.lgp.back .lgr{animation:lgFade .4s .15s both}
+[data-lp]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 /* ===== pill aesthetic, app-wide ===== */
 .pkb,.olb,.tcard .pkb,.bkb,.vopt,.rdo button,.rcban button,.refc button,.pkbar button,.hrow2 button,.rwk button,.rirr button,.prrd,.gychip,.blkchip,.baled,.rolet,.rdx span,.balok span,.tag,.resume,.nccb,.wgfix,.hsplit button,.chw button,.dsbtn,.ovnav{border-radius:999px}
 .seg,.seg button{border-radius:999px}
@@ -1259,9 +1266,9 @@ function perSide(st){const ps=(st.p||[]).reduce((a,b)=>a+b,0);return `${fmt(bar(
 function logBar(s,it,st,lab,work){const rs=s.rest,chk=`<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>`;
   if(rs){const left=Math.max(0,(rs.end-Date.now())/1000),frac=Math.min(1,left*1000/rs.total),an=V.restAnim?'anim':'';V.restAnim=false;
     const short=st.done?'NEXT':st.wu?'WARM-UP':st.ds?'DROP':'SET '+(work.indexOf(st)+1);
-    return `<div class="logbar"><div class="lgp rest ${an}"><button class="lgt" data-a="ropen" aria-label="Rest timer, ${mmss(Math.ceil(left))} left"><span class="lgf" style="width:${(frac*100).toFixed(2)}%" data-left="${left.toFixed(2)}"></span><span class="lgtt">${ic('watch',2)}<b id="rt2">${mmss(Math.ceil(left)).replace(/^0(\d:)/,'$1')}</b><small>REST</small></span><span class="lgx" data-a="radj" data-x="30" role="button" aria-label="Add 30 seconds">+30</span></button><button class="lgn" data-a="nexts">${chk}${short}</button></div></div>`}
+    return `<div class="logbar"><div class="lgp rest ${an}"><button class="lgt" data-a="rtap" data-lp="ropen" aria-label="Rest timer, ${mmss(Math.ceil(left))} left. Hold for options"><span class="lgf" style="width:${(frac*100).toFixed(2)}%" data-left="${left.toFixed(2)}"></span><span class="lgtt">${ic('watch',2)}<b id="rt2">${mmss(Math.ceil(left)).replace(/^0(\d:)/,'$1')}</b><small>REST</small></span><span class="lgx" data-a="radj" data-x="30" role="button" aria-label="Add 30 seconds">+30</span></button><button class="lgn" data-a="rnext">${short}<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></div></div>`}
   const an=V.restEnd?'back':'';V.restEnd=false;const t=S.rest||90;
-  return `<div class="logbar"><div class="lgp ${an}"><button class="lgm" data-a="nexts">${chk}<span>${lab}</span></button><i></i><button class="lgr" data-a="ropen" aria-label="Rest timer">${ic('watch',2)}${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}</button></div></div>`}
+  return `<div class="logbar"><div class="lgp ${an}"><button class="lgm" data-a="nexts">${chk}<span>${lab}</span></button><i></i><button class="lgr" data-a="rtap" data-lp="ropen" aria-label="Start rest. Hold for options">${ic('watch',2)}${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}</button></div></div>`}
 function restCard(s,it,st,e){const L=V.lastLog,an=V.restAnim?'anim':'';const pi=s.items[L.i],pe=ex(pi.exId);
   const rr=String(pi.rr||'').split(/[-–]/).map(Number),lo=rr[0]||0,hi=rr[1]||rr[0]||0;let tip='',btn='';
   if(L.i!==s.i){tip=`Up next: <b>${esc(e.name)}</b> · ${it.sets.filter(x=>!x.wu).length} sets. Set it up while you rest.`}
@@ -1421,7 +1428,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.72';
+const APPV='1.73';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
@@ -1765,6 +1772,10 @@ function ldEnd(){if(!LD)return;const d=LD;LD=null;clearTimeout(d.tm);if(!d.on)re
   if(d.grp==='day'){const [,ri,di]=d.c.dataset.ld.split('|');mv(D(ri,di).items);RS()}
   else if(d.grp==='rd'){const r=R(d.c.dataset.ld.split('|')[1]);if(r){const x=r.days.splice(d.i0,1)[0];r.days.splice(d.to,0,x);save();render();toast('Day order updated')}}
   else if(d.grp==='ov'){const s=S.session,cur=s.items[s.i];mv(s.items);s.i=Math.max(0,s.items.indexOf(cur));save();render()}}
+
+let LP=null;document.addEventListener('pointerdown',e=>{const el=e.target.closest&&e.target.closest('[data-lp]');if(!el)return;const x0=e.clientX,y0=e.clientY;el.classList.add('lpress');LP={el,x0,y0,t:setTimeout(()=>{V.lpT=Date.now();el.classList.remove('lpress');try{navigator.vibrate&&navigator.vibrate(15)}catch(_){}const f=ACT[el.dataset.lp];if(f)f(el.dataset.x,el);LP=null},480)}},{passive:true});
+const lpEnd=()=>{if(LP){clearTimeout(LP.t);LP.el.classList.remove('lpress');LP=null}};document.addEventListener('pointerup',lpEnd);document.addEventListener('pointercancel',lpEnd);document.addEventListener('pointermove',e=>{if(LP&&Math.hypot(e.clientX-LP.x0,e.clientY-LP.y0)>10)lpEnd()},{passive:true});
+document.addEventListener('contextmenu',e=>{if(e.target.closest&&e.target.closest('[data-lp]'))e.preventDefault()});
 document.addEventListener('pointerup',ldEnd);document.addEventListener('pointercancel',()=>{if(LD&&LD.on)return;if(LD){clearTimeout(LD.tm);LD=null}});
 document.addEventListener('touchend',()=>{if(LD&&LD.on)ldEnd()});
 
@@ -4313,6 +4324,8 @@ const ACT={
   smnote:()=>{closeSheet();setTimeout(()=>ACT.exnote(),250)},
   whtap:(x,el)=>{const b=el&&el.closest?el.closest('.whi'):null;if(!b)return;const w=b.closest('.whl'),kind=w&&w.dataset.wh;if(b.classList.contains('on')){if(kind==='r')ACT.typer();else ACT.typew();return}const k=[...b.parentNode.children].indexOf(b);if(w._go)w._go(k)},
   setautorest:()=>{S.autoRest=!S.autoRest;save();refreshSheet(restSheet())},
+  rtap:()=>{if(V.lpT&&Date.now()-V.lpT<700)return;const s=S.session;if(!s)return;if(s.rest){const b=$('#sp .lgt');if(b){b.classList.remove('nudge');void b.offsetWidth;b.classList.add('nudge')}if(!S.lpHint){S.lpHint=1;save();toast('Hold the timer for rest options')}return}startRest();V.restAnim=true;RS()},
+  rnext:()=>{const s=S.session;if(!s||!s.rest)return;const p=$('#sp .lgp');if(p)p.classList.add('out');setTimeout(()=>{s.rest=null;V.restEnd=true;V.lastLog=null;RS()},260)},
   restup:x=>{const st=cur();st.w=+x;delete st.p;RS()},
   restundo:()=>{const s=S.session,L=V.lastLog;if(!L)return;s.i=L.i;s.s=L.s;const st=s.items[L.i].sets[L.s];st.done=false;s.rest=null;V.lastLog=null;RS();toast('Set reopened')},
   rlen:x=>{S.rest=+x;if(S.session&&S.session.rest){const rs=S.session.rest,el=rs.total-(rs.end-Date.now());rs.total=S.rest*1000;rs.end=Date.now()+Math.max(0,rs.total-el)}save();refreshSheet(restSheet());render()},
