@@ -672,25 +672,29 @@ html[data-theme="light"] .setscr .sdb,html[data-theme="light"] .smenu{background
 @media (max-height:740px){.setscr .whl{height:84px}.whi{height:40px;font-size:17px}.setscr .barsvg{max-height:9vh}.setscr .plates{margin-top:6px}.ppl{height:calc(30px + 24px * var(--k))}.setscr .rirr button{height:38px}.lgp{height:56px}.setdd{margin-top:4px}.sdb{height:36px}.wsec{gap:2px}.setscr .shd .shb{height:38px}}
 
 /* ===== rest mode in the log pill ===== */
-.lgp{position:relative;transition:background-color .5s cubic-bezier(.2,.8,.2,1)}
-.lgm span{display:inline-block}
+.lgp{position:relative;isolation:isolate;transition:background-color .6s cubic-bezier(.45,0,.2,1),box-shadow .6s cubic-bezier(.45,0,.2,1)}
 .lgp.rest{background:#1c1c1e;box-shadow:inset 0 0 0 1.5px #2c2c2e}
-.lgt{flex:1;position:relative;overflow:hidden;border:0;background:none;color:#f4f4f5;display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 20px;border-radius:999px}
-.lgf{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,rgba(255,214,10,.30),rgba(255,214,10,.16));border-radius:999px 0 0 999px;pointer-events:none}
-.lgtt{position:relative;display:flex;align-items:baseline;gap:8px}.lgtt .i{width:18px;height:18px;align-self:center;color:var(--pk)}
-.lgtt b{font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em}.lgtt small{font-size:10px;font-weight:700;letter-spacing:.16em;color:var(--mute)}
-.lgx{position:relative;height:36px;padding:0 12px;border-radius:999px;background:rgba(255,255,255,.1);font-size:13px;font-weight:700;display:flex;align-items:center}
-.lgn{flex:none;width:118px;margin:6px;border:0;border-radius:999px;background:var(--pk);color:#000;font-size:15px;font-weight:800;letter-spacing:.05em;display:flex;align-items:center;justify-content:center;gap:6px}
-.lgp.rest.anim{animation:lgDark .6s cubic-bezier(.2,.8,.2,1)}
-.lgp.rest.anim .lgn{animation:lgSlide .62s cubic-bezier(.2,.9,.25,1.12)}
-.lgp.rest.anim .lgtt,.lgp.rest.anim .lgx{animation:lgFade .5s .18s both}
-.lgp.rest.anim .lgf{animation:lgFill .7s .1s cubic-bezier(.2,.8,.2,1) both}
-@keyframes lgDark{from{background:var(--pk);box-shadow:inset 0 0 0 0 transparent}}
-@keyframes lgSlide{from{transform:translateX(calc(-100vw + 220px));width:calc(100vw - 32px)}to{transform:none}}
-@keyframes lgFade{from{opacity:0;transform:translateY(6px)}}
-@keyframes lgFill{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
-.lgp.back{animation:lgBack .55s cubic-bezier(.2,.8,.2,1)}.lgp.back .lgm span{animation:lgFade .45s .1s both}
-@keyframes lgBack{0%{background:#1c1c1e}60%{box-shadow:0 0 0 0 rgba(255,214,10,.5)}100%{box-shadow:0 0 0 14px rgba(255,214,10,0)}}
+.lgA,.lgB{position:relative;border:0;background:none;padding:0;font:inherit;-webkit-tap-highlight-color:transparent}
+.lgA{flex:1;min-width:0}
+.lgA>span,.lgB>span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;transition:opacity .16s ease-in,transform .5s cubic-bezier(.2,.8,.2,1)}
+.lgA .lgI{color:#000;font-size:16px;font-weight:800;letter-spacing:.06em}
+.lgA .lgR{justify-content:flex-start;padding-left:20px;color:#f4f4f5;opacity:0;transform:translateX(-14px)}
+.lgR b{font-size:24px;font-weight:600;font-variant-numeric:tabular-nums}.lgA .lgR small{font-size:10px;font-weight:700;letter-spacing:.16em;color:var(--mute);align-self:center;margin-top:3px}.lgA .lgR .i{width:18px;height:18px;color:var(--pk)}
+.lgp.rest .lgA .lgI{opacity:0;transform:translateX(18px)}
+.lgp.rest .lgA .lgR{opacity:1;transform:none;transition:opacity .38s .2s ease-out,transform .6s .12s cubic-bezier(.2,.8,.2,1)}
+.lgp:not(.rest) .lgA .lgI,.lgp:not(.rest) .lgB .lgI{transition:opacity .38s .2s ease-out,transform .6s .12s cubic-bezier(.2,.8,.2,1)}
+.lgd{width:1.5px;background:rgba(0,0,0,.22);margin:15px 0;transition:opacity .3s}.lgp.rest .lgd{opacity:0}
+.lgB{flex:none;width:112px;margin:0;border-radius:999px;background:rgba(255,214,10,0);transition:background-color .6s cubic-bezier(.45,0,.2,1),width .6s cubic-bezier(.2,.8,.2,1),margin .6s cubic-bezier(.2,.8,.2,1),transform .15s}
+.lgp.rest .lgB{width:124px;margin:6px;background:var(--pk)}
+.lgB .lgI{color:#000;font-size:15px;font-weight:700;gap:6px}.lgB .lgI .i{width:18px;height:18px}
+.lgB .lgR{color:#000;font-size:15px;font-weight:800;letter-spacing:.05em;gap:4px;opacity:0;transform:translateX(-10px) scale(.96)}
+.lgp.rest .lgB .lgI{opacity:0;transform:scale(.9)}.lgp.rest .lgB .lgR{opacity:1;transform:none;transition:opacity .38s .24s ease-out,transform .6s .16s cubic-bezier(.2,.8,.2,1)}
+.lgf{position:absolute;left:0;top:0;bottom:0;z-index:-1;background:linear-gradient(90deg,rgba(255,214,10,.30),rgba(255,214,10,.15));border-radius:999px 0 0 999px;pointer-events:none;opacity:0;transition:opacity .5s ease}
+.lgp.rest .lgf{opacity:1}
+.lgx{position:absolute;right:140px;top:50%;margin-top:-18px;height:36px;padding:0 12px;border-radius:999px;background:rgba(255,255,255,.1);color:#f4f4f5;font-size:13px;font-weight:700;display:flex;align-items:center;opacity:0;pointer-events:none;transform:scale(.9);transition:opacity .14s,transform .4s cubic-bezier(.2,.8,.2,1)}
+.lgp.rest .lgx{opacity:1;pointer-events:auto;transform:none;transition:opacity .38s .26s,transform .6s .2s cubic-bezier(.2,.8,.2,1)}
+.lgA:active .lgI,.lgB:active{transform:scale(.97)}
+@media (prefers-reduced-motion:reduce){.lgp,.lgp *{transition-duration:.01s!important;transition-delay:0s!important}}
 .rcard{margin:clamp(8px,1.4vh,12px) 16px 0;background:#1c1c1e;border:1px solid #2c2c2e;border-radius:22px;padding:10px 12px;text-align:left}
 .rcard.anim{animation:rcIn .5s .1s cubic-bezier(.2,.8,.2,1) both}@keyframes rcIn{from{opacity:0;transform:translateY(-8px) scale(.98)}}
 .rc1{display:flex;align-items:center;gap:8px;font-size:14px}.rc1 b{font-weight:700}.rc1>span:not(.rck){color:var(--mute);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}.rc1 b{white-space:nowrap}
@@ -882,7 +886,8 @@ function wuPlan(w,t){const b=t==='barbell'?bar():0,inc=t==='barbell'?(U()==='lb'
   for(const [p,rp] of pct){const x=r(w*p);if(x>0&&x<w&&x>(out.length?out[out.length-1].w:0))out.push({w:x,r:rp})}return out}
 function weekStart(ts){const d=new Date(ts);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime()}
 function prTimeline(exId){const out=[];let be=0;for(let k=S.history.length-1;k>=0;k--){const h=S.history[k],e=h.entries.find(x=>x.exId===exId);if(!e)continue;let best=null;for(const x of dn(e)){const v=x.w>0?e1(x.w,x.r):x.r;if(v>be+.01&&(!best||v>best.v))best={v,w:x.w,r:x.r}}if(best){be=best.v;out.push({date:h.date,...best})}}return out}
-function restDone(b){const s=S.session;if(!s||!s.rest)return;s.rest=null;V.restOpen=false;if(b){beep();try{navigator.vibrate&&navigator.vibrate([60,40,60])}catch(_){}V.restEnd=true;restNotify()}save();if(V.inSession)render()}
+function restDone(b){const s=S.session;if(!s||!s.rest||s.rest.ending)return;const fin=()=>{s.rest=null;V.restOpen=false;save();if(V.inSession)render()};if(b){beep();try{navigator.vibrate&&navigator.vibrate([60,40,60])}catch(_){}restNotify()}if(b&&!document.hidden&&$('#lgp.rest')){s.rest.ending=1;restExit(fin)}else fin()}
+function restExit(fn){const p=$('#lgp');if(!p||!p.classList.contains('rest')){fn();return}const f=p.querySelector('.lgf');if(f){const w=getComputedStyle(f).width;f.style.transition='none';f.style.width=w}p.classList.remove('rest');p.classList.add('leaving');setTimeout(fn,560)}
 function restNotify(){try{if(!S.restNotify||!('Notification' in window)||Notification.permission!=='granted'||!document.hidden)return;const s=S.session,it=s&&s.items[s.i],t='Rest is over',body=it?`Time for ${ex(it.exId).name}`:'Time for your next set';if(navigator.serviceWorker)navigator.serviceWorker.ready.then(r=>r.showNotification(t,{body,tag:'bars-rest',icon:'icon-bars-192.png',renotify:true})).catch(()=>{});else new Notification(t,{body})}catch(_){}}
 function restSchedule(){try{const s=S.session;if(!s||!s.rest||!S.restNotify||!('Notification' in window)||Notification.permission!=='granted')return;if('showTrigger' in Notification.prototype&&typeof TimestampTrigger!=='undefined'&&navigator.serviceWorker)navigator.serviceWorker.ready.then(r=>r.showNotification('Rest is over',{body:'Time for your next set',tag:'bars-rest',showTrigger:new TimestampTrigger(s.rest.end)})).catch(()=>{})}catch(_){}}
 document.addEventListener('visibilitychange',()=>{const s=S.session;if(document.hidden){restSchedule()}else if(s&&s.rest&&Date.now()>=s.rest.end){restDone(false);toast('Rest finished while you were away')}});
@@ -1263,12 +1268,16 @@ function whLive(kind,v){const s=S.session;if(!s)return;const it=s.items[s.i],st=
 function whCommit(kind,v){if(v==null)return;save()}
 function perSide(st){const ps=(st.p||[]).reduce((a,b)=>a+b,0);return `${fmt(bar())} ${U()} bar · ${fmt(ps)} per side`}
 
-function logBar(s,it,st,lab,work){const rs=s.rest,chk=`<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>`;
-  if(rs){const left=Math.max(0,(rs.end-Date.now())/1000),frac=Math.min(1,left*1000/rs.total),an=V.restAnim?'anim':'';V.restAnim=false;
-    const short=st.done?'NEXT':st.wu?'WARM-UP':st.ds?'DROP':'SET '+(work.indexOf(st)+1);
-    return `<div class="logbar"><div class="lgp rest ${an}"><button class="lgt" data-a="rtap" data-lp="ropen" aria-label="Rest timer, ${mmss(Math.ceil(left))} left. Hold for options"><span class="lgf" style="width:${(frac*100).toFixed(2)}%" data-left="${left.toFixed(2)}"></span><span class="lgtt">${ic('watch',2)}<b id="rt2">${mmss(Math.ceil(left)).replace(/^0(\d:)/,'$1')}</b><small>REST</small></span><span class="lgx" data-a="radj" data-x="30" role="button" aria-label="Add 30 seconds">+30</span></button><button class="lgn" data-a="rnext">${short}<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></div></div>`}
-  const an=V.restEnd?'back':'';V.restEnd=false;const t=S.rest||90;
-  return `<div class="logbar"><div class="lgp ${an}"><button class="lgm" data-a="nexts">${chk}<span>${lab}</span></button><i></i><button class="lgr" data-a="rtap" data-lp="ropen" aria-label="Start rest. Hold for options">${ic('watch',2)}${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}</button></div></div>`}
+function logBar(s,it,st,lab,work){const rs=s.rest,enter=!!(rs&&V.restAnim);V.restAnim=false;V.restEnd=false;const t=S.rest||90;
+  const chk=`<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>`,arr=`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>`;
+  const sh=x=>x.wu?'WARM-UP':x.ds?'DROP SET':'SET '+(work.indexOf(x)+1);let up=sh(st),idle=lab;
+  if(rs&&!rs.fromLog&&!st.done){const L=seqList(),k=seqIdx(),nx=L[k+1];if(nx&&nx[0]===s.i){const x=it.sets[nx[1]];up=sh(x);idle='LOG '+up}else{up='NEXT';idle='LOG SET'}}
+  const left=rs?Math.max(0,(rs.end-Date.now())/1000):t,frac=rs?Math.min(1,left*1000/rs.total):1,tt=rs?mmss(Math.ceil(left)).replace(/^0(\d:)/,'$1'):`${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}`;
+  return `<div class="logbar"><div class="lgp ${rs&&!enter?'rest':''}" id="lgp" ${enter?'data-enter="1"':''}>
+  <span class="lgf" style="width:${(frac*100).toFixed(2)}%" ${rs?`data-left="${left.toFixed(2)}"`:''}></span>
+  <button class="lgA" data-a="${rs?'rtap':'nexts'}" aria-label="${rs?`Rest, ${tt} left. Tap for options`:idle}"><span class="lgI">${chk}<span>${idle}</span></span><span class="lgR">${ic('watch',2)}<b id="rt2">${tt}</b><small>REST</small></span></button>
+  <span class="lgx" data-a="radj" data-x="30" role="button" aria-label="Add 30 seconds">+30</span><i class="lgd"></i>
+  <button class="lgB" data-a="${rs?'rnext':'rtap'}" data-lp="ropen" aria-label="${rs?`Go to ${up.toLowerCase()}`:'Start rest. Hold for options'}"><span class="lgI">${ic('watch',2)}${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}</span><span class="lgR">${up}${arr}</span></button></div></div>`}
 function restCard(s,it,st,e){const L=V.lastLog,an=V.restAnim?'anim':'';const pi=s.items[L.i],pe=ex(pi.exId);
   const rr=String(pi.rr||'').split(/[-–]/).map(Number),lo=rr[0]||0,hi=rr[1]||rr[0]||0;let tip='',btn='';
   if(L.i!==s.i){tip=`Up next: <b>${esc(e.name)}</b> · ${it.sets.filter(x=>!x.wu).length} sets. Set it up while you rest.`}
@@ -1364,7 +1373,8 @@ function render(){syncBars();
   try{document.body.style.overflow=sp2?'hidden':''}catch(e){}
   if(V.anim){const m=$('#app main');if(m&&m.classList)m.classList.add(V.anim);V.anim=null}
   if(document.querySelector('#sp .whl'))whInit();
-  const lf=document.querySelector('#sp .lgf');if(lf){const lt=+lf.dataset.left;requestAnimationFrame(()=>requestAnimationFrame(()=>{lf.style.transition=`width ${lt}s linear`;lf.style.width='0%'}))}
+  const lp=document.querySelector('#lgp[data-enter]');if(lp){lp.removeAttribute('data-enter');requestAnimationFrame(()=>requestAnimationFrame(()=>lp.classList.add('rest')))}
+  const lf=document.querySelector('#sp .lgf[data-left]');if(lf){const lt=+lf.dataset.left;requestAnimationFrame(()=>requestAnimationFrame(()=>{lf.style.transition=`width ${lt}s linear, opacity .5s ease`;lf.style.width='0%'}))}
 }
 
 /* ===== swipe from left edge to go back ===== */
@@ -1428,7 +1438,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.74';
+const APPV='1.75';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
@@ -4300,7 +4310,7 @@ const ACT={
   minimize:()=>{V.inSession=false;V.ov=false;V.restOpen=false;V.anim='fade';render()},
   discard:()=>confirmSheet('Discard this workout? Nothing from it will be saved.',()=>{S.session=null;V.inSession=false;V.ov=false;V.restOpen=false;RS()},'Discard'),
   finish:()=>{const s=S.session,done=sum(s.items.map(it=>it.sets.filter(x=>(x.done&&!x.wu)||(x.dur!=null&&(cEl(x)>0||x.dist>0))).length));if(!done){confirmSheet('No sets logged yet. Discard this workout?',()=>{S.session=null;V.inSession=false;V.ov=false;RS()},'Discard');return}const left=sum(s.items.map(it=>it.sets.filter(x=>!x.done&&!x.wu&&!(x.dur!=null&&(cEl(x)>0||x.dist>0))).length));confirmSheet(left?`Finish workout? ${left} unlogged set${left>1?'s':''} will be marked skipped.`:'Finish workout?',finishNow,'Finish',true)},
-  nexts:()=>{const s=S.session,st=cur(),it=s.items[s.i];if(st.run){st.dur=cEl(st);st.run=null}if(isCardio(it.exId)&&!cEl(st)&&!st.dist){toast('Start the timer or enter a time first');return}const wasDone=st.done;st.done=true;if(!wasDone&&!st.wu)checkPR(it,st);V.lastLog={i:s.i,s:s.s,w:st.w,r:st.r,rir:st.rir,wu:!!st.wu,lab:(()=>{const wk=it.sets.filter(x=>!x.wu&&!x.ds);return st.wu?'Warm-up':st.ds?'Drop set':'Set '+(wk.indexOf(st)+1)})()};const L=seqList(),k=seqIdx(),nx=L[k+1];const midSS=nx&&nx[1]===s.s&&nx[0]!==s.i&&grp(nx[0])[0]===grp(s.i)[0];if(S.autoRest&&S.rest>0&&!midSS){startRest();V.restAnim=true}if(isLast()){save();render();closePanel();toast('All sets done. Tap Finish when ready');return}move(1);save();render();const sp=$('#sp');if(sp)sp.scrollTop=0},
+  nexts:()=>{const s=S.session,st=cur(),it=s.items[s.i];if(st.run){st.dur=cEl(st);st.run=null}if(isCardio(it.exId)&&!cEl(st)&&!st.dist){toast('Start the timer or enter a time first');return}const wasDone=st.done;st.done=true;if(!wasDone&&!st.wu)checkPR(it,st);V.lastLog={i:s.i,s:s.s,w:st.w,r:st.r,rir:st.rir,wu:!!st.wu,lab:(()=>{const wk=it.sets.filter(x=>!x.wu&&!x.ds);return st.wu?'Warm-up':st.ds?'Drop set':'Set '+(wk.indexOf(st)+1)})()};const L=seqList(),k=seqIdx(),nx=L[k+1];const midSS=nx&&nx[1]===s.s&&nx[0]!==s.i&&grp(nx[0])[0]===grp(s.i)[0];if(S.autoRest&&S.rest>0&&!midSS&&!V.noRest){startRest();S.session.rest.fromLog=true;V.restAnim=true}if(isLast()){save();render();closePanel();toast('All sets done. Tap Finish when ready');return}move(1);save();render();const sp=$('#sp');if(sp)sp.scrollTop=0},
   prevs:()=>{move(-1);RS()},
   unlog:()=>{cur().done=false;RS()},
   w:x=>{const st=cur();st.w=Math.max(0,Math.round((st.w+ +x*step())*100)/100);RS()},
@@ -4324,8 +4334,8 @@ const ACT={
   smnote:()=>{closeSheet();setTimeout(()=>ACT.exnote(),250)},
   whtap:(x,el)=>{const b=el&&el.closest?el.closest('.whi'):null;if(!b)return;const w=b.closest('.whl'),kind=w&&w.dataset.wh;if(b.classList.contains('on')){if(kind==='r')ACT.typer();else ACT.typew();return}const k=[...b.parentNode.children].indexOf(b);if(w._go)w._go(k)},
   setautorest:()=>{S.autoRest=!S.autoRest;save();refreshSheet(restSheet())},
-  rtap:()=>{if(V.lpT&&Date.now()-V.lpT<700)return;const s=S.session;if(!s)return;if(s.rest){const b=$('#sp .lgt');if(b){b.classList.remove('nudge');void b.offsetWidth;b.classList.add('nudge')}if(!S.lpHint){S.lpHint=1;save();toast('Hold the timer for rest options')}return}startRest();V.restAnim=true;RS()},
-  rnext:()=>{const s=S.session;if(!s||!s.rest)return;const p=$('#sp .lgp');if(p)p.classList.add('out');setTimeout(()=>{s.rest=null;V.restEnd=true;V.lastLog=null;RS()},260)},
+  rtap:()=>{if(V.lpT&&Date.now()-V.lpT<700)return;const s=S.session;if(!s)return;if(s.rest){ACT.ropen();return}startRest();s.rest.fromLog=false;V.restAnim=true;RS()},
+  rnext:()=>{const s=S.session;if(!s||!s.rest)return;restExit(()=>{const st=cur();if(!s.rest.fromLog&&!st.done){V.noRest=true;s.rest=null;ACT.nexts();V.noRest=false}else{s.rest=null;RS()}V.lastLog=null})},
   restup:x=>{const st=cur();st.w=+x;delete st.p;RS()},
   restundo:()=>{const s=S.session,L=V.lastLog;if(!L)return;s.i=L.i;s.s=L.s;const st=s.items[L.i].sets[L.s];st.done=false;s.rest=null;V.lastLog=null;RS();toast('Set reopened')},
   rlen:x=>{S.rest=+x;if(S.session&&S.session.rest){const rs=S.session.rest,el=rs.total-(rs.end-Date.now());rs.total=S.rest*1000;rs.end=Date.now()+Math.max(0,rs.total-el)}save();refreshSheet(restSheet());render()},
