@@ -748,6 +748,14 @@ html[data-theme="light"] .setscr .sdb,html[data-theme="light"] .smenu{background
 @keyframes scIn{from{opacity:0;transform:translate(-50%,-24px) scale(.9)}}
 @keyframes scPop{from{transform:scale(0) rotate(-30deg)}}
 @keyframes scOut{to{opacity:0;transform:translate(-50%,-16px) scale(.96)}}
+
+.hpills{display:flex;gap:8px;padding:4px 16px 6px}
+.hpills button{flex:1;min-width:0;height:44px;border-radius:999px;border:1px solid #2c2c2e;background:#1c1c1e;color:#f4f4f5;display:flex;align-items:center;gap:7px;padding:0 8px 0 5px;font:inherit}
+.hpi{width:32px;height:32px;border-radius:16px;background:rgba(255,214,10,.14);color:var(--pk);display:flex;align-items:center;justify-content:center;flex:none}.hpi .i{width:16px;height:16px}
+.hpills b{font-size:14px;font-weight:700;flex:1;text-align:left;white-space:nowrap}
+.hpills em{font-style:normal;font-size:12px;font-weight:700;color:var(--mute);background:#2c2c2e;border-radius:999px;padding:2px 7px;font-variant-numeric:tabular-nums}
+@media (max-width:350px){.hpills em{display:none}}
+html[data-theme="light"] .hpills button{background:#fff;border-color:#e5e5ea;color:#111}html[data-theme="light"] .hpills em{background:#f2f2f7}
 /* ===== pill aesthetic, app-wide ===== */
 .pkb,.olb,.tcard .pkb,.bkb,.vopt,.rdo button,.rcban button,.refc button,.pkbar button,.hrow2 button,.rwk button,.rirr button,.prrd,.gychip,.blkchip,.baled,.rolet,.rdx span,.balok span,.tag,.resume,.nccb,.wgfix,.hsplit button,.chw button,.dsbtn,.ovnav{border-radius:999px}
 .seg,.seg button{border-radius:999px}
@@ -998,6 +1006,7 @@ function renderHome(){
   const bkDue=S.history.length>0&&(!S.lastBackup||Date.now()-S.lastBackup>7*864e5);
   let h=`<div class="greet">${true?`<button class="bkic ${bkDue?'due':''}" data-a="bkfile" aria-label="Back up to iCloud">${ic('cloud')}${bkDue?`<span>${S.lastBackup?'Back up · '+Math.floor((Date.now()-S.lastBackup)/864e5)+'d':'Back up'}</span>`:''}</button>`:''}<label class="av ${S.avatar?'ph':''}" aria-label="Change profile photo" ${S.avatar?`style="background-image:url(${S.avatar})"`:''}>${S.avatar?'':esc((S.name||'?')[0].toUpperCase())}<input type="file" accept="image/*" id="avin" style="display:none"></label>Hi${S.name?', '+esc(S.name):''}<button class="gearb" data-a="tab" data-x="more" aria-label="Settings">${ic('gear')}</button></div>`;
   if(S.session)h+=`<div class="resume" data-a="resume"><div style="flex:1"><b>${S.session.pre?'READY TO START':'WORKOUT IN PROGRESS'}</b><div class="sm">${esc(S.session.name)} · <span id="el2">${mmss((Date.now()-S.session.start)/1000)}</span></div></div><span class="lnk sm">RESUME</span></div>`;
+  h+=`<div class="hpills"><button data-a="sub" data-x="routines"><span class="hpi">${ic('log')}</span><b>Routines</b><em>${S.routines.length}</em></button><button data-a="sub" data-x="exercises"><span class="hpi">${ic('search')}</span><b>Exercises</b><em>${S.exercises.length}</em></button></div>`;
   h+=cycChip();
   h+=stackCard();
   h+=weekPlan();
@@ -1496,7 +1505,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.84';
+const APPV='1.85';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 
@@ -1911,7 +1920,6 @@ function weekPlan(){const r=S.routines.find(x=>x.active),ws=weekStart(Date.now()
     h+=`<div class="upn" data-a="sugr" data-x="${r.id}" style="cursor:pointer"><div class="xs" style="letter-spacing:.1em;color:var(--pk);font-weight:700;display:flex;justify-content:space-between;align-items:center">SUGGESTED · ${esc(r.name).toUpperCase()}<span style="color:var(--mute);display:flex;flex:none">${ic('chev',2)}</span></div><div class="upnt">${esc(d0.name)}</div><div class="sm mute">${exSets(d0)} · ${esc(d0.items.slice(0,4).map(it=>ex(it.exId).name).join(', '))}${d0.items.length>4?'…':''}</div><div class="upnb"><button class="pkb" data-a="startd" data-x="${r.id}|${d0.id}">${ic('play')} Start</button><button class="olb" data-a="preview" data-x="${r.id}|${d0.id}">Preview</button></div></div>`;
     h+=`<div class="wplan">${ord.slice(1).map((d,k)=>{const dn2=S.history.find(x=>x.did===d.id&&x.date>=ws);return `<div class="li" data-a="preview" data-x="${r.id}|${d.id}"><span class="wpn ${dn2?'ok':''}">${dn2?'✓':k+2}</span><div class="g"><div class="tt">${esc(d.name)}</div><div class="sb">${dn2?'Done '+new Date(dn2.date).toLocaleDateString(undefined,{weekday:'short'}):exSets(d)}</div></div><span class="chev">${ic('chev')}</span></div>`}).join('')}</div>`}
   if(td.length)h+=td.map(c=>clsRow(c,true)).join('');
-  h+=`<div class="hrow2"><button data-a="sub" data-x="routines"><span>${ic('log')}</span><div><b>Routines</b><em>${S.routines.length} saved</em></div></button><button data-a="sub" data-x="exercises"><span>${ic('search')}</span><div><b>Exercises</b><em>Look one up</em></div></button></div>`;
   return h+recoveryCard()}
 /* ===== home: lift | move (unused) ===== */
 function homeSplit(){const m=V.hm||(S.style==='classes'?'move':'lift'),sug=liftSug(),wk=wkCardio(),g=G().weekCardio,ws=weekStart(Date.now());
@@ -3705,7 +3713,7 @@ const TOUR=[
  {c:'Home',go:()=>tBase('home'),sel:'.stk',tap:'.stk',t:'Today’s Bars',d:'Five daily goals, like rings on a watch. Workouts, sets, minutes and cardio fill them in. Close all five for a full set.'},
  {c:'Home',go:()=>{tBase('home');ACT.stackinfo()},sel:()=>[secl('Choose Your Bars'),$q('.bpk')],t:'Make the bars yours',d:'Tapping the card opens this. Pick which five bars you want (steps, water, sleep, mobility and more) and set a goal for each.'},
  {c:'Home',go:()=>tBase('home'),sel:()=>[h2el('This Week'),$q('.upn'),...[...document.querySelectorAll('.wplan .li')]],t:'Your week, planned',d:'Your routine for the week. The suggested workout sits on top: tap Start to go or Preview to look first. Done days get a yellow ✓.'},
- {c:'Home',go:()=>tBase('home'),sel:'.hrow2',t:'Routines and exercises',d:'Jump to your saved routines, or look up any exercise to see how it’s done.'},
+ {c:'Home',go:()=>tBase('home'),sel:'.hpills',t:'Routines and exercises',d:'Jump to your saved routines, or look up any exercise to see how it’s done.'},
  {c:'Quick Actions',go:()=>tBase('home'),sel:'.tabs .fab',round:1,pulse:'.tabs .fab',t:'The yellow button',d:'Everything you start begins here. Let’s open it.'},
  {c:'Quick Actions',go:()=>{tBase('home');openQuick()},wait:60,sel:'.qheros',t:'Lift or Cardio',d:'The two ways to train. Lift starts a weights workout. Cardio tracks a run, ride or row, or logs a class.'},
  {c:'Quick Actions',go:()=>{tBase('home');openQuick()},wait:60,sel:'.qgrid.qd',tap:'.qh[data-a=qlift]',t:'Your shortcuts',d:'Handy shortcuts. Press and hold any tile to customize: remove, add tools, and drag to reorder.'},
