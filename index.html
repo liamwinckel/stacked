@@ -633,10 +633,10 @@ button.whr{color:var(--soft)}
 .whl{position:relative;height:clamp(84px,11.5vh,100px);-webkit-mask-image:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent);mask-image:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent)}
 .whs{position:absolute;left:50%;top:0;bottom:0;width:0;will-change:transform}
 .whl{overflow:hidden;touch-action:pan-y;outline:none;cursor:grab}
-.whi{position:absolute;top:50%;left:0;min-width:62px;height:46px;padding:0 14px;border-radius:999px;border:1.5px solid #3a3a3c;background:transparent;color:#f4f4f5;font-size:18px;font-weight:500;font-variant-numeric:tabular-nums;will-change:transform,opacity;transform:translate(-50%,-50%);transition:background-color .28s cubic-bezier(.2,.8,.2,1),border-color .28s cubic-bezier(.2,.8,.2,1),color .28s cubic-bezier(.2,.8,.2,1);box-sizing:border-box;white-space:nowrap;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+.whi{position:absolute;top:50%;left:0;min-width:62px;height:46px;padding:0 14px;border-radius:999px;border:1.5px solid #3a3a3c;background:transparent;color:#f4f4f5;font-size:18px;font-weight:500;font-variant-numeric:tabular-nums;will-change:transform,opacity;transform:translate(-50%,-50%);transition:background-color .14s ease-out,border-color .14s ease-out,color .14s ease-out;box-sizing:border-box;white-space:nowrap;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 .whv{display:inline-block}
 .whi.on{background:var(--pk);border-color:var(--pk);color:#000;font-weight:800;box-shadow:0 6px 22px rgba(255,214,10,.22)}
-.whi.pop .whv{animation:whpop .42s cubic-bezier(.34,1.56,.64,1)}
+.whi.whpop .whv{animation:whpop .42s cubic-bezier(.34,1.56,.64,1)}
 @keyframes whpop{0%{transform:scale(1)}40%{transform:scale(1.09)}100%{transform:scale(1)}}
 .whm{position:absolute;left:50%;top:-15px;transform:translateX(-50%);font-style:normal;font-size:8.5px;font-weight:800;letter-spacing:.1em;white-space:nowrap;color:var(--mute)}
 .whm.g{color:#5fe39a}.whi.on .whm{top:-14px}
@@ -1237,7 +1237,7 @@ function whInit(){document.querySelectorAll('#sp .whl').forEach(w=>{if(w._wh)ret
       const s=a<1?1.22-(1.22-.94)*(a*a*(3-2*a)):Math.max(.82,.94-(a-1)*.05),o=Math.max(0,1-Math.pow(a/3.3,1.7));
       b.style.transform=`translate(-50%,-50%) scale(${s.toFixed(4)})`;b.style.opacity=o.toFixed(3)}
     const n=clampI(Math.round(-x/P));if(n!==sel){items[sel].classList.remove('on');items[sel].setAttribute('aria-selected','false');sel=n;items[sel].classList.add('on');items[sel].setAttribute('aria-selected','true');if(user)whLive(kind,+items[sel].dataset.x)}};
-  const settle=()=>{const b=items[sel];b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop');const v=+b.dataset.x;if(kind==='w'&&v!==startV){const ss=S.session,it=ss.items[ss.i],st=it.sets[ss.s];if(!st.wu&&typeof carryW==='function')carryW(it,st,startV);startV=v}whCommit(kind,v)};
+  const settle=()=>{const b=items[sel];b.classList.remove('whpop');void b.offsetWidth;b.classList.add('whpop');const v=+b.dataset.x;if(kind==='w'&&v!==startV){const ss=S.session,it=ss.items[ss.i],st=it.sets[ss.s];if(!st.wu&&typeof carryW==='function')carryW(it,st,startV);startV=v}whCommit(kind,v)};
   const ease=t=>1-Math.pow(1-t,4);
   const go=(to,dur)=>{cancelAnimationFrame(anim);const x0=x,t0=performance.now();dur=dur||Math.max(320,Math.min(1100,260+Math.abs(to-x0)*.75));
     const st=now=>{const t=Math.min(1,(now-t0)/dur);x=x0+(to-x0)*ease(t);paint();if(t<1)anim=requestAnimationFrame(st);else{anim=0;settle()}};anim=requestAnimationFrame(st)};
@@ -1428,7 +1428,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.73';
+const APPV='1.74';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 function dayStats(d0){const st=dayStats0(d0),o=dayOv(d0);if(!o)return st;if(o.skip)return Object.assign({},st,{rest:true});if(o.bars)Object.keys(o.bars).forEach(k=>{if(o.bars[k])st[k]=1});return st}
