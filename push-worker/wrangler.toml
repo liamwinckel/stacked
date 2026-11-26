@@ -1,0 +1,17 @@
+name = "bars-push"
+main = "src/index.js"
+compatibility_date = "2025-06-01"
+workers_dev = true
+
+[vars]
+VAPID_PUBLIC = "BBBrk82LZLfUuuJJ-8tbLWUMiVeZsOdCl8woNMsguKPsY5t_k6kUB3T8f8WSkdzBGfXoL4BCakLHgym0yT5QEOY"
+VAPID_SUB = "https://liamwinckel.github.io/stacked/"
+ALLOW_ORIGINS = "https://liamwinckel.github.io"
+
+[[durable_objects.bindings]]
+name = "TIMER"
+class_name = "RestTimer"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["RestTimer"]
