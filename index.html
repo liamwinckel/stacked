@@ -1591,15 +1591,16 @@ function widget(id){
   const bw=b.w===0;
   return `<div class="wcard"><div class="row"><div style="flex:1;font-weight:600">${esc(e.name)}</div><button class="ico" data-a="delwid" data-x="${id}">${ic('x')}</button></div><div class="ws"><div><b>${b.n?(bw?b.reps:fmt(Math.round(b.e))):'–'}</b><span>${bw?'Best reps':'Est. 1RM'}</span></div><div><b>${b.n&&!bw?fmt(b.w)+'×'+b.wr:'–'}</b><span>Heaviest</span></div><div><b>${b.n}</b><span>Sessions</span></div></div>${spark(pts)}</div>`;
 }
-function renderGoals(){
-  let h=`<div class="h2">Your Focus</div>
+function renderGoals(){const gs=V.gs||'focus';
+  const sw=`<div class="pseg"><div class="seg">${[['focus','Focus'],['plan','Plan'],['body','Body']].map(([k,l])=>`<button class="${gs===k?'on':''}" data-a="gseg" data-x="${k}">${l}</button>`).join('')}</div></div>`;
+  if(gs==='plan')return hd('Goals')+`<main class="pg">${sw}${planCard()}</main>`;
+  if(gs==='body')return hd('Goals')+`<main class="pg">${sw}<div class="h2">Body Targets</div>${bodySection('goal')}</main>`;
+  let h=sw+`<div class="h2">Your Focus</div>
   <div class="li" style="cursor:default;flex-direction:column;align-items:stretch;gap:8px"><div class="sm mute">Main goal</div><div class="seg">${Object.entries(GOALL).map(([k,l])=>`<button class="${P().goal===k?'on':''}" data-a="pfset" data-x="goal|${k}" style="font-size:12px">${l}</button>`).join('')}</div></div>
   <div class="li" style="cursor:default;flex-direction:column;align-items:stretch;gap:8px"><div class="sm mute">Training experience</div><div class="seg">${Object.entries(EXPL).map(([k,l])=>`<button class="${P().exp===k?'on':''}" data-a="pfset" data-x="exp|${k}">${l}</button>`).join('')}</div><div class="xs mute">${{beg:'Under ~1 year of consistent lifting',int:'1–4 years, still progressing month to month',adv:'4+ years, progress takes months'}[P().exp]}</div></div>
-  <div class="li" style="cursor:default;flex-direction:column;align-items:stretch;gap:8px"><div class="sm mute">Training style</div><div class="seg">${Object.entries(STYLES).map(([k,o])=>`<button class="${(S.style||'lift')===k?'on':''}" data-a="tstyle" data-x="${k}" style="font-size:12px">${o.n}</button>`).join('')}</div><div class="xs mute">${STYLES[S.style||'lift'].d}. Sets your default bars and what Quick Actions puts first.</div></div>
+  <div class="li" style="cursor:default;flex-direction:column;align-items:stretch;gap:8px"><div class="sm mute">Training style</div><div class="seg">${Object.entries(STYLES).map(([k,o])=>`<button class="${(S.style||'lift')===k?'on':''}" data-a="tstyle" data-x="${k}" style="font-size:12px">${o.n}</button>`).join('')}</div><div class="xs mute">${STYLES[S.style||'lift'].d}. Sets your default bars.</div></div>
   ${prioHtml()}
   <div class="li" style="cursor:default"><div class="xs mute">Sets your weekly target of <b style="color:var(--pk)">${volTarget().join('–')}</b> sets per muscle and the plan below.</div></div>`;
-  h+=planCard();
-  h+=`<div class="h2">Body Targets</div>`+bodySection('goal');
   h+=weekVolume();
 
   return hd('Goals')+`<main class="pg">${h}</main>`;
@@ -1917,7 +1918,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='2.25';
+const APPV='2.26';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 
@@ -4170,11 +4171,10 @@ const TOUR=[
  {c:'Home',go:()=>{tBase('home');ACT.stackinfo();setTimeout(()=>ACT.bxtog('_choose'),60)},wait:560,sel:()=>$q('#bx .bpk')||$q('#bx .bxs.open'),t:'Make the bars yours',d:'Tapping the card opens your bars full screen. Tap any bar for details, or open Choose Your Bars to pick your five and set a goal for each.'},
  {c:'Home',go:()=>tBase('home'),sel:()=>[$q('.hup'),$q('.hwk')],t:'Your week, planned',d:'Your routine for the week. The suggested workout sits on top: tap Start to go or Preview to look first. Done days get a yellow ✓.'},
  {c:'Home',go:()=>tBase('home'),sel:'.lnav .lnlogo',round:1,t:'Routines and exercises',d:'Your routines and the full exercise library live in Library, at the bottom of the logo menu.'},
- {c:'Menu',go:()=>tBase('home'),sel:'.lnav .lnlogo',round:1,pulse:'.lnav .lnlogo',t:'The logo is your menu',d:'Tap it to fan out Today, Progress, Goals, Tools and Settings, or press and slide up to jump straight there. Swipe it sideways to flip between screens.'},
- {c:'Quick Actions',go:()=>tBase('home'),sel:'.lnav .lift',pulse:'.lnav .lift',t:'Lift',d:'Everything you start begins here. Let’s open it.'},
+ {c:'Menu',go:()=>tBase('home'),sel:'.lnav .lnlogo',round:1,pulse:'.lnav .lnlogo',t:'The logo is your menu',d:'Tap it to fan out Progress, Goals, Home, Tools and Library, or press and slide up to jump straight there. Swipe it sideways to flip between screens.'},
  {c:'Home',go:()=>{tBase('home')},wait:60,sel:'.lnav .lift',t:'Your activity bar',d:'Tap it to pick any workout, or tap play to start your next one right away. During a workout it shows your time and sets, and takes you straight back in.'},
- {c:'Quick Actions',go:()=>{tBase('home');ACT.qlift()},sel:()=>{const r=$q('.sheet .sugrow');return [r&&r.previousElementSibling,r,...after(r,2)]},t:'Picking a lift',d:'Every workout in your routines. Your next one is highlighted, but you can start any of them. Empty Workout and Build Me a Workout are further down.'},
- {c:'Quick Actions',go:()=>{tBase('home');ACT.qcar()},sel:()=>{const a=secl('Track Live');return [a,...after(a,2)]},t:'Picking cardio',d:'Track a machine live with time, distance and pace. Below that you can log a class you already did, or follow a guided session.'},
+ {c:'Workouts',go:()=>{tBase('home');ACT.qlift()},sel:()=>{const r=$q('.sheet .sugrow');return [r&&r.previousElementSibling,r,...after(r,2)]},t:'Picking a lift',d:'Every workout in your routines. Your next one is highlighted, but you can start any of them. Empty Workout and Build Me a Workout are further down.'},
+ {c:'Workouts',go:()=>{tBase('home');ACT.qcar()},sel:()=>{const a=secl('Track Live');return [a,...after(a,2)]},t:'Picking cardio',d:'Tap Cardio on Home to track a machine live with time, distance and pace. Below that you can log a class you already did, or follow a guided session.'},
  {c:'Working Out',demo:1,dock:'mid',dim:'.ovbar.prego .pkb',go:()=>{tBase('home');tDemo(true)},sel:()=>[...document.querySelectorAll('#app [data-sw^="ex|"]')],tap:'.ovbar.prego .pkb',t:'The Ready screen',d:'Starting a workout opens this first. Check your exercises, reorder or swap them, then tap Start Workout. This is a practice run, so nothing gets saved.'},
  {c:'Working Out',demo:1,go:()=>{tBase('home');tDemo(false)},wait:90,sel:()=>[$q('#sp .sdb'),$q('#sp .whl[data-wh=w]')],t:'One set at a time',d:'Tap the set to jump between sets or add one. Scroll the wheel to change the weight, or tap the yellow number to type it.'},
  {c:'Working Out',demo:1,go:()=>{tBase('home');tDemo(false)},wait:90,sel:()=>[$q('#sp .barsvg'),$q('#sp .plates')],t:'Load the bar',d:'Tap a plate to add it to both sides. Tap a plate on the bar to take it off.'},
@@ -4182,7 +4182,7 @@ const TOUR=[
  {c:'Working Out',demo:1,go:()=>{tBase('home');tDemo(false)},wait:90,sel:'#sp .lgp',t:'Log the set',d:'Tap Log Set to save it and move on. Tap the time on the right to change your rest. Tap Finish when you’re done.'},
  {c:'Progress',go:()=>{tBase('prog');tSample()},sel:()=>[h2el('Workout Progress'),$q('.wtg')],t:'Progress',d:'Charts for the lifts you care about, like this sample. Tap Track an Exercise to add one, and tap any chart for your best sets and history.'},
  {c:'Progress',go:()=>tBase('prog'),sel:()=>[h2el('Insights'),...[...document.querySelectorAll('.insg .ins')]],dock:'top',t:'Insights',d:'Deeper looks: your month of bars, volume balance, strength levels, readiness and more.'},
- {c:'Goals',go:()=>tBase('goals'),sel:()=>h2pair('Your Focus'),dock:'top',t:'Goals',d:'Tell Bars what you’re after and how you like to train. It sets your weekly targets, calories and priority muscles.'},
+ {c:'Goals',go:()=>{V.gs='focus';tBase('goals')},sel:()=>h2pair('Your Focus'),dock:'top',t:'Goals',d:'Tell Bars what you’re after and how you like to train. It sets your weekly targets, calories and priority muscles.'},
  {c:'Tools',go:()=>tBase('tools'),sel:'.tbig',t:'Tools',d:'Routines and the exercise library sit at the top. Programs and templates live inside Routines.'},
  {c:'Tools',go:()=>tBase('tools'),sel:()=>[$q('.tpins')],t:'Pinned tools',d:'Your favourite tools sit up top. Tap EDIT to pin up to four, and drag them into any order.'},
  {c:'Tools',go:()=>tBase('tools'),sel:()=>[secl('All Tools'),...document.querySelectorAll('.tgrid .tdr')],tap:'.tbig [data-x="exercises"]',t:'Every tool',d:'Plate calculator, timers, pace, heart rate zones and more. Search or filter at the top to find one fast.'},
@@ -4684,6 +4684,7 @@ const ACT={
   sugapply:()=>{const s=suggestStack();S.goals=Object.assign(G(),s.g);S.weekGoal=s.week;S.sugDismiss=undefined;save();refreshSheet(stackInfoHtml());render();toast('Bars updated. Home and your rings now use them')},
   sugdismiss:()=>{S.sugDismiss=sugSig(suggestStack());save();render()},
   pseg:x=>{V.ps=x;render();scr0()},
+  gseg:x=>{V.gs=x;render();scr0()},
   hsync:()=>{closeSheet();if(!S.hsGuided){S.hsGuided=1;save();openSheet(hGuide());return}try{localStorage.setItem('stk-hpend',Date.now())}catch(e){}location.href='shortcuts://run-shortcut?name='+encodeURIComponent(HSC)},
   hguide:()=>{S.hsGuided=1;save();closeSheet();openSheet(hGuide())},
   himport:()=>{closeSheet();openSheet(hImportSheet())},
@@ -4693,7 +4694,7 @@ const ACT={
   wgfixdate:x=>{V.wgT=$('#wgT').value;V.wgD=x;refreshSheet(wgHtml())},
   wgsave:()=>{const t=parseFloat($('#wgT').value),d=$('#wgD').value;if(!t||!d)return;const bw=curBW();S.weightGoal={target:t,date:new Date(d+'T12:00').getTime(),start:(S.weightGoal&&S.weightGoal.target===t)?S.weightGoal.start:bw,startDate:(S.weightGoal&&S.weightGoal.target===t)?S.weightGoal.startDate:Date.now()};S.nutMode=undefined;save();closeSheet();render();toast('Weight goal set. Your nutrition plan now follows it')},
   wgclear:()=>{S.weightGoal=undefined;save();closeSheet();render();toast('Weight goal removed')},
-  plangoal:()=>{if(S.weightGoal){ACT.wgopen();return}const p=P(),g=S.planGoal||{};if(p.goal==='fat'){ACT.tab('goals');return}if(p.goal==='muscle')numSheet(`Lean muscle to gain (${U()})`,g.lean||(U()==='kg'?2.5:5),v=>{S.planGoal=Object.assign({},g,{lean:v>0?v:undefined})});else numSheet('Strength increase goal (%)',g.str||(p.goal==='strength'?10:5),v=>{S.planGoal=Object.assign({},g,{str:v>0?v:undefined})})},
+  plangoal:()=>{if(S.weightGoal){ACT.wgopen();return}const p=P(),g=S.planGoal||{};if(p.goal==='fat'){V.gs='body';ACT.tab('goals');return}if(p.goal==='muscle')numSheet(`Lean muscle to gain (${U()})`,g.lean||(U()==='kg'?2.5:5),v=>{S.planGoal=Object.assign({},g,{lean:v>0?v:undefined})});else numSheet('Strength increase goal (%)',g.str||(p.goal==='strength'?10:5),v=>{S.planGoal=Object.assign({},g,{str:v>0?v:undefined})})},
   pfset:x=>{const [k,v]=x.split('|');S.profile=Object.assign(P(),{[k]:v});if(k==='goal')delete S.profile.goalUnsure;save();render()},
   swdel:()=>{const o=SWO;if(!o)return;SWO=null;SWEAT=false;o.el.style.transition='transform .2s ease,opacity .2s';o.el.style.transform=`translateX(${-o.el.offsetWidth}px)`;o.el.style.opacity='0';o.bg.style.transition='width .2s ease';o.bg.style.width=o.el.offsetWidth+'px';setTimeout(()=>{o.bg.remove();swDo(o.el.dataset.sw)},190)},
   dropset:()=>{const s=S.session,it=s.items[s.i],st=cur(),e=ex(it.exId);let w=st.w>0?Math.max(e.type==='barbell'?bar():0,rnd(st.w*.8)):0;if(st.w>0&&w>=st.w)w=Math.max(0,st.w-incFor(e.type));const ns={w,r:st.r,done:false,ds:true};it.sets.push(ns);if(!st.done)st.done=true;s.s=it.sets.length-1;save();render();toast(st.w>0?`Drop set: ${fmt(w)} ${U()} (−${Math.round((1-w/st.w)*100)}%). Go to failure`:'Drop set added. Go to failure')},
