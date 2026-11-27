@@ -894,10 +894,10 @@ html[data-theme="light"] .hpills button{background:#fff;border-color:#e5e5ea;col
 #lnm{position:fixed;inset:0;z-index:60;-webkit-user-select:none;user-select:none}
 .lnbg{position:absolute;inset:0;background:rgba(0,0,0,.55);opacity:0;transition:opacity .28s ease}#lnm.in .lnbg{opacity:1}
 .lnst{position:absolute;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
-.lnp{height:50px;border-radius:25px;border:0;background:var(--pk);color:#0b0b0c;display:flex;align-items:center;gap:10px;padding:0 18px;font-family:inherit;font-size:17px;font-weight:800;transform-origin:left center;opacity:0;transform:translate3d(0,22px,0) scale(.35,.6);transition:transform .46s cubic-bezier(.2,1.22,.4,1),opacity .22s ease,box-shadow .2s;transition-delay:calc(var(--k)*38ms);will-change:transform}
+.lnp{height:50px;border-radius:25px;border:0;background:var(--pk);color:#0b0b0c;display:flex;align-items:center;gap:10px;padding:0 18px;font-family:inherit;font-size:17px;font-weight:800;transform-origin:left center;opacity:0;transform:translate3d(0,22px,0) scale(.35,.6);transition:transform .46s cubic-bezier(.2,1.22,.4,1),opacity .22s ease,box-shadow .2s,background-color .18s,color .18s;transition-delay:calc(var(--k)*38ms);will-change:transform}
 .lnp .i,.lnp svg{width:22px;height:22px;flex:none}.lnp.mid{background:#f4f4f5}.lnp.cur::after{content:'';width:8px;height:8px;border-radius:4px;background:#0b0b0c;margin-left:auto;flex:none}
-#lnm.in .lnp{opacity:1;transform:translate3d(0,0,0) scale(var(--s,1))}
-#lnm.drag .lnp{transition:transform .14s cubic-bezier(.2,.8,.2,1),opacity .2s,box-shadow .15s;transition-delay:0s}
+#lnm.in .lnp{opacity:1;transform:translate3d(var(--tx,0px),0,0) scale(var(--s,1))}
+#lnm.drag .lnp{transition:transform .16s cubic-bezier(.2,1.2,.4,1),opacity .2s,box-shadow .15s,background-color .15s,color .15s;transition-delay:0s}
 .lnp.hov{box-shadow:0 0 0 4px rgba(255,214,10,.28),0 10px 26px rgba(0,0,0,.45)}.lnp.mid.hov{box-shadow:0 0 0 4px rgba(255,255,255,.28),0 10px 26px rgba(0,0,0,.45)}
 #lnm.in .lnp.pick{transform:translate3d(6px,0,0) scale(1.1);transition:transform .13s ease-out;transition-delay:0s}
 #lnm.out .lnp{opacity:0;transform:translate3d(0,14px,0) scale(.4,.7);transition:transform .24s cubic-bezier(.4,0,.2,1),opacity .18s ease;transition-delay:calc((4 - var(--k))*18ms)}
@@ -971,6 +971,7 @@ main.edout>*{animation:edOut .15s ease forwards}main.edin>*{animation:edIn .38s 
 #app main.rise{animation:riseIn .46s cubic-bezier(.2,1.04,.3,1) both;transform-origin:var(--tox,50%) var(--toy,100%);will-change:transform,opacity}
 #app main.settle{animation:settleIn .36s cubic-bezier(.2,.88,.2,1) both;transform-origin:50% 40%}
 #app header.hdin{animation:hdIn .3s ease both}
+#lnm.drag .lnp{background:#6b5c0e;color:#151309}#lnm.drag .lnp.mid{background:#6f6f73}#lnm.drag .lnp.hov{background:var(--pk);color:#0b0b0c}#lnm.drag .lnp.mid.hov{background:#f4f4f5}#lnm.drag .lnp.hov{--s:1.2!important;--tx:12px;box-shadow:0 0 0 5px rgba(255,214,10,.3),0 14px 30px rgba(0,0,0,.55)}#lnm.drag .lnp.mid.hov{box-shadow:0 0 0 5px rgba(255,255,255,.3),0 14px 30px rgba(0,0,0,.55)}
 </style>
 </head>
 <body>
@@ -1778,7 +1779,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='2.10';
+const APPV='2.11';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 
@@ -4856,7 +4857,7 @@ try{if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!n
   function close(){if(!M)return;const m=M;M=null;m.b.setAttribute('aria-expanded','false');m.b.classList.remove('open');m.el.classList.remove('in','drag');m.el.classList.add('out');setTimeout(()=>m.el.remove(),300)}
   function pick(k){if(!M)return;const p=M.items.find(x=>x.dataset.k===k);if(p)p.classList.add('pick');setTimeout(()=>{close();go(k)},130)}
   function hover(y){if(!M)return;let best=null,bd=1e9;M.el.classList.add('drag');
-    M.items.forEach(p=>{const r=p.getBoundingClientRect(),c=(r.top+r.bottom)/2,d=Math.abs(y-c);p.style.setProperty('--s',(1+.06*Math.exp(-(d*d)/(44*44))).toFixed(3));if(y>=r.top-6&&y<=r.bottom+6&&d<bd){bd=d;best=p}});
+    M.items.forEach(p=>{const r=p.getBoundingClientRect(),c=(r.top+r.bottom)/2,d=Math.abs(y-c);p.style.setProperty('--s',(1+.07*Math.exp(-(d*d)/(40*40))).toFixed(3));if(y>=r.top-6&&y<=r.bottom+6&&d<bd){bd=d;best=p}});
     if(best!==M.hov){if(M.hov)M.hov.classList.remove('hov');M.hov=best;if(best){best.classList.add('hov');try{navigator.vibrate&&navigator.vibrate(6)}catch(e){}}}}
   function cycle(dir){const c=cur()||'home',i=CYC.indexOf(c),n=CYC[(Math.max(0,i)+dir+CYC.length)%CYC.length];const b=document.querySelector('.lnav .lnlogo');if(b){b.classList.remove('cl','cr');void b.offsetWidth;b.classList.add(dir>0?'cl':'cr')}setTimeout(()=>go(n),90)}
   document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('.lnav .lnlogo');if(!b)return;e.preventDefault();
