@@ -1031,6 +1031,16 @@ main.edout>*{animation:edOut .15s ease forwards}main.edin>*{animation:edIn .38s 
 .lfr circle{fill:none;stroke:rgba(255,214,10,.22);stroke-width:3}.lfr .lfrp{stroke:var(--pk);stroke-linecap:round;transition:stroke-dasharray .5s cubic-bezier(.2,.8,.2,1)}
 .lnav.qopen .lfi.live{background:var(--pk);color:#0b0b0c}.lnav.qopen .lfr{opacity:0}
 .qh.lift.res{background:var(--pk);color:#0b0b0c}.qh.lift.res .qhi{background:rgba(0,0,0,.12);color:#0b0b0c}.qh.lift.res em{color:rgba(11,11,12,.7)}
+
+/* this week: totals + rows that grow into spare height */
+.wtot{display:flex;gap:8px;padding:14px 16px 0}.wtot>div{flex:1;background:rgba(255,255,255,.045);border-radius:18px;padding:10px 12px}.wtot b{display:block;font-size:20px;font-weight:800;letter-spacing:-.01em}.wtot span{display:block;font-size:11.5px;font-weight:600;color:var(--mute);margin-top:1px}
+.hsec[data-p="1"] .wrows{flex:1 0 auto;gap:0}
+.hsec[data-p="1"] .wrow{flex:1 0 auto;min-height:42px;max-height:56px}
+.wmus{display:grid!important;grid-template-columns:1fr 1fr;column-gap:26px;row-gap:8px}.wmh{grid-column:1/-1}.wmr span{width:auto;min-width:0;flex:none;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.wmr{gap:8px}
+.hsec.f2 .wmus{display:grid!important}.hsec.f3 .wmus{display:none!important}
+.hsec.f1[data-p="1"] .wrow{min-height:38px}.hsec.f2[data-p="1"] .wrow{min-height:35px}.hsec.f3[data-p="1"] .wrow{min-height:32px}
+.hsec[data-p="1"] .wmus{flex:none}
+.hsec.f1 .wtot b{font-size:17px}.hsec.f1 .wtot>div{padding:8px 10px}.hsec.f2 .wtot{display:none}
 </style>
 </head>
 <body>
@@ -1324,7 +1334,9 @@ function homeWeekPage(){const t0=dayStart(Date.now()),ws=weekStart(t0),r=S.routi
   const a={};S.history.forEach(h=>{if(h.date<ws)return;h.entries.forEach(e=>{const m=ex(e.exId).mg;if(!m||m==='cardio')return;a[m]=(a[m]||0)+dn(e).length})});
   const G2=[['Chest',['chest']],['Back',['back','traps','rear delts']],['Legs',['quads','hamstrings','glutes','adductors','calves']],['Shoulders',['shoulders']],['Arms',['biceps','triceps','forearms']],['Core',['abs']]];
   const [lo,hi]=volTarget();const mrows=G2.map(([l,ms])=>{const n=ms.reduce((x,m)=>x+(a[m]||0),0);return `<div class="wmr"><span>${l}</span><i><b style="width:${Math.min(100,n/hi*100).toFixed(0)}%;${n>=lo?'background:var(--pk)':''}"></b></i><em>${n}</em></div>`}).join('');
-  return `<div class="hpgh"><div><small>This week</small><b>${lifts} of ${S.weekGoal} lifts</b></div>${st?`<span class="wstk">${st}-week streak</span>`:''}</div><div class="wrows">${rows}</div><div class="wmus"><div class="wmh"><span>Sets per muscle</span><em>target ${lo}–${hi}</em></div>${mrows}</div>`}
+  const WH=S.history.filter(h=>h.date>=ws&&h.date<ws+7*864e5),wv=Math.round(sum(WH.filter(h=>!h.act).map(volOf))),wsets=sum(WH.filter(h=>!h.act).map(h=>sum(h.entries.map(e=>dn(e).length)))),wmin=Math.round(sum(WH.map(h=>h.act?h.act.min:(h.dur||0)/60)));
+  const tot=`<div class="wtot"><div><b>${wv>=10000?fmt(Math.round(wv/100)/10)+'k':fmt(wv)}</b><span>${U()} lifted</span></div><div><b>${wsets}</b><span>sets</span></div><div><b>${wmin}</b><span>min active</span></div></div>`;
+  return `<div class="hpgh"><div><small>This week</small><b>${lifts} of ${S.weekGoal} lifts</b></div>${st?`<span class="wstk">${st}-week streak</span>`:''}</div>${tot}<div class="wrows">${rows}</div><div class="wmus"><div class="wmh"><span>Sets per muscle</span><em>target ${lo}–${hi}</em></div>${mrows}</div>`}
 function homeStack(h,lit){const es=h.entries.filter(e=>!isCardio(e.exId)).slice(0,5);if(!es.length)return '';const mx=Math.max(1,...es.map(e=>dn(e).length));return `<svg class="rstk" viewBox="0 0 96 ${es.length*13-4}" aria-hidden="true">${es.map((e,k)=>`<rect x="0" y="${k*13}" width="${Math.max(20,96*dn(e).length/mx)}" height="9" rx="4.5" fill="${lit}"/>`).join('')}</svg>`}
 function homeRecentPage(){const H=S.history.slice(0,3);
   if(!H.length)return `<div class="hpgh"><div><small>Recent</small><b>Nothing yet</b></div></div><div class="empty sm" style="padding:30px 24px">Your finished workouts will show up here, each drawn as its own stack of bars.</div>`;
@@ -1337,7 +1349,7 @@ function homeRecentPage(){const H=S.history.slice(0,3);
 function hpFit(secs){(secs||document.querySelectorAll('.hsec')).forEach(sc=>{sc.classList.remove('f1','f2','f3');for(let k=1;k<=3&&sc.scrollHeight>sc.clientHeight+1;k++)sc.classList.add('f'+k)})}
 function hpInit(){const m=document.querySelector('#app main.hpage'),nav=document.querySelector('.hpi');if(!m||!nav)return;const secs=[...m.querySelectorAll('.hsec')];
   const setH=()=>{m.style.setProperty('--ph',m.clientHeight+'px')};setH();if(!window._hpR){window._hpR=1;addEventListener('resize',()=>{const mm=document.querySelector('#app main.hpage');if(mm){mm.style.setProperty('--ph',mm.clientHeight+'px');hpFit()}})}
-  nav.style.top=(m.offsetTop+m.clientHeight/2)+'px';hpFit(secs);const want=Math.min(2,V.hpg||0);if(Math.round(m.scrollTop/Math.max(1,m.clientHeight))!==want)m.scrollTop=want*m.clientHeight;
+  nav.style.top=(m.offsetTop+m.clientHeight/2)+'px';hpFit(secs);const re=()=>{if(!m.isConnected)return;setH();nav.style.top=(m.offsetTop+m.clientHeight/2)+'px';hpFit(secs)};requestAnimationFrame(re);setTimeout(re,350);setTimeout(re,1200);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(re);const want=Math.min(2,V.hpg||0);if(Math.round(m.scrollTop/Math.max(1,m.clientHeight))!==want)m.scrollTop=want*m.clientHeight;
   let raf=0;m.addEventListener('scroll',()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;const i=Math.max(0,Math.min(secs.length-1,Math.round(m.scrollTop/Math.max(1,m.clientHeight))));nav.querySelectorAll('button').forEach((b,k)=>b.classList.toggle('on',k===i));
     if(i!==(V.hpg||0)){V.hpg=i;const sc=secs[i];if(sc&&!matchMedia('(prefers-reduced-motion: reduce)').matches){sc.classList.remove('arr');void sc.offsetWidth;sc.classList.add('arr');setTimeout(()=>sc.classList.remove('arr'),700)}}})},{passive:true});
   nav.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.pg;m.scrollTo({top:i*m.clientHeight,behavior:'smooth'})}))}
@@ -1875,7 +1887,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='2.19';
+const APPV='2.20';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 
