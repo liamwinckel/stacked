@@ -613,7 +613,7 @@ html[data-theme="light"] .qh.car{background:#18181b;color:#fff}html[data-theme="
 
 /* ===== set screen v2: wheels + pill plates ===== */
 .setscr{text-align:center}
-.shd{display:flex;align-items:center;gap:2px;padding:0 8px}
+.shd{display:grid;grid-template-columns:42px 42px minmax(0,1fr) 42px 42px;align-items:center;gap:0;padding:0 6px}.shd>.shn{grid-column:3;text-align:center}
 .shb{width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;color:var(--mute);border-radius:999px}
 .shb .i{width:22px;height:22px}
 .shn{flex:1;min-width:0}
@@ -635,6 +635,7 @@ button.whr{color:var(--soft)}
 .whl{overflow:hidden;touch-action:none;outline:none;cursor:grab}
 .whi{position:absolute;top:50%;left:0;min-width:62px;height:46px;padding:0 14px;border-radius:999px;border:1.5px solid #3a3a3c;background:transparent;color:#f4f4f5;font-size:18px;font-weight:500;font-variant-numeric:tabular-nums;will-change:transform,opacity;transform:translate(-50%,-50%);transition:background-color .14s ease-out,border-color .14s ease-out,color .14s ease-out;box-sizing:border-box;white-space:nowrap;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 .whv{display:inline-block}
+.whl[data-wh=w] .whi{height:52px;min-width:70px;padding:0 16px;font-size:20px}
 .whi.on{background:var(--pk);border-color:var(--pk);color:#000;font-weight:800;box-shadow:0 6px 22px rgba(255,214,10,.22)}
 .whi.whpop .whv{animation:whpop .42s cubic-bezier(.34,1.56,.64,1)}
 @keyframes whpop{0%{transform:scale(1)}40%{transform:scale(1.09)}100%{transform:scale(1)}}
@@ -669,7 +670,7 @@ button.whr{color:var(--soft)}
 html[data-theme="light"] .setscr .sdb,html[data-theme="light"] .smenu{background:#1c1c1e}
 
 .smi b{text-align:left}
-@media (max-height:740px){.setscr .whl{height:90px}.whi{height:40px;font-size:17px}.setscr .barsvg{max-height:9vh}.setscr .plates{margin-top:6px}.ppl{height:calc(30px + 24px * var(--k))}.setscr .rirr button{height:38px}.lgp{height:56px}.setdd{margin-top:4px}.sdb{height:36px}.wsec{gap:2px}.setscr .shd .shb{height:38px}}
+@media (max-height:740px){.setscr .whl{height:90px}.whi{height:40px;font-size:17px}.whl[data-wh=w] .whi{height:46px;font-size:19px}.setscr .barsvg{max-height:9vh}.setscr .plates{margin-top:6px}.ppl{height:calc(30px + 24px * var(--k))}.setscr .rirr button{height:38px}.lgp{height:56px}.setdd{margin-top:4px}.sdb{height:36px}.wsec{gap:2px}.setscr .shd .shb{height:38px}}
 
 /* ===== rest mode in the log pill ===== */
 .lgp{position:relative;isolation:isolate;transition:background-color .6s cubic-bezier(.45,0,.2,1),box-shadow .6s cubic-bezier(.45,0,.2,1)}
@@ -988,7 +989,7 @@ function pushArm(force){if(!PUSH_URL||(!S.pushOn&&!V.pushEnd))return;const hid=d
   if(want){const s=S.session,it=s&&s.items[s.i],e=it&&ex(it.exId);pushPost('/schedule',want===V.pushTest&&!(s&&s.rest)?{end:want,title:'Bars test alert',body:'Rest alerts are working 💪'}:{end:want,title:'Rest is over',body:e?`Time for ${e.name}`:'Time for your next set'})}else if(V.pushEnd||force)pushPost('/cancel');V.pushEnd=want}
 function pushSync(){pushArm(document.hidden)}
 document.addEventListener('visibilitychange',pushSync);window.addEventListener('pagehide',()=>pushArm(true));setInterval(()=>{if(!document.hidden)pushArm(false)},1000);setTimeout(pushCache,800);
-function restNotify(){try{if(!S.restNotify||!('Notification' in window)||Notification.permission!=='granted'||!document.hidden)return;const s=S.session,it=s&&s.items[s.i],t='Rest is over',body=it?`Time for ${ex(it.exId).name}`:'Time for your next set';if(navigator.serviceWorker)navigator.serviceWorker.ready.then(r=>r.showNotification(t,{body,tag:'bars-rest',icon:'icon-bars-192.png',renotify:true})).catch(()=>{});else new Notification(t,{body})}catch(_){}}
+function restNotify(){try{if(S.pushOn||!S.restNotify||!('Notification' in window)||Notification.permission!=='granted'||!document.hidden)return;const s=S.session;if(s&&s.rest&&Date.now()-s.rest.end>3000)return;const it=s&&s.items[s.i],t='Rest is over',body=it?`Time for ${ex(it.exId).name}`:'Time for your next set';if(navigator.serviceWorker)navigator.serviceWorker.ready.then(r=>r.showNotification(t,{body,tag:'bars-rest',icon:'icon-bars-192.png',renotify:true})).catch(()=>{});else new Notification(t,{body})}catch(_){}}
 function restSchedule(){try{const s=S.session;if(!s||!s.rest||!S.restNotify||!('Notification' in window)||Notification.permission!=='granted')return;if('showTrigger' in Notification.prototype&&typeof TimestampTrigger!=='undefined'&&navigator.serviceWorker)navigator.serviceWorker.ready.then(r=>r.showNotification('Rest is over',{body:'Time for your next set',tag:'bars-rest',showTrigger:new TimestampTrigger(s.rest.end)})).catch(()=>{})}catch(_){}}
 document.addEventListener('visibilitychange',()=>{const s=S.session;if(document.hidden){restSchedule()}else if(s&&s.rest&&Date.now()>=s.rest.end){restDone(false);toast('Rest finished while you were away')}});
 function restEx(){const s=S.session,it=s&&s.items[s.i];return it?ex(it.exId):null}
@@ -1337,9 +1338,10 @@ function whVals(kind,e,cur){const out=[];
 function wheelHtml(kind,vals,cur,marks,label,ff){
   return `<div class="whl" data-wh="${kind}" tabindex="0" role="listbox" aria-label="${label}"><div class="whs">${vals.map(v=>{const m=marks[v];const on=Math.abs(v-cur)<1e-6;return `<button class="whi${on?' on':''}" data-a="whtap" data-x="${v}" role="option" aria-selected="${on}"><span class="whv">${ff?ff(v):fmt(v)}</span>${m?`<em class="whm ${m[1]}">${m[0]}</em>`:''}</button>`}).join('')}</div></div>`}
 const WH={};
-function whInit(){document.querySelectorAll('#sp .whl').forEach(w=>{if(w._wh)return;w._wh=1;
+function exFit(){const e=document.querySelector('.setscr .shn .exn');if(!e||e._fit)return;e._fit=1;let f=parseFloat(getComputedStyle(e).fontSize);const min=Math.min(f,18);while(f>min&&e.getBoundingClientRect().height>f*1.12*1.5){f-=.5;e.style.fontSize=f+'px'}}
+function whInit(){exFit();document.querySelectorAll('#sp .whl').forEach(w=>{if(w._wh)return;w._wh=1;
   const tr=w.querySelector('.whs'),kind=w.dataset.wh,items=[...tr.children];if(!items.length)return;
-  const P=kind==='t'?90:Math.max(80,Math.max(...items.map(b=>(b.querySelector('.whv')||b).textContent.length))*11+48);items.forEach((b,i)=>b.style.left=(i*P)+'px');
+  const P=kind==='t'?90:kind==='w'?Math.max(90,Math.max(...items.map(b=>(b.querySelector('.whv')||b).textContent.length))*12+58):Math.max(80,Math.max(...items.map(b=>(b.querySelector('.whv')||b).textContent.length))*11+48);items.forEach((b,i)=>b.style.left=(i*P)+'px');
   const N=items.length,minX=-(N-1)*P;let idx=Math.max(0,items.findIndex(b=>b.classList.contains('on'))),x=-idx*P,sel=idx,anim=0,user=false,startV=+items[idx].dataset.x;
   const clampI=i=>Math.max(0,Math.min(N-1,i));
   const paint=()=>{tr.style.transform=`translate3d(${x}px,0,0)`;
@@ -1555,7 +1557,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.92';
+const APPV='1.93';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 
