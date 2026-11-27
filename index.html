@@ -1761,7 +1761,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='2.07';
+const APPV='2.08';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 
@@ -4822,7 +4822,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()});
 
 (function(){try{if(document.querySelector('link[rel=apple-touch-icon]'))return;const c=document.createElement('canvas');c.width=c.height=180;const g=c.getContext('2d');const gr=g.createLinearGradient(0,0,0,180);gr.addColorStop(0,'#14297a');gr.addColorStop(1,'#060920');g.fillStyle=gr;g.fillRect(0,0,180,180);g.fillStyle='#ec3a6e';[[34,114,112],[48,82,84],[62,50,56]].forEach(([x,y,w])=>{g.beginPath();if(g.roundRect)g.roundRect(x,y,w,24,5);else g.rect(x,y,w,24);g.fill()});const u=c.toDataURL();const l=document.createElement('link');l.rel='apple-touch-icon';l.href=u;document.head.appendChild(l);const i=document.createElement('link');i.rel='icon';i.href=u;document.head.appendChild(i)}catch(e){}})();
 applyTheme();render();
-try{if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{document.addEventListener('visibilitychange',()=>{if(!document.hidden)r.update().catch(()=>{})})}).catch(()=>{});navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had&&!window._rl){window._rl=1;save();location.reload()}})}}catch(e){}
+try{if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{document.addEventListener('visibilitychange',()=>{if(!document.hidden)r.update().catch(()=>{})})}).catch(()=>{});const rl=()=>{if(window._rl)return;window._rl=1;try{save()}catch(e){}location.reload()};navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;if(document.hidden)rl();else window._rlPend=1});document.addEventListener('visibilitychange',()=>{if(document.hidden&&window._rlPend)rl()});window.addEventListener('pagehide',()=>{if(window._rlPend)rl()})}}catch(e){}
 
 /* ===== logo nav: tap to fan, press-and-slide to pick, swipe sideways to cycle ===== */
 (function(){
