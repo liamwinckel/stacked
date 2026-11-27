@@ -772,8 +772,9 @@ html[data-theme="light"] .hpills button{background:#fff;border-color:#e5e5ea;col
 #bx{position:fixed;inset:0;z-index:150}
 .bxbg{position:absolute;inset:0;background:rgba(0,0,0,.6);opacity:0;transition:opacity .4s ease;will-change:opacity}
 #bx.in .bxbg{opacity:1}
-.bxpane{position:absolute;inset:0;background:#0b0b0c;display:flex;flex-direction:column;overflow:hidden;transform:translate3d(0,100%,0);transition:transform .5s cubic-bezier(.22,.9,.28,1);will-change:transform;backface-visibility:hidden;contain:layout paint}
-#bx.in .bxpane{transform:translate3d(0,0,0)}
+.bxpane{position:absolute;inset:0;background:#0b0b0c;display:flex;flex-direction:column;overflow:hidden;transform:scale(.88);opacity:0;border-radius:30px;transition:transform .48s cubic-bezier(.2,1.04,.3,1),opacity .26s ease,border-radius .48s cubic-bezier(.2,.88,.2,1);will-change:transform,opacity;backface-visibility:hidden;contain:layout paint}
+#bx.in .bxpane{transform:none;opacity:1;border-radius:0}
+#bx.out .bxpane{transition:transform .32s cubic-bezier(.4,0,.6,1),opacity .26s ease .04s,border-radius .32s}#bx.out .bxbg{opacity:0;transition:opacity .3s ease}
 .bxpane.drag{transition:none!important}
 .bxtop{display:flex;align-items:center;justify-content:space-between;padding:calc(var(--sat,0px) + 14px) 16px 8px 22px}
 .bxtop b{font-size:26px;font-weight:800;letter-spacing:-.01em}
@@ -1716,7 +1717,7 @@ function render(){syncBars();
 
 /* ===== swipe from left edge to go back ===== */
 let EB=null;
-function ebTarget(){if(V.bx)return ()=>bxClose();if(document.getElementById('sheet')||document.getElementById('obw')||V.calc||(S.session&&V.inSession))return null;if(V.tool)return ()=>ACT.toolx();if(V.sub)return ()=>ACT.back();if(V.tab==='more')return ()=>ACT.tab('home');return null}
+function ebTarget(){if(V.bx)return null;if(document.getElementById('sheet')||document.getElementById('obw')||V.calc||(S.session&&V.inSession))return null;if(V.tool)return ()=>ACT.toolx();if(V.sub)return ()=>ACT.back();if(V.tab==='more')return ()=>ACT.tab('home');return null}
 function ebEl(){return V.tool?document.querySelector('.toolscr'):document.getElementById('app')}
 function ebHScroll(n){while(n&&n!==document.body){if(n.scrollWidth>n.clientWidth+4){const ox=getComputedStyle(n).overflowX;if(ox==='auto'||ox==='scroll')return true}n=n.parentElement}return false}
 document.addEventListener('touchstart',e=>{const t=e.touches[0];if(e.touches.length!==1||(e.target.closest&&e.target.closest('.chips2,.tpins,.whl,.rbar,.rbov')))return;const edge=t.clientX<=28;
@@ -1779,7 +1780,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='2.11';
+const APPV='2.12';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 
@@ -1851,19 +1852,22 @@ function bxOpen(){if($('#bx'))return;V.bx=true;V.bxo=null;
   const w=document.createElement('div');w.id='bx';w.setAttribute('role','dialog');w.setAttribute('aria-label',"Today's Bars");
   w.innerHTML=`<div class="bxbg"></div><div class="bxpane"><div class="bxtop"><b>Today’s Bars</b><button class="bxx" data-a="bxclose" aria-label="Close">${ic('x',2.2)}</button></div><div class="bxsc">${bxBody()}</div></div>`;
   document.body.appendChild(w);const pn=w.querySelector('.bxpane'),bg=w.querySelector('.bxbg');
-  void pn.offsetHeight;requestAnimationFrame(()=>requestAnimationFrame(()=>w.classList.add('in')));
-  const sc=w.querySelector('.bxsc');let y0=null,dy=0,raf=0,t0=0;
-  const apply=()=>{raf=0;const d=Math.max(0,dy);pn.style.transform=`translate3d(0,${d}px,0)`;bg.style.opacity=String(Math.max(0,1-d/innerHeight))};
-  pn.addEventListener('touchstart',e=>{if(e.touches.length!==1){y0=null;return}y0=(sc.scrollTop<=0||e.target.closest('.bxtop'))?e.touches[0].clientY:null;dy=0;t0=performance.now()},{passive:true});
-  pn.addEventListener('touchmove',e=>{if(y0==null)return;dy=e.touches[0].clientY-y0;if(dy<=0){if(pn.classList.contains('drag')){pn.classList.remove('drag');pn.style.transform='';bg.style.opacity=''}return}
-    if(!pn.classList.contains('drag'))pn.classList.add('drag');if(e.cancelable)e.preventDefault();if(!raf)raf=requestAnimationFrame(apply)},{passive:false});
-  const end=()=>{if(y0==null)return;y0=null;if(raf){cancelAnimationFrame(raf);raf=0}if(!pn.classList.contains('drag'))return;const v=dy/Math.max(1,performance.now()-t0);pn.classList.remove('drag');
-    if(dy>120||(v>.5&&dy>30))bxClose(v);else{pn.style.transform='';bg.style.opacity=''}};
+  const tp=V.tapPt,hb=document.querySelector('.hbw');let ox=innerWidth/2,oy=innerHeight/2;if(tp&&Date.now()-tp.t<900){ox=tp.x;oy=tp.y}else if(hb){const r=hb.getBoundingClientRect();ox=r.left+r.width/2;oy=r.top+r.height/2}
+  pn.style.transformOrigin=`${ox}px ${oy}px`;void pn.offsetHeight;requestAnimationFrame(()=>requestAnimationFrame(()=>w.classList.add('in')));
+  let x0=null,y0=0,dx=0,act=false,raf=0,t0=0;
+  const apply=()=>{raf=0;const d=Math.max(0,dx),f=d/innerWidth;pn.style.transform=`translate3d(${d}px,0,0) scale(${(1-Math.min(.08,f*.14)).toFixed(4)})`;pn.style.borderRadius=`${Math.min(30,d/6)}px`;bg.style.opacity=String(Math.max(0,1-f*1.2))};
+  const hs=n=>{while(n&&n!==pn){if(n.scrollWidth>n.clientWidth+4){const o=getComputedStyle(n).overflowX;if(o==='auto'||o==='scroll')return true}n=n.parentElement}return false};
+  pn.addEventListener('touchstart',e=>{if(e.touches.length!==1||hs(e.target)||(e.target.closest&&e.target.closest('input,textarea,select'))){x0=null;return}x0=e.touches[0].clientX;y0=e.touches[0].clientY;dx=0;act=false;t0=performance.now()},{passive:true});
+  pn.addEventListener('touchmove',e=>{if(x0==null)return;const mx=e.touches[0].clientX-x0,my=e.touches[0].clientY-y0;
+    if(!act){if(Math.abs(my)>Math.abs(mx)&&Math.abs(my)>8){x0=null;return}if(mx<(x0<=28?8:14)||mx<Math.abs(my)*1.6)return;act=true;pn.classList.add('drag');t0=performance.now()}
+    dx=mx;if(e.cancelable)e.preventDefault();if(!raf)raf=requestAnimationFrame(apply)},{passive:false});
+  const end=()=>{if(x0==null)return;x0=null;if(raf){cancelAnimationFrame(raf);raf=0}if(!act)return;act=false;const v=dx/Math.max(1,performance.now()-t0);pn.classList.remove('drag');
+    if(dx>innerWidth*.3||(v>.45&&dx>50))bxClose({swipe:true,v});else{pn.style.transform='';pn.style.borderRadius='';bg.style.opacity=''}};
   pn.addEventListener('touchend',end);pn.addEventListener('touchcancel',end)}
-function bxClose(v){const w=$('#bx');if(!w||w.classList.contains('out'))return;V.bx=false;const pn=w.querySelector('.bxpane'),bg=w.querySelector('.bxbg');
-  const cur=new DOMMatrix(getComputedStyle(pn).transform).m42||0,rem=innerHeight-cur,ms=typeof v==='number'&&v>0?Math.round(Math.max(180,Math.min(380,rem/Math.max(v,1.2)*1.4))):380;
-  pn.style.transition=`transform ${ms}ms cubic-bezier(.3,.55,.35,1)`;pn.style.transform=`translate3d(0,${cur}px,0)`;w.classList.add('out');bg.style.transition=`opacity ${ms}ms linear`;void pn.offsetHeight;
-  requestAnimationFrame(()=>{pn.style.transform=`translate3d(0,${innerHeight+20}px,0)`;bg.style.opacity='0'});setTimeout(()=>w.remove(),ms+40)}
+function bxClose(o){const w=$('#bx');if(!w||w.classList.contains('out'))return;V.bx=false;const pn=w.querySelector('.bxpane'),bg=w.querySelector('.bxbg');
+  if(o&&o.swipe){const ms=Math.round(Math.max(200,Math.min(340,300/Math.max(o.v,.6))));pn.style.transition=`transform ${ms}ms cubic-bezier(.25,.6,.35,1),opacity ${ms}ms ease,border-radius ${ms}ms`;bg.style.transition=`opacity ${ms}ms linear`;
+    requestAnimationFrame(()=>{pn.style.transform=`translate3d(${innerWidth}px,0,0) scale(.9)`;pn.style.opacity='0';pn.style.borderRadius='30px';bg.style.opacity='0'});w.classList.add('out');setTimeout(()=>w.remove(),ms+40);return}
+  pn.style.transform='';pn.style.borderRadius='';bg.style.opacity='';w.classList.add('out');w.classList.remove('in');setTimeout(()=>w.remove(),360)}
 function stackInfoHtml(){const g=G(),bk=barKeys(),bd=V.bd||bk;const row=(k,l,v,u)=>`<div class="li" style="cursor:default"><div class="g">${l}</div><div class="stp w"><button data-a="gstep" data-x="${k}|-1">${ic('minusc')}</button><span>${v} ${u}</span><button data-a="gstep" data-x="${k}|1">${ic('plusc')}</button></div></div>`;
   const dl=daily(Date.now()),drow=(k,l,v,u)=>`<div class="li" style="cursor:default"><div class="g">${l}</div><div class="stp w"><button data-a="dlog" data-x="${k}|-1">${ic('minusc')}</button><span><b>${v}</b> ${u}</span><button data-a="dlog" data-x="${k}|1">${ic('plusc')}</button></div></div>`;
   const logs=[bk.includes('water')&&drow('water','Water',dl.water||0,'glasses'),bk.includes('sleep')&&drow('sleep','Sleep last night',dl.sleep||0,'hr'),bk.includes('mindful')&&drow('mindful','Mindful',dl.mindful||0,'min'),bk.includes('steps')&&drow('steps','Steps',((S.steps||{})[ymd(Date.now())]||0).toLocaleString(),'')].filter(Boolean);
