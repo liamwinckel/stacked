@@ -986,7 +986,8 @@ let PSUB=null;function pushCache(){if(!PUSH_URL||!S.pushOn)return;pushSub(false)
 async function pushStatus(){if(!PSUB)return;try{const r=await fetch(PUSH_URL+'/status',{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify({sub:PSUB})});const d=await r.json();if(!d||!d.ok)return;S.pushLast=d.last||null;save();
   if(d.last&&[403,404,410].includes(d.last.status)&&d.last.t>(S.pushFix||0)){S.pushFix=Date.now();save();const reg=await navigator.serviceWorker.ready,old=await reg.pushManager.getSubscription();if(old)await old.unsubscribe();const nw=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID_PUB)});PSUB=nw.toJSON()}
   if(V.tab==='tools'||$('.pushst'))render()}catch(_){}}
-function pushStTxt(){const l=S.pushLast;if(!l)return 'No alerts sent yet';const ago=Math.max(0,Math.round((Date.now()-l.t)/60000)),when=ago<1?'just now':ago<60?ago+' min ago':ago<1440?Math.round(ago/60)+' h ago':Math.round(ago/1440)+' d ago';
+function pushStTxt(){return 'v'+APPV+' · '+pushStTxt0()}
+function pushStTxt0(){const l=S.pushLast;if(!l)return 'No alerts sent yet';const ago=Math.max(0,Math.round((Date.now()-l.t)/60000)),when=ago<1?'just now':ago<60?ago+' min ago':ago<1440?Math.round(ago/60)+' h ago':Math.round(ago/1440)+' d ago';
   return l.status>=200&&l.status<300?`Last alert accepted by Apple ${when}`:`Last alert failed ${when} (code ${l.status}${l.msg?': '+esc(String(l.msg).slice(0,60)):''})`}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(pushCache,400)});
 function pushPost(path,data){const go=sub=>fetch(PUSH_URL+path,{method:'POST',keepalive:true,headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify(Object.assign({sub},data||{}))}).then(r=>{if(!r.ok)throw 0;return r});
@@ -1567,7 +1568,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.95';
+const APPV='1.96';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 
@@ -4517,7 +4518,12 @@ const ACT={
   smnote:()=>{closeSheet();setTimeout(()=>ACT.exnote(),250)},
   whtap:(x,el)=>{const b=el&&el.closest?el.closest('.whi'):null;if(!b)return;const w=b.closest('.whl'),kind=w&&w.dataset.wh;if(b.classList.contains('on')){if(kind==='r')ACT.typer();else ACT.typew();return}const k=[...b.parentNode.children].indexOf(b);if(w._go)w._go(k)},
   setautorest:()=>{S.autoRest=!S.autoRest;save();refreshSheet(restSheet())},
-  pushtest:()=>{if(S.session&&S.session.rest){toast('Finish your rest first');return}V.pushTest=Date.now()+10000;V.pushEnd=0;pushArm(false);toast('Now switch to another app. Alert in 10 seconds')},
+  pushtest:async()=>{if(S.session&&S.session.rest){toast('Finish your rest first');return}const say=t=>{const e=$('.pushst');if(e)e.textContent=t};
+    try{say('Checking…');if(!('serviceWorker' in navigator)||!('PushManager' in window)){say('This browser has no push support. Open Bars from the Home Screen icon');return}
+      const pm=Notification.permission;if(pm!=='granted'){say('Notifications are '+pm+' for Bars. Turn them on in iPhone Settings › Notifications › Bars');return}
+      const reg=await navigator.serviceWorker.ready;let sb=await reg.pushManager.getSubscription(),re='';if(!sb){sb=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID_PUB)});re=' (re-registered)'}PSUB=sb.toJSON();
+      const end=Date.now()+10000;let r,d;try{r=await fetch(PUSH_URL+'/schedule',{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify({sub:PSUB,end,title:'Bars test alert',body:'Rest alerts are working 💪'})});d=await r.json()}catch(e){say('Couldn’t reach the alert server: '+(e&&e.message||e));return}
+      if(!r.ok||!d.ok){say('Server said '+r.status+' '+JSON.stringify(d));return}V.pushEnd=end;V.pushTest=end;say('✓ Booked'+re+'. Switch apps now. Alert in 10 s');toast('Switch apps now. Alert in 10 seconds')}catch(e){say('Error: '+(e&&e.message||e))}},
   pushon:()=>{if(S.pushOn){pushPost('/cancel');S.pushOn=false;V.pushEnd=0;save();render();return}pushSub(true).then(sub=>{if(!sub){toast('Allow notifications for Bars in iPhone Settings, then try again');return}PSUB=sub.toJSON();S.pushOn=true;save();render();fetch(PUSH_URL+'/test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sub:sub.toJSON()})}).then(r=>r.json()).then(d=>toast(d.ok?'Rest alerts are on. Test sent':'Couldn’t reach the alert server')).catch(()=>toast('Couldn’t reach the alert server'))}).catch(()=>toast('Notifications aren’t available. Open Bars from your Home Screen'))},
   rtap:()=>{if(V.lpUp&&Date.now()-V.lpUp<400)return;const s=S.session;if(!s)return;if(V.rbar){rbarClose();return}if(s.rest){rbarOpen();return}startRest();s.rest.fromLog=false;V.restAnim=true;RS()},
   rnext:()=>{if(V.lpUp&&Date.now()-V.lpUp<400)return;const s=S.session;if(!s||!s.rest)return;if(V.rbar){V.rbar=false;const rb=$('#sp .rbar'),ro=$('#sp .rbov');if(rb)rb.remove();if(ro)ro.remove()}restExit(()=>{const st=cur();if(!s.rest.fromLog&&!st.done){V.noRest=true;s.rest=null;ACT.nexts();V.noRest=false}else{s.rest=null;RS()}V.lastLog=null})},
