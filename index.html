@@ -1010,6 +1010,13 @@ main.edout>*{animation:edOut .15s ease forwards}main.edin>*{animation:edIn .38s 
 .rdot{width:44px;height:28px;border-radius:14px;background:rgba(255,255,255,.12);display:block;flex:none}
 .rbest{padding:16px 16px 0}.rbest small{display:block;font-size:13px;font-weight:700;color:var(--mute);margin-bottom:8px}.rbest div{display:flex;flex-wrap:wrap;gap:6px}.rbest span{height:32px;border-radius:16px;padding:0 12px;display:inline-flex;align-items:center;font-size:12px;font-weight:700;background:rgba(255,255,255,.08)}
 @media (max-height:720px){.wpl{height:32px}.wrows{gap:4px}.wmus{display:none}.rbest{display:none}}
+
+.hhead{flex:none;padding:0 8px 8px;position:relative;z-index:4}
+.hsec+.hsec{padding-top:14px!important}
+.hpi{top:50%}
+.bkb,.hd .bkb{width:40px;height:40px;min-width:40px;border-radius:20px;border:0;padding:0;background:rgba(255,255,255,.08)!important;color:#f4f4f5!important;display:flex;align-items:center;justify-content:center;flex:none}
+.bkb .i,.bkb svg{width:20px;height:20px}
+.bxtop{padding:calc(var(--sat,0px) + 12px) 16px 12px!important}.bxtop b{font-size:17px!important;font-weight:600!important;letter-spacing:0!important}
 </style>
 </head>
 <body>
@@ -1260,7 +1267,7 @@ function newExHtml(){return `<div class="sh-t">Custom Exercise</div><div class="
 
 /* shared bits */
 const hd=(t,l='',r='',st='')=>`<header class="hd"><div class="hl">${l}</div><h1>${t}${st?`<span class="st">${st}</span>`:''}</h1><div class="hr">${r}</div></header>`;
-const back=()=>`<button class="lnk" data-a="back" style="display:flex">${ic('back',2)}</button>`;
+const back=()=>`<button class="bkb" data-a="back" aria-label="Back">${ic('back',2.4)}</button>`;
 function statsGrid(a,b,c,d){return `<div class="stats"><div>${ic('dumb')}<div><b>${a}</b><span>Exercises</span></div></div><div>${ic('log')}<div><b>${b}</b><span>Sets</span></div></div><div>${ic('rep')}<div><b>${c}</b><span>Reps</span></div></div><div>${ic('target')}<div><b>${d}<small> ${U()}</small></b><span>Weight lifted</span></div></div></div>`}
 const NAVI=[['prog','Progress','prog'],['goals','Goals','goals'],['home','Home','home'],['tools','Tools','tools'],['lib','Library','log']],NAVW=[71,91,66,96,74];
 function navLogo(){return `<svg viewBox="0 0 96 61" aria-hidden="true">${NAVW.map((w,k)=>`<rect x="0" y="${k*13}" width="${w}" height="9" rx="4.5" fill="${k===2?'#f4f4f5':'var(--pk)'}"/>`).join('')}</svg>`}
@@ -1276,16 +1283,16 @@ function renderHome(){
   const bkDue=S.history.length>0&&(!S.lastBackup||Date.now()-S.lastBackup>7*864e5);
   const dt=new Date().toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'});
   let h=`<div class="greet hg1"><button class="bkic ${bkDue?'due':''}" data-a="bkfile" aria-label="${bkDue?'Back up to iCloud (due)':'Back up to iCloud'}">${ic('cloud')}</button><div class="hgc"><div><label class="av ${S.avatar?'ph':''}" aria-label="Change profile photo" ${S.avatar?`style="background-image:url(${S.avatar})"`:''}>${S.avatar?'':esc((S.name||'?')[0].toUpperCase())}<input type="file" accept="image/*" id="avin" style="display:none"></label><span>Hi${S.name?', '+esc(S.name):''}</span></div></div><button class="gearb" data-a="tab" data-x="more" aria-label="Settings">${ic('gear')}</button></div>`;
-  h=`<section class="hsec" data-p="0" aria-label="Today">`+h;
   h+=homeWeek();
   h+=cycChip();
+  const top=`<div class="hhead">${h}</div>`;h=`<section class="hsec" data-p="0" aria-label="Today">`;
   h+=homeBars();
   h+=homeUpNext();
   {const td=clsToday();if(td.length)h+=td.map(c=>clsRow(c,true)).join('')}
   h+=deloadCard();
   h+=`</section><section class="hsec" data-p="1" aria-label="This week">${homeWeekPage()}</section><section class="hsec" data-p="2" aria-label="Recent">${homeRecentPage()}</section>`;
   const pg=Math.min(2,V.hpg||0);
-  return `<main class="pg hpage">${h}</main><nav class="hpi" aria-label="Home pages">${[['Today',11],['This week',14],['Recent',9]].map(([l,w],k)=>`<button class="${k===pg?'on':''}" data-pg="${k}" aria-label="${l}"><i style="width:${w}px"></i></button>`).join('')}</nav>`;
+  return `${top}<main class="pg hpage">${h}</main><nav class="hpi" aria-label="Home pages">${[['Today',11],['This week',14],['Recent',9]].map(([l,w],k)=>`<button class="${k===pg?'on':''}" data-pg="${k}" aria-label="${l}"><i style="width:${w}px"></i></button>`).join('')}</nav>`;
 }
 function homeStreak(){const ws=weekStart(Date.now()),cnt=w=>S.history.filter(h=>h.date>=w&&h.date<w+7*864e5&&!h.act).length;let st=cnt(ws)>=S.weekGoal?1:0,w=ws-7*864e5;while(cnt(w)>=S.weekGoal){st++;w-=7*864e5}return st}
 function homeWeekPage(){const t0=dayStart(Date.now()),ws=weekStart(t0),r=S.routines.find(x=>x.active),nx=homeNext(),st=homeStreak();let lifts=0;
@@ -1313,7 +1320,7 @@ function homeRecentPage(){const H=S.history.slice(0,3);
   return `<div class="hpgh"><div><small>Recent</small><b>Last ${H.length} session${H.length===1?'':'s'}</b></div><button class="wstk" style="background:rgba(255,255,255,.08);color:#f4f4f5;border:0" data-a="tab" data-x="log">All history</button></div>${big}<div class="rrows">${rest}</div>${pb.length?`<div class="rbest"><small>New bests this month</small><div>${pb.map(n=>`<span>${esc(n)}</span>`).join('')}</div></div>`:''}`}
 function hpInit(){const m=document.querySelector('#app main.hpage'),nav=document.querySelector('.hpi');if(!m||!nav)return;const secs=[...m.querySelectorAll('.hsec')];
   const setH=()=>{m.style.setProperty('--ph',m.clientHeight+'px')};setH();if(!window._hpR){window._hpR=1;addEventListener('resize',()=>{const mm=document.querySelector('#app main.hpage');if(mm)mm.style.setProperty('--ph',mm.clientHeight+'px')})}
-  const want=Math.min(2,V.hpg||0);if(Math.round(m.scrollTop/Math.max(1,m.clientHeight))!==want)m.scrollTop=want*m.clientHeight;
+  nav.style.top=(m.offsetTop+m.clientHeight/2)+'px';const want=Math.min(2,V.hpg||0);if(Math.round(m.scrollTop/Math.max(1,m.clientHeight))!==want)m.scrollTop=want*m.clientHeight;
   let raf=0;m.addEventListener('scroll',()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;const i=Math.max(0,Math.min(secs.length-1,Math.round(m.scrollTop/Math.max(1,m.clientHeight))));nav.querySelectorAll('button').forEach((b,k)=>b.classList.toggle('on',k===i));
     if(i!==(V.hpg||0)){V.hpg=i;const sc=secs[i];if(sc&&!matchMedia('(prefers-reduced-motion: reduce)').matches){sc.classList.remove('arr');void sc.offsetWidth;sc.classList.add('arr');setTimeout(()=>sc.classList.remove('arr'),700)}}})},{passive:true});
   nav.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.pg;m.scrollTo({top:i*m.clientHeight,behavior:'smooth'})}))}
@@ -1547,7 +1554,7 @@ function renderProgress(){const ps=V.ps||'stats';
   return hd('Progress')+`<main class="pg">${h}</main>`;
 }
 function renderCalc(){
-  const c=V.calc;return `<div class="calcscr"><div class="bgfx"></div><header class="hd" style="background:none"><div class="hl"><button data-a="calcx" style="display:flex">${ic('x',2)}</button></div><h1>One-Rep Max Calculator</h1><div class="hr"></div></header>
+  const c=V.calc;return `<div class="calcscr"><div class="bgfx"></div><header class="hd" style="background:none"><div class="hl"><button class="bkb" data-a="calcx" aria-label="Back">${ic('back',2.4)}</button></div><h1>One-Rep Max Calculator</h1><div class="hr"></div></header>
   <div class="cin"><label>${ic('rep')}<input id="cr" type="number" inputmode="numeric" data-in="calc" value="${c.r}" placeholder="0">REPS</label><label>${ic('target')}<input id="cw" type="number" inputmode="decimal" data-in="calc" value="${c.w}" placeholder="0">${ulab()}</label></div>
   <div class="crows" id="crows">${calcRows()}</div><button class="pkb" data-a="calcreset">Reset</button></div>`;
 }
@@ -1749,7 +1756,7 @@ function renderOverview(){
   h+=s.pre?`<div class="ovacts"><button data-a="minimize">Save for later</button></div>`:`<div class="ovacts"><button data-a="ovedit">${V.ovEdit?'Done editing':'Edit lifts'}</button><button data-a="minimize">Minimize</button><button class="dz" data-a="discard">Discard</button></div>`;
   const it=s.items[s.i];
   const bottom=s.pre?`<div class="ovbar prego ovgo"><button class="lnlogo" aria-haspopup="menu" aria-expanded="false" aria-label="Menu">${navLogo()}</button><button class="ovback" data-a="go"><span>Start ${esc(s.name)}</span><em>${sum(s.items.map(it=>it.sets.filter(x=>!x.wu).length))} sets · let’s raise the bar</em></button></div>`:it?`<div class="ovbar ovgo"><button class="lnlogo" aria-haspopup="menu" aria-expanded="false" aria-label="Menu">${navLogo()}</button><button class="ovback" data-a="ovclose"><span>Back to the bar</span><em>${esc(ex(it.exId).name)} · ${setLabel(it,s.s).toLowerCase().replace(/\/\d+$/,'')}</em></button></div>`:'';
-  return hd(esc(s.name),`<button class="ovhome" data-a="minimize" aria-label="Back to home (workout keeps running)">${ic('back',2.4)}</button>`,s.pre?`<button class="lnk" data-a="precancel">Cancel</button>`:`<button class="lnk ovwrap" data-a="finish">Wrap up</button>`,s.pre?'Ready when you are':`<span id="el">${mmss((Date.now()-s.start)/1000)}</span>`)+`<main class="pg" style="padding-bottom:calc(170px + var(--sab))">${h}</main>`+bottom+renderTabs();
+  return hd(esc(s.name),`<button class="bkb ovhome" data-a="minimize" aria-label="Back to home (workout keeps running)">${ic('back',2.4)}</button>`,s.pre?`<button class="lnk" data-a="precancel">Cancel</button>`:`<button class="lnk ovwrap" data-a="finish">Wrap up</button>`,s.pre?'Ready when you are':`<span id="el">${mmss((Date.now()-s.start)/1000)}</span>`)+`<main class="pg" style="padding-bottom:calc(170px + var(--sab))">${h}</main>`+bottom+renderTabs();
 }
 function renderRest(){const rs=S.session.rest;const C=2*Math.PI*88;const left=rs?Math.max(0,(rs.end-Date.now())/1000):S.rest;const frac=rs?left*1000/rs.total:1;
   return `<div class="modal" data-a="rclose"><div class="tcard" data-a="noop"><button class="x" data-a="rclose">${ic('x',2)}</button><h3>Rest Timer</h3><div class="ring"><svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="88" fill="none" stroke="var(--track)" stroke-width="5"/><circle id="rring" cx="100" cy="100" r="88" fill="none" stroke="var(--pk)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-frac)}"/></svg><div class="tm" id="rt">${mmss(Math.ceil(left))}</div></div><div class="adj"><button data-a="radj" data-x="-30">-30 <small>sec</small></button><button data-a="radj" data-x="30">+30 <small>sec</small></button></div>${rs?`<button class="pkb" data-a="rstop">Stop</button>`:`<button class="pkb" data-a="rgo">Start</button>`}</div></div>`}
@@ -1851,7 +1858,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='2.16';
+const APPV='2.18';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 
@@ -1921,7 +1928,7 @@ function bxBody(){const t0=dayStart(Date.now()),st=dayStats(t0),n=closedCount(st
 function bxRender(){const b=$('#bx .bxsc');if(b){const y=b.scrollTop;b.innerHTML=bxBody();b.scrollTop=y}}
 function bxOpen(){if($('#bx'))return;V.bx=true;V.bxo=null;
   const w=document.createElement('div');w.id='bx';w.setAttribute('role','dialog');w.setAttribute('aria-label',"Today's Bars");
-  w.innerHTML=`<div class="bxbg"></div><div class="bxpane"><div class="bxtop"><button class="bxx bxb" data-a="bxclose" aria-label="Back">${ic('back',2.4)}</button><b>Today’s Bars</b><span class="bxsp" aria-hidden="true"></span></div><div class="bxsc">${bxBody()}</div></div>`;
+  w.innerHTML=`<div class="bxbg"></div><div class="bxpane"><div class="bxtop"><button class="bkb bxb" data-a="bxclose" aria-label="Back">${ic('back',2.4)}</button><b>Today’s Bars</b><span class="bxsp" aria-hidden="true"></span></div><div class="bxsc">${bxBody()}</div></div>`;
   document.body.appendChild(w);const pn=w.querySelector('.bxpane'),bg=w.querySelector('.bxbg');
   const tp=V.tapPt,hb=document.querySelector('.hbw');let ox=innerWidth/2,oy=innerHeight/2;if(tp&&Date.now()-tp.t<900){ox=tp.x;oy=tp.y}else if(hb){const r=hb.getBoundingClientRect();ox=r.left+r.width/2;oy=r.top+r.height/2}
   pn.style.transformOrigin=`${ox}px ${oy}px`;void pn.offsetHeight;requestAnimationFrame(()=>requestAnimationFrame(()=>w.classList.add('in')));
@@ -4366,7 +4373,7 @@ const RPET=[100,95.5,92.2,89.2,86.3,83.7,81.1,78.6,76.2,73.9,70.7,68];
 function rpePct(reps,rpe){const e=reps+(10-rpe)-1;if(e<=0)return 100;const i=Math.floor(e),f=e-i;const g=k=>k<RPET.length?RPET[k]:RPET[RPET.length-1]-2.6*(k-RPET.length+1);return g(i)+(g(i+1)-g(i))*f}
 function bigLifts(){return [['Squat','Barbell Back Squat'],['Bench','Barbell Bench Press'],['Deadlift','Deadlift'],['OHP','Overhead Press']].map(([k,n])=>{const e=S.exercises.find(x=>x.name===n);return {k,n,e,b:e?bests(e.id):{e:0,n:0}}})}
 function dots(totalKg,bwKg,sex){const c=sex==='f'?[-57.96288,13.6175032,-.1126655495,.0005158568,-.0000010706]:[-307.75076,24.0900756,-.1918759221,.0007391293,-.000001093];const b=Math.min(Math.max(bwKg,40),sex==='f'?150:210);const d=c[0]+c[1]*b+c[2]*b*b+c[3]*b**3+c[4]*b**4;return totalKg*500/d}
-function toolWrap(title,body){return `<div class="calcscr toolscr"><div class="bgfx"></div><header class="hd" style="background:none"><div class="hl"><button data-a="toolx" style="display:flex">${ic('x',2)}</button></div><h1>${title}</h1><div class="hr"></div></header><div class="tbody">${body}</div></div>`}
+function toolWrap(title,body){return `<div class="calcscr toolscr"><div class="bgfx"></div><header class="hd" style="background:none"><div class="hl"><button class="bkb" data-a="toolx" aria-label="Back">${ic('back',2.4)}</button></div><h1>${title}</h1><div class="hr"></div></header><div class="tbody">${body}</div></div>`}
 function renderTool(){const t=V.tool;
  if(t==='hrz')return hrHtml();if(t==='pace')return paceHtml();if(t==='runwalk')return rwHtml();if(t==='stretch')return strHtml();if(t==='flow')return flowHtml();if(t==='breath')return brHtml();if(t==='classes')return clsHtml();if(t==='pass')return passHtml();if(t==='warm')return warmHtml();if(t==='sw')return swHtml();if(t==='bf')return bfHtml();if(t==='program')return pgHtml();if(t==='cal')return calHtml();
  if(t==='plates'){const P=V.pt,tot=bar()+2*sum(P.p),cnt={};P.p.forEach(x=>cnt[x]=(cnt[x]||0)+1);const av=availPlates();
@@ -4921,8 +4928,8 @@ try{if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!n
 /* ===== logo nav: tap to fan, press-and-slide to pick, swipe sideways to cycle ===== */
 (function(){
   const CYC=['prog','goals','home','tools','lib'];let G0=null,M=null;
-  const cur=()=>V.sub?null:V.tab;
-  function go(k){if(k==='home'&&!V.sub&&V.tab==='home'){scr0();return}ACT.tab(k)}
+  const cur=()=>V.sub||(S.session&&V.inSession)?null:V.tab;
+  function go(k){if(S.session&&V.inSession){if(k==='home'&&V.tab==='home'&&!V.sub&&!V.tool){ACT.minimize();return}ACT.tab(k);return}if(k==='home'&&!V.sub&&V.tab==='home'){scr0();return}ACT.tab(k)}
   function open(bb){if(M)return;const b=bb||document.querySelector('.lnav .lnlogo')||document.querySelector('.lnlogo');if(!b)return;const r=b.getBoundingClientRect();
     const el=document.createElement('div');el.id='lnm';el.setAttribute('role','menu');
     el.innerHTML=`<div class="lnbg"></div><div class="lnst" style="left:${r.left}px;bottom:${innerHeight-r.top+14}px">${NAVI.map(([k,l,i],n)=>`<button class="lnp ${n===2?'mid':''} ${k===cur()?'cur':''}" role="menuitem" ${k===cur()?'aria-current="page"':''} data-k="${k}" style="width:${Math.round(NAVW[n]*2.75)}px;--k:${4-n}">${ic(i)}<span>${l}</span></button>`).join('')}</div>`;
