@@ -1063,6 +1063,11 @@ main.edout>*{animation:edOut .15s ease forwards}main.edin>*{animation:edIn .38s 
 .hrow .hupb .hgo{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hrow .hupl em{display:none}
 .hsec .hrow .hup{margin:0!important}
+
+.pchk{padding:16px}.pchh{padding:0 4px 12px}.pchh b{font-size:20px}
+.pchr{gap:10px}.pchr button{flex-direction:column;align-items:flex-start;gap:12px;padding:16px;border-radius:22px;min-height:132px}
+.pchr button>span{width:48px;height:48px;border-radius:24px}.pchr button>span .i,.pchr button>span svg{width:24px;height:24px}
+.pchr b{font-size:17px;font-weight:800}.pchr em{font-size:13px;margin-top:3px;white-space:normal}
 </style>
 </head>
 <body>
@@ -1386,7 +1391,7 @@ function homeUpNext(){const n=homeNext();
   if(!n)return `<div class="hup"><div class="hupl"><span>No plan yet</span></div><div class="hupn">Pick a plan</div><div class="hupm">Choose a program or template, or just start lifting.</div><div class="hupb"><button class="hgo" data-a="libgo" data-x="routines">Browse plans</button><button class="hpv" data-a="qlift">Quick workout</button></div></div>`;
   const {r,d0,lab,rest,miss}=n,sets=d0.items.reduce((a,it)=>a+(+it.sets||0),0),mins=Math.round(sets*2.5+8),mx=Math.max(1,...d0.items.map(it=>+it.sets||0)),its=d0.items.slice(0,5);
   const mk=its.length?`<svg class="hupk" viewBox="0 0 96 ${its.length*13-4}" aria-hidden="true">${its.map((it,k)=>`<rect x="0" y="${k*13}" width="${Math.max(24,96*(+it.sets||0)/mx)}" height="9" rx="4.5" fill="${k===0?'var(--pk)':'rgba(255,255,255,.16)'}"/>`).join('')}</svg>`:'';
-  return `<div class="hup" data-a="hupopen" data-x="${r.id}|${d0.id}" role="button" aria-label="Open ${esc(r.name)}"><div class="hupl"><span>${rest?'Rest day · or get ahead':lab}</span><em>${esc(r.name)}</em></div><div class="hupt"><div><div class="hupn">${esc(d0.name)}</div><div class="hupm">${d0.items.length} lift${d0.items.length===1?'':'s'} · ${sets} sets · ~${mins} min</div>${its[0]?`<div class="hupf">First: ${esc(ex(its[0].exId).name)}</div>`:''}</div>${mk}</div>${miss?`<button class="hmiss" data-a="startd" data-x="${r.id}|${miss.d.id}">Catch up: ${esc(miss.d.name)} from ${WDN[miss.k]}</button>`:''}<div class="hupb">${S.session?`<button class="hgo" data-a="resume">Resume ${esc(S.session.name.toLowerCase())}</button>`:`<button class="hgo" data-a="startd" data-x="${r.id}|${d0.id}">Start ${esc(d0.name.toLowerCase())}</button>`}<button class="hpv hpvi" data-a="preview" data-x="${r.id}|${d0.id}" aria-label="Preview">${ic('eye')}</button></div></div>`}
+  return `<div class="hup" data-a="hupopen" data-x="${r.id}|${d0.id}" role="button" aria-label="Open ${esc(r.name)}"><div class="hupl"><span>${rest?'Rest day · or get ahead':lab}</span><em>${esc(r.name)}</em></div><div class="hupt"><div><div class="hupn">${esc(d0.name)}</div><div class="hupm">${d0.items.length} lift${d0.items.length===1?'':'s'} · ${sets} sets · ~${mins} min</div>${its[0]?`<div class="hupf">First: ${esc(ex(its[0].exId).name)}</div>`:''}</div>${mk}</div>${miss?`<button class="hmiss" data-a="startd" data-x="${r.id}|${miss.d.id}">Catch up: ${esc(miss.d.name)} from ${WDN[miss.k]}</button>`:''}<div class="hupb">${S.session?`<button class="hgo" data-a="resume">Resume</button>`:`<button class="hgo" data-a="startd" data-x="${r.id}|${d0.id}">Start</button>`}<button class="hpv hpvi" data-a="preview" data-x="${r.id}|${d0.id}" aria-label="Preview">${ic('eye')}</button></div></div>`}
 function homeWeek(){const t0=dayStart(Date.now()),ws=weekStart(t0);let lifts=0;
   const ds=[...Array(7)].map((_,k)=>{const d=ws+k*864e5,hs=S.history.filter(x=>x.date>=d&&x.date<d+864e5),lift=hs.some(x=>!x.act),act=hs.some(x=>x.act),o=dayOv(d),rest=o&&o.skip;if(lift)lifts+=hs.filter(x=>!x.act).length;
     return `<button class="${lift?'wl':act?'wa':rest?'wr':''} ${d===t0?'td':''} ${d>t0?'fut':''}" data-a="dayopt" data-x="${d}" aria-label="${WDN[k]}${lift?', lifted':act?', active':rest?', rest day':''}. Open day">${'MTWTFSS'[k]}</button>`}).join('');
@@ -1912,7 +1917,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='2.24';
+const APPV='2.25';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 
