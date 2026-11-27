@@ -1919,7 +1919,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='2.27';
+const APPV='2.28';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 
@@ -2362,12 +2362,14 @@ function liftHtml(){const rs=S.routines.filter(r=>r.days.length).sort((a,b)=>(b.
   return h}
 function cardioList(n){const use={},last={};S.history.forEach(h=>h.entries.forEach(e=>{if(isCardio(e.exId)){use[e.exId]=(use[e.exId]||0)+1;if(!last[e.exId]){const x=dn(e)[0];if(x)last[e.exId]=x}}}));
   return {list:S.exercises.filter(e=>e.type==='cardio').sort((a,b)=>(use[b.id]||0)-(use[a.id]||0)||(b.pop?1:0)-(a.pop?1:0)||a.name.localeCompare(b.name)).slice(0,n),last}}
-function cardioHtml(){const wk=wkCardio(),g=G().weekCardio,{list,last}=cardioList(4);
-  return `<div class="sh-t">Cardio<div class="xs mute" style="font-weight:400;margin-top:2px">${wk} of ${g} min this week</div></div><div class="shp"><div class="mbar"><i style="width:${Math.min(100,wk/g*100)}%"></i></div></div>
-  <div class="secl">Track Live</div>${list.map(e=>`<div class="li" data-a="cstart" data-x="${e.id}"><span style="color:var(--pk);display:flex">${ic('play')}</span><div class="g"><div class="tt">${esc(e.name)}</div><div class="sb">${last[e.id]?'Last: '+cfmt(last[e.id]):'Time, distance and pace'}</div></div><span class="chev">${ic('chev')}</span></div>`).join('')}<div class="li" data-a="qcardio"><span class="mute" style="display:flex">${ic('heart')}</span><div class="g"><div class="tt">All cardio machines</div></div><span class="chev">${ic('chev')}</span></div>
-  <div class="secl">Already Done It?</div><div class="li" data-a="qact"><span style="color:var(--pk);display:flex">${ic('note')}</span><div class="g"><div class="tt">Log a Class or Activity</div><div class="sb">Yoga, Pilates, spin, runs, swims and more</div></div><span class="chev">${ic('chev')}</span></div>
-  <div class="secl">Guided & Timed</div><div class="chips2 gch">${allGuided().map(g2=>`<button data-a="gpstart" data-x="${g2.id}">${esc(g2.n)}</button>`).join('')}</div>
-  <div class="li" data-a="qtool" data-x="interval"><span class="mute" style="display:flex">${ic('watch')}</span><div class="g"><div class="tt">Circuit Timer</div><div class="sb">EMOM, Tabata, AMRAP · logs as cardio</div></div><span class="chev">${ic('chev')}</span></div><div class="li" data-a="qtool" data-x="runwalk"><span class="mute" style="display:flex">${ic('runner')}</span><div class="g"><div class="tt">Run / Walk Program</div><div class="sb">${S.rw?'Week '+(S.rw.wk+1):'8 weeks to a 25-minute run'}</div></div><span class="chev">${ic('chev')}</span></div>`}
+function cardioHtml(){const wk=Math.round(wkCardio()),g=G().weekCardio,{list,last}=cardioList(4),top=list[0]&&last[list[0].id]?list[0].id:null;
+  const ico=(n,hi)=>`<span style="color:${hi?'var(--pk)':'var(--cy)'};display:flex">${ic(n)}</span>`,chev=`<span class="chev">${ic('chev')}</span>`;
+  const row=(a,x,icn,tt,sb,hi,tag)=>`<div class="li ${hi?'sugrow':''}" data-a="${a}"${x!=null?` data-x="${x}"`:''}>${ico(icn,hi)}<div class="g"><div class="tt">${tt}${tag?`<span class="tag">${tag}</span>`:''}</div>${sb?`<div class="sb">${sb}</div>`:''}</div>${chev}</div>`;
+  let h=`<div class="sh-t">Cardio<div class="xs mute" style="font-weight:400;margin-top:2px">${wk} of ${g} min this week.${top?' Your usual is highlighted.':' Pick anything to start.'}</div></div>`;
+  h+=`<div class="secl">Track Live</div>`+list.map(e=>row('cstart',e.id,'play',esc(e.name),last[e.id]?'Last: '+cfmt(last[e.id]):'Time, distance and pace',e.id===top,e.id===top?'USUAL':'')).join('')+row('qcardio',null,'heart','All Cardio Machines','Every machine in your library');
+  h+=`<div class="secl">Guided Sessions</div>`+allGuided().map(g2=>row('gpstart',g2.id,'play',esc(g2.n),`${esc(g2.d||'')}${g2.steps?` · ${Math.max(1,Math.round(g2.steps.reduce((a,z)=>a+(+z[1]||0),0)/60))} min`:''}`)).join('');
+  h+=`<div class="secl">Other Ways</div>`+row('qact',null,'note','Log a Class or Activity','Yoga, Pilates, spin, runs, swims and more')+row('qtool','interval','watch','Circuit Timer','EMOM, Tabata, AMRAP · logs as cardio')+row('qtool','runwalk','runner','Run / Walk Program',S.rw?'Week '+(S.rw.wk+1):'8 weeks to a 25-minute run');
+  return h}
 
 /* ===== home: week plan ===== */
 function weekPlan(){const r=S.routines.find(x=>x.active),ws=weekStart(Date.now()),done=S.history.filter(x=>x.date>=ws&&!x.act).length,td=clsToday();
@@ -4175,7 +4177,7 @@ const TOUR=[
  {c:'Menu',go:()=>tBase('home'),sel:'.lnav .lnlogo',round:1,pulse:'.lnav .lnlogo',t:'The logo is your menu',d:'Tap it to fan out Progress, Goals, Home, Tools and Library, or press and slide up to jump straight there. Swipe it sideways to flip between screens.'},
  {c:'Home',go:()=>{tBase('home')},wait:60,sel:'.lnav .lift',t:'Your activity bar',d:'Tap it to pick any workout, or tap play to start your next one right away. During a workout it shows your time and sets, and takes you straight back in.'},
  {c:'Workouts',go:()=>{tBase('home');ACT.qlift()},sel:()=>{const r=$q('.sheet .sugrow');return [r&&r.previousElementSibling,r,...after(r,2)]},t:'Picking a lift',d:'Every workout in your routines. Your next one is highlighted, but you can start any of them. Empty Workout and Build Me a Workout are further down.'},
- {c:'Workouts',go:()=>{tBase('home');ACT.qcar()},sel:()=>{const a=secl('Track Live');return [a,...after(a,2)]},t:'Picking cardio',d:'Tap Cardio on Home to track a machine live with time, distance and pace. Below that you can log a class you already did, or follow a guided session.'},
+ {c:'Workouts',go:()=>{tBase('home');ACT.qcar()},sel:()=>{const a=secl('Track Live');return [a,...after(a,2)]},t:'Picking cardio',d:'Tap Cardio on Home to track a machine live with time, distance and pace. Guided sessions, logging a class, and timers are further down.'},
  {c:'Working Out',demo:1,dock:'mid',dim:'.ovbar.prego .pkb',go:()=>{tBase('home');tDemo(true)},sel:()=>[...document.querySelectorAll('#app [data-sw^="ex|"]')],tap:'.ovbar.prego .pkb',t:'The Ready screen',d:'Starting a workout opens this first. Check your exercises, reorder or swap them, then tap Start Workout. This is a practice run, so nothing gets saved.'},
  {c:'Working Out',demo:1,go:()=>{tBase('home');tDemo(false)},wait:90,sel:()=>[$q('#sp .sdb'),$q('#sp .whl[data-wh=w]')],t:'One set at a time',d:'Tap the set to jump between sets or add one. Scroll the wheel to change the weight, or tap the yellow number to type it.'},
  {c:'Working Out',demo:1,go:()=>{tBase('home');tDemo(false)},wait:90,sel:()=>[$q('#sp .barsvg'),$q('#sp .plates')],t:'Load the bar',d:'Tap a plate to add it to both sides. Tap a plate on the bar to take it off.'},
