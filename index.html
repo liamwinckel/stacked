@@ -885,6 +885,7 @@ html[data-theme="light"] .hpills button{background:#fff;border-color:#e5e5ea;col
 /* ===== logo nav ===== */
 .lnav{position:absolute;left:0;right:0;bottom:0;z-index:7;max-width:520px;margin:0 auto;display:flex;gap:10px;align-items:center;padding:18px 16px calc(12px + var(--sab));background:linear-gradient(180deg,rgba(11,11,12,0),rgba(11,11,12,.94) 46%);pointer-events:none}
 .lnav>*{pointer-events:auto}
+.ovgo{gap:10px;align-items:center}.ovgo .lnlogo{width:60px;height:60px}
 .lnlogo{width:64px;height:64px;border-radius:32px;border:0;background:#1c1c20;display:flex;align-items:center;justify-content:center;flex:none;touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;box-shadow:0 8px 24px rgba(0,0,0,.5);transition:background .25s}
 .lnlogo svg{width:34px;height:22px;overflow:visible}.lnlogo svg rect{transition:fill .25s}.lnlogo.open{background:#26262a}
 @keyframes lnCl{0%{transform:none}40%{transform:translateX(-7px)}100%{transform:none}}@keyframes lnCr{0%{transform:none}40%{transform:translateX(7px)}100%{transform:none}}
@@ -973,6 +974,7 @@ main.edout>*{animation:edOut .15s ease forwards}main.edin>*{animation:edIn .38s 
 #app main.settle{animation:settleIn .36s cubic-bezier(.2,.88,.2,1) both;transform-origin:50% 40%}
 #app header.hdin{animation:hdIn .3s ease both}
 #lnm.drag .lnp{background:#6b5c0e;color:#151309}#lnm.drag .lnp.mid{background:#6f6f73}#lnm.drag .lnp.hov{background:var(--pk);color:#0b0b0c}#lnm.drag .lnp.mid.hov{background:#f4f4f5}#lnm.drag .lnp.hov{--s:1.2!important;--tx:12px;box-shadow:0 0 0 5px rgba(255,214,10,.3),0 14px 30px rgba(0,0,0,.55)}#lnm.drag .lnp.mid.hov{box-shadow:0 0 0 5px rgba(255,255,255,.3),0 14px 30px rgba(0,0,0,.55)}
+.ovhome{width:40px;height:40px;border-radius:20px;border:0;background:rgba(255,255,255,.08);color:#f4f4f5;display:flex;align-items:center;justify-content:center}.ovhome .i,.ovhome svg{width:20px;height:20px}
 </style>
 </head>
 <body>
@@ -1678,8 +1680,8 @@ function renderOverview(){
   if(V.ovEdit)h+=`<p class="xs mute" style="padding:10px 20px 0;margin:0">Tap ${'🔗'} to superset an exercise with the one below it.</p>`;
   h+=s.pre?`<div class="ovacts"><button data-a="minimize">Save for later</button></div>`:`<div class="ovacts"><button data-a="ovedit">${V.ovEdit?'Done editing':'Edit lifts'}</button><button data-a="minimize">Minimize</button><button class="dz" data-a="discard">Discard</button></div>`;
   const it=s.items[s.i];
-  const bottom=s.pre?`<div class="ovbar prego ovgo"><button class="ovback" data-a="go"><span>Start ${esc(s.name)}</span><em>${sum(s.items.map(it=>it.sets.filter(x=>!x.wu).length))} sets · let’s raise the bar</em></button></div>`:it?`<div class="ovbar ovgo"><button class="ovback" data-a="ovclose"><span>Back to the bar</span><em>${esc(ex(it.exId).name)} · ${setLabel(it,s.s).toLowerCase().replace(/\/\d+$/,'')}</em></button></div>`:'';
-  return hd(esc(s.name),'',s.pre?`<button class="lnk" data-a="precancel">Cancel</button>`:`<button class="lnk ovwrap" data-a="finish">Wrap up</button>`,s.pre?'Ready when you are':`<span id="el">${mmss((Date.now()-s.start)/1000)}</span>`)+`<main class="pg" style="padding-bottom:calc(170px + var(--sab))">${h}</main>`+bottom+renderTabs();
+  const bottom=s.pre?`<div class="ovbar prego ovgo"><button class="lnlogo" aria-haspopup="menu" aria-expanded="false" aria-label="Menu">${navLogo()}</button><button class="ovback" data-a="go"><span>Start ${esc(s.name)}</span><em>${sum(s.items.map(it=>it.sets.filter(x=>!x.wu).length))} sets · let’s raise the bar</em></button></div>`:it?`<div class="ovbar ovgo"><button class="lnlogo" aria-haspopup="menu" aria-expanded="false" aria-label="Menu">${navLogo()}</button><button class="ovback" data-a="ovclose"><span>Back to the bar</span><em>${esc(ex(it.exId).name)} · ${setLabel(it,s.s).toLowerCase().replace(/\/\d+$/,'')}</em></button></div>`:'';
+  return hd(esc(s.name),`<button class="ovhome" data-a="minimize" aria-label="Back to home (workout keeps running)">${ic('back',2.4)}</button>`,s.pre?`<button class="lnk" data-a="precancel">Cancel</button>`:`<button class="lnk ovwrap" data-a="finish">Wrap up</button>`,s.pre?'Ready when you are':`<span id="el">${mmss((Date.now()-s.start)/1000)}</span>`)+`<main class="pg" style="padding-bottom:calc(170px + var(--sab))">${h}</main>`+bottom+renderTabs();
 }
 function renderRest(){const rs=S.session.rest;const C=2*Math.PI*88;const left=rs?Math.max(0,(rs.end-Date.now())/1000):S.rest;const frac=rs?left*1000/rs.total:1;
   return `<div class="modal" data-a="rclose"><div class="tcard" data-a="noop"><button class="x" data-a="rclose">${ic('x',2)}</button><h3>Rest Timer</h3><div class="ring"><svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="88" fill="none" stroke="var(--track)" stroke-width="5"/><circle id="rring" cx="100" cy="100" r="88" fill="none" stroke="var(--pk)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-frac)}"/></svg><div class="tm" id="rt">${mmss(Math.ceil(left))}</div></div><div class="adj"><button data-a="radj" data-x="-30">-30 <small>sec</small></button><button data-a="radj" data-x="30">+30 <small>sec</small></button></div>${rs?`<button class="pkb" data-a="rstop">Stop</button>`:`<button class="pkb" data-a="rgo">Start</button>`}</div></div>`}
@@ -1717,11 +1719,11 @@ function render(){syncBars();
 
 /* ===== swipe from left edge to go back ===== */
 let EB=null;
-function ebTarget(){if(V.bx)return null;if(document.getElementById('sheet')||document.getElementById('obw')||V.calc||(S.session&&V.inSession))return null;if(V.tool)return ()=>ACT.toolx();if(V.sub)return ()=>ACT.back();if(V.tab==='more')return ()=>ACT.tab('home');return null}
+function ebTarget(){if(V.bx)return null;if(document.getElementById('sheet')||document.getElementById('obw')||V.calc)return null;if(S.session&&V.inSession)return V.ov&&!document.getElementById('sp')?()=>ACT.minimize():null;if(V.tool)return ()=>ACT.toolx();if(V.sub)return ()=>ACT.back();if(V.tab==='more')return ()=>ACT.tab('home');return null}
 function ebEl(){return V.tool?document.querySelector('.toolscr'):document.getElementById('app')}
 function ebHScroll(n){while(n&&n!==document.body){if(n.scrollWidth>n.clientWidth+4){const ox=getComputedStyle(n).overflowX;if(ox==='auto'||ox==='scroll')return true}n=n.parentElement}return false}
 document.addEventListener('touchstart',e=>{const t=e.touches[0];if(e.touches.length!==1||(e.target.closest&&e.target.closest('.chips2,.tpins,.whl,.rbar,.rbov')))return;const edge=t.clientX<=28;
-  if(!edge){if(!(V.sub||V.tool)||(e.target.closest&&e.target.closest('input,textarea,select,[data-sw],.libsw,.ldrag,.sheet,#lnm'))||ebHScroll(e.target))return}
+  if(!edge){if(!(V.sub||V.tool||(S.session&&V.inSession&&V.ov))||(e.target.closest&&e.target.closest('input,textarea,select,[data-sw],.libsw,.ldrag,.sheet,#lnm'))||ebHScroll(e.target))return}
   const go=ebTarget();if(!go)return;EB={go,edge,x0:t.clientX,y0:t.clientY,t0:Date.now(),dx:0,act:false,el:ebEl()}},{passive:true});
 document.addEventListener('touchmove',e=>{if(!EB)return;const t=e.touches[0],dx=t.clientX-EB.x0,dy=t.clientY-EB.y0;if(!EB.act){if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>8){EB=null;return}if(dx<(EB.edge?8:16))return;if(!EB.edge&&dx<Math.abs(dy)*1.6){EB=null;return}EB.act=true;if(EB.el)EB.el.style.transition='none'}EB.dx=Math.max(0,dx);if(EB.el)EB.el.style.transform=`translateX(${EB.dx}px)`;if(e.cancelable)e.preventDefault()},{passive:false});
 document.addEventListener('touchend',()=>{if(!EB)return;const d=EB;EB=null;if(!d.act)return;const v=d.dx/Math.max(1,Date.now()-d.t0),el=d.el;const done=d.dx>window.innerWidth*.33||(v>.45&&d.dx>50);
@@ -1780,7 +1782,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='2.12';
+const APPV='2.13';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 
@@ -4720,7 +4722,7 @@ const ACT={
   exmv:x=>{const [i,d]=x.split('|').map(Number),a=S.session.items,j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];if(S.session.i===i)S.session.i=j;else if(S.session.i===j)S.session.i=i;RS()},
   exdel:x=>{const s=S.session;s.items.splice(+x,1);s.i=Math.max(0,Math.min(s.i,s.items.length-1));s.s=0;RS()},
   saddex:()=>pickExercise(id=>{const s=S.session;s.items.push(mkItem(id,3));s.i=s.items.length-1;s.s=0;save();openPanel()},S.session.items.map(it=>it.exId),ids=>{const s=S.session,k=s.items.length;ids.forEach(id=>s.items.push(mkItem(id,3)));s.i=k;s.s=0;save();openPanel()}),
-  minimize:()=>{V.inSession=false;V.ov=false;V.restOpen=false;V.anim='fade';render()},
+  minimize:()=>{V.inSession=false;V.ov=false;V.restOpen=false;V.anim='pop';render()},
   discard:()=>confirmSheet('Discard this workout? Nothing from it will be saved.',()=>{S.session=null;V.inSession=false;V.ov=false;V.restOpen=false;RS()},'Discard'),
   finish:()=>{const s=S.session,done=sum(s.items.map(it=>it.sets.filter(x=>(x.done&&!x.wu)||(x.dur!=null&&(cEl(x)>0||x.dist>0))).length));if(!done){confirmSheet('No sets logged yet. Discard this workout?',()=>{S.session=null;V.inSession=false;V.ov=false;RS()},'Discard');return}const left=sum(s.items.map(it=>it.sets.filter(x=>!x.done&&!x.wu&&!(x.dur!=null&&(cEl(x)>0||x.dist>0))).length));confirmSheet(left?`Finish workout? ${left} unlogged set${left>1?'s':''} will be marked skipped.`:'Finish workout?',finishNow,'Finish',true)},
   nexts:()=>{const s=S.session,st=cur(),it=s.items[s.i];if(st.run){st.dur=cEl(st);st.run=null}if(isCardio(it.exId)&&!cEl(st)&&!st.dist){toast('Start the timer or enter a time first');return}V.from={i:s.i,w:st.w,r:st.r};const wasDone=st.done;st.done=true;if(!wasDone&&!st.wu)checkPR(it,st);V.lastLog={i:s.i,s:s.s,w:st.w,r:st.r,rir:st.rir,wu:!!st.wu,lab:(()=>{const wk=it.sets.filter(x=>!x.wu&&!x.ds);return st.wu?'Warm-up':st.ds?'Drop set':'Set '+(wk.indexOf(st)+1)})()};const L=seqList(),k=seqIdx(),nx=L[k+1];const midSS=nx&&nx[1]===s.s&&nx[0]!==s.i&&grp(nx[0])[0]===grp(s.i)[0];if(S.autoRest&&restCur()>0&&!midSS&&!V.noRest){startRest();S.session.rest.fromLog=true;V.restAnim=true}if(isLast()){save();render();closePanel();toast('All sets done. Tap Finish when ready');return}move(1);save();render();const sp=$('#sp');if(sp)sp.scrollTop=0},
@@ -4852,7 +4854,7 @@ try{if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!n
   const CYC=['prog','goals','home','tools','lib'];let G0=null,M=null;
   const cur=()=>V.sub?null:V.tab;
   function go(k){if(k==='home'&&!V.sub&&V.tab==='home'){scr0();return}ACT.tab(k)}
-  function open(){if(M)return;const b=document.querySelector('.lnav .lnlogo');if(!b)return;const r=b.getBoundingClientRect();
+  function open(bb){if(M)return;const b=bb||document.querySelector('.lnav .lnlogo')||document.querySelector('.lnlogo');if(!b)return;const r=b.getBoundingClientRect();
     const el=document.createElement('div');el.id='lnm';el.setAttribute('role','menu');
     el.innerHTML=`<div class="lnbg"></div><div class="lnst" style="left:${r.left}px;bottom:${innerHeight-r.top+14}px">${NAVI.map(([k,l,i],n)=>`<button class="lnp ${n===2?'mid':''} ${k===cur()?'cur':''}" role="menuitem" ${k===cur()?'aria-current="page"':''} data-k="${k}" style="width:${Math.round(NAVW[n]*2.75)}px;--k:${4-n}">${ic(i)}<span>${l}</span></button>`).join('')}</div>`;
     document.body.appendChild(el);b.setAttribute('aria-expanded','true');b.classList.add('open');
@@ -4863,11 +4865,11 @@ try{if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!n
   function hover(y){if(!M)return;let best=null,bd=1e9;M.el.classList.add('drag');
     M.items.forEach(p=>{const r=p.getBoundingClientRect(),c=(r.top+r.bottom)/2,d=Math.abs(y-c);p.style.setProperty('--s',(1+.07*Math.exp(-(d*d)/(40*40))).toFixed(3));if(y>=r.top-6&&y<=r.bottom+6&&d<bd){bd=d;best=p}});
     if(best!==M.hov){if(M.hov)M.hov.classList.remove('hov');M.hov=best;if(best){best.classList.add('hov');try{navigator.vibrate&&navigator.vibrate(6)}catch(e){}}}}
-  function cycle(dir){const c=cur()||'home',i=CYC.indexOf(c),n=CYC[(Math.max(0,i)+dir+CYC.length)%CYC.length];const b=document.querySelector('.lnav .lnlogo');if(b){b.classList.remove('cl','cr');void b.offsetWidth;b.classList.add(dir>0?'cl':'cr')}setTimeout(()=>go(n),90)}
-  document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('.lnav .lnlogo');if(!b)return;e.preventDefault();
+  function cycle(dir){const c=cur()||'home',i=CYC.indexOf(c),n=CYC[(Math.max(0,i)+dir+CYC.length)%CYC.length];const b=document.querySelector('.lnlogo');if(b){b.classList.remove('cl','cr');void b.offsetWidth;b.classList.add(dir>0?'cl':'cr')}setTimeout(()=>go(n),90)}
+  document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('.lnlogo');if(!b)return;e.preventDefault();
     try{b.setPointerCapture(e.pointerId)}catch(_){}
     const wasOpen=!!M;G0={id:e.pointerId,x:e.clientX,y:e.clientY,t:performance.now(),open:wasOpen,wasOpen,cyc:false,moved:false,tm:null};
-    if(!wasOpen){open();G0.open=true}},{passive:false});
+    if(!wasOpen){open(b);G0.open=true}},{passive:false});
   document.addEventListener('pointermove',e=>{if(!G0||e.pointerId!==G0.id)return;const dx=e.clientX-G0.x,dy=e.clientY-G0.y;if(Math.abs(dx)>6||Math.abs(dy)>6)G0.moved=true;
     if(!G0.cyc&&!G0.wasOpen&&!(M&&M.hov)&&Math.abs(dx)>22&&Math.abs(dx)>Math.abs(dy)*1.4){G0.cyc=true;close();return}
     if(G0.open&&M&&!G0.cyc&&dy<-4)hover(e.clientY)});
@@ -4878,7 +4880,7 @@ try{if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!n
     if(g.wasOpen&&!g.moved){close();return}
     if(M&&g.moved&&M.el.classList.contains('drag')){M.items.forEach(p=>{p.style.removeProperty('--s');p.classList.remove('hov')});M.hov=null;M.el.classList.remove('drag')}};
   document.addEventListener('pointerup',end);document.addEventListener('pointercancel',end);
-  document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.lnav .lnlogo');if(b&&e.detail===0){M?close():open()}});
+  document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.lnlogo');if(b&&e.detail===0){M?close():open(b)}});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&M)close()});
   window.lnClose=close;
 })();
