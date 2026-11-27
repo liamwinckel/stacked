@@ -5,6 +5,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          curl -s "https://bars-push.liam-bars.workers.dev/debug?self=1"; echo
-          sleep 10
-          curl -s "https://bars-push.liam-bars.workers.dev/debug"; echo
+          U=https://bars-push.liam-bars.workers.dev
+          curl -s "$U/debug?self=1"; echo
+          END=$(( $(date +%s%3N) + 4000 ))
+          curl -s -X POST "$U/schedule" -H 'Origin: https://liamwinckel.github.io' -H 'Content-Type: application/json' \
+            -d "{\"sub\":{\"endpoint\":\"https://web.push.apple.com/selftest-fake\",\"keys\":{\"p256dh\":\"BCVxsr7N_eNgVRqvHtD0zTZsEc6-VV-JvLexhqUzORcxaOzi6-AYWXvTBHm4bjyPjs7Vd8pZGH6SRpkNtoIAiw4\",\"auth\":\"BTBZMqHH6r4Tts7J_aSIgg\"}},\"end\":$END,\"title\":\"selftest\"}"; echo
+          sleep 12
+          curl -s "$U/debug"; echo
