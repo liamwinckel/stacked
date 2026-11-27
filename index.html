@@ -808,6 +808,41 @@ html[data-theme="light"] .hpills button{background:#fff;border-color:#e5e5ea;col
 .wcard,.tcard,.vcell,.pcmp,.proj,.ach,.cdf,.qtile,.cal,.bm,.thm,.sgc,.pgc,.pgd,.dlc,.mcd{border-radius:18px}
 .vsum div,.balbtn,.plc,.stk,.msc,.ins,.wtl,.obc,.qbld,.qhero,.upn,.tpin,.prpop{border-radius:22px}
 .sheet{border-radius:26px 26px 0 0}
+
+/* session stack (loadout) */
+.prbtns .olb{border:0;background:rgba(255,255,255,.07);color:#e4e4e7;text-transform:none;letter-spacing:0;border-radius:21px;min-height:42px;padding:0 16px;font-size:14px;font-weight:600}.prbtns .olb.on{background:var(--pk);color:#0b0b0c}
+.ovs{padding:6px 20px 0}
+.ovhero{display:flex;align-items:center;gap:18px;padding:10px 0 4px}
+.ovmk{flex:none;overflow:visible}
+.ovbig{font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1.05;font-variant-numeric:tabular-nums}
+.ovsub{font-size:14px;color:var(--pk);font-weight:700;margin-top:5px;line-height:1.3}
+.ovrows{display:flex;flex-direction:column;gap:10px;margin-top:22px}
+.ovr{padding:12px 14px;margin:0 -14px;border-radius:24px;transition:background .35s ease}
+.ovr.cur{background:rgba(255,255,255,.055)}
+.ovn{display:flex;justify-content:space-between;align-items:baseline;gap:10px;width:100%;background:none;border:0;padding:0;color:inherit;font-family:inherit;font-size:16px;font-weight:700;text-align:left}
+.ovn em{font-style:normal;font-size:13px;font-weight:600;color:var(--mute);flex:none}.ovn em.now{color:var(--pk)}
+.ovps{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ovp{min-width:70px;height:36px;padding:0 12px;border-radius:18px;border:0;font-family:inherit;font-size:13px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums;box-sizing:border-box;transition:background .3s ease,color .3s ease}
+.ovp.dn{background:var(--pk);color:#0b0b0c}.ovp.nw{background:#f4f4f5;color:#0b0b0c;animation:ovPulse 2.4s ease-out infinite}.ovp.up{background:rgba(255,255,255,.08);color:#9a9aa3;font-weight:600}
+.ovp.wu{min-width:36px;padding:0 11px}
+.ovadd{margin-top:16px;height:42px;border-radius:21px;border:1.5px dashed rgba(255,255,255,.18);background:none;color:#d4d4d8;padding:0 16px;font-family:inherit;font-size:14px;font-weight:600}
+.ovacts{display:flex;flex-wrap:wrap;gap:8px;padding:26px 20px 0}
+.ovacts button{height:42px;border-radius:21px;border:0;background:rgba(255,255,255,.07);color:#e4e4e7;padding:0 16px;font-family:inherit;font-size:14px;font-weight:600}.ovacts .dz{color:#fca5a5}
+.ovbar.ovgo{background:linear-gradient(180deg,rgba(11,11,12,0),#0b0b0c 38%)!important;border-top:0!important;padding-top:26px;cursor:default}
+.ovback{flex:1;height:60px;border-radius:30px;border:0;background:var(--pk);color:#0b0b0c;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-family:inherit}
+.ovback span{font-size:16px;font-weight:800}.ovback em{font-style:normal;font-size:12px;font-weight:600;color:#0b0b0c!important;opacity:.62}
+.lnk.ovwrap{background:rgba(255,255,255,.08);border-radius:18px;padding:8px 14px;color:#f4f4f5}
+#el{font-variant-numeric:tabular-nums}
+@keyframes ovRise{from{opacity:0;transform:translate3d(0,14px,0)}}
+@keyframes ovGrow{from{transform:scaleX(0)}}
+@keyframes ovFill{0%{background:rgba(255,255,255,.08);color:#9a9aa3;transform:scale(.86)}55%{transform:scale(1.08)}100%{transform:none}}
+@keyframes ovPulse{0%{box-shadow:0 0 0 0 rgba(244,244,245,.45)}70%,100%{box-shadow:0 0 0 9px rgba(244,244,245,0)}}
+.ovs.in .ovhero{animation:ovRise .5s cubic-bezier(.2,.88,.2,1) backwards}
+.ovs.in .ovr,.ovs.in .ovadd{animation:ovRise .55s cubic-bezier(.2,.88,.2,1) backwards;animation-delay:calc(var(--k,6)*45ms + 70ms)}
+.ovs.in .ovmk g rect{transform-box:fill-box;transform-origin:left center;animation:ovGrow .7s cubic-bezier(.2,.88,.2,1) backwards;animation-delay:calc(var(--k)*60ms + 60ms)}
+.ovp.just{animation:ovFill .6s cubic-bezier(.2,1.3,.4,1) .3s backwards}
+.ovp.nw.just{animation:ovFill .6s cubic-bezier(.2,1.3,.4,1) .3s backwards,ovPulse 2.4s ease-out 1s infinite}
+@media (prefers-reduced-motion:reduce){.ovs *,.ovp{animation:none!important}}
 </style>
 </head>
 <body>
@@ -1453,24 +1488,39 @@ function renderSet(){
   ${b.n?`<div class="setrow"><span>PERSONAL BEST</span><span style="color:var(--pk)">${fmt(b.w)} ${U()} × ${b.wr} · e1RM ${fmt(Math.round(b.e))}</span></div>`:''}</div>
   </div>`;
 }
+function ovDone(it,x){return x.dur!=null||ex(it.exId).type==='cardio'?(x.done||cEl(x)>0||x.dist>0):!!x.done}
+function ovTxt(it,x){const t=ex(it.exId).type;if(x.wu)return 'W';if(t==='cardio'||x.dur!=null){const e=cEl(x);return e>0?mmss(e):(x.dist?x.dist+'':'—')}if(t==='bodyweight'&&!(x.w>0))return `${x.r||0} reps`;return `${fmt(x.w)}×${x.r||0}`}
+function ovStackSvg(s){const n=s.items.length,H=9,G=13,mx=Math.max(...s.items.map(it=>it.sets.filter(x=>!x.wu).length),1);
+  return `<svg class="ovmk" viewBox="0 0 96 ${n*G-4}" width="104" height="${Math.round((n*G-4)*104/96)}" aria-hidden="true">${s.items.map((it,i)=>{const ws=it.sets.filter(x=>!x.wu),w=Math.max(18,96*ws.length/mx),d=ws.filter(x=>ovDone(it,x)).length,cur=i===s.i&&!s.pre?ws.indexOf(it.sets[s.s]):-1,u=w/Math.max(1,ws.length);
+    return `<g style="--k:${i}"><rect x="0" y="${i*G}" width="${w}" height="${H}" rx="4.5" fill="rgba(255,255,255,.12)"/>${d?`<rect x="0" y="${i*G}" width="${Math.max(H,u*d)}" height="${H}" rx="4.5" fill="var(--pk)"/>`:''}${cur>=d&&cur>=0?`<rect x="${u*cur+(cur?1.5:0)}" y="${i*G}" width="${Math.max(H,u-(cur?1.5:0))}" height="${H}" rx="4.5" fill="#f4f4f5"/>`:''}</g>`}).join('')}</svg>`}
+function renderStack(s){const vis=V.ov!==false,fresh=V.fresh&&vis;const prev=V.ovSeen||{};const seen={};let tot=0,dn=0;
+  const rows=s.items.map((it,i)=>{const ws=it.sets.filter(x=>!x.wu);tot+=ws.length;const d=ws.filter(x=>ovDone(it,x)).length;dn+=d;const curRow=i===s.i&&!s.pre;const cs=curRow?it.sets[s.s]:null;
+    const st=d>=ws.length&&ws.length?'<em class="ok">done</em>':curRow&&cs?(cs.wu?'<em class="now">warming up</em>':`<em class="now">set ${ws.indexOf(cs)+1} now</em>`):`<em>${d?d+' of ':''}${ws.length} set${ws.length===1?'':'s'}</em>`;
+    const pills=it.sets.map((x,j)=>{const k=i+'|'+j,dd=ovDone(it,x);if(dd)seen[k]=1;const c=curRow&&j===s.s&&!dd?'nw':dd?'dn':'up';const just=vis&&dd&&!prev[k]&&V.ovSeen?' just':'';
+      return `<button class="ovp ${c}${x.wu?' wu':''}${just}" data-a="ovpick" data-x="${i}|${j}" aria-label="${esc(ex(it.exId).name)} ${x.wu?'warm-up':'set '+(ws.indexOf(x)+1)}: ${ovTxt(it,x)}${dd?' logged':''}">${ovTxt(it,x)}</button>`}).join('');
+    return `<div class="ovr ${curRow?'cur':''}" style="--k:${i}"><button class="ovn" data-a="goex" data-x="${i}"><span>${esc(ex(it.exId).name)}${inSS(i)?' <span class="sstag sm2">SUPERSET</span>':''}</span>${st}</button><div class="ovps">${pills}</div></div>`}).join('');
+  if(vis)V.ovSeen=seen;
+  const it=s.items[s.i],nx=it&&it.sets[s.s];const mins=Math.round(tot*2.5+8);
+  const sub=s.pre?`${s.items.length} lifts · ~${mins} min`:nx&&it?`Next: ${esc(ex(it.exId).name)} · ${ovTxt(it,nx)}`:'All sets logged';
+  return `<div class="ovs ${fresh?'in':''}"><div class="ovhero">${ovStackSvg(s)}<div><div class="ovbig">${s.pre?`${tot} sets`:`${dn} of ${tot} sets`}</div><div class="ovsub">${sub}</div></div></div><div class="ovrows">${rows}</div><button class="ovadd" data-a="saddex">+ Add a lift</button></div>`}
 function renderOverview(){
   const s=S.session;const doneSets=s.items.flatMap(it=>it.sets.filter(x=>x.done&&!x.wu));
   let h='';if(s.pre){const t=readyToday(),sc=t&&t.score;const mins=Math.round(sum(s.items.map(it=>it.sets.filter(x=>!x.wu).length))*2.5+8);
-    h+=`<div class="prec">${(S.gyms||[]).length?`<button class="gychip" data-a="gycycle">${ic('dumb')} ${esc(gym()?gym().name:'Any equipment')} ▾</button>`:''}${s.blk?`<div class="blkchip">${esc(s.blk)}</div>`:''}<div class="prsum">${s.items.length} exercises · ${sum(s.items.map(it=>it.sets.filter(x=>!x.wu).length))} sets · ~${mins} min</div>
+    h+=`<div class="prec">${(S.gyms||[]).length?`<button class="gychip" data-a="gycycle">${ic('dumb')} ${esc(gym()?gym().name:'Any equipment')} ▾</button>`:''}${s.blk?`<div class="blkchip">${esc(s.blk)}</div>`:''}${V.ovEdit?`<div class="prsum">${s.items.length} exercises · ${sum(s.items.map(it=>it.sets.filter(x=>!x.wu).length))} sets · ~${mins} min</div>`:''}
     ${sc?`<div class="prrd ${sc<=2.4?'lo':''}">${ic('heart')}<span>Feeling ${sc}/5 · ${sc<=2.4?'Easy day: weights −10%, lighter goals':sc<=3.4?'Steady day: plan as written':'Feeling strong: go get it'}</span></div>`:''}
-    <div class="prbtns">${S.readyAsk!==false?`<button class="olb" data-a="rdopen">${ic('heart')} Check In</button>`:''}<button class="olb ${V.ovEdit?'on':''}" data-a="ovedit">${ic('edit')} ${V.ovEdit?'Done':'Edit'}</button></div></div>`}
-  h+=`<div class="h2">Exercises<small>SETS</small></div>`;
+    <div class="prbtns">${S.readyAsk!==false?`<button class="olb" data-a="rdopen">${ic('heart')} Check in</button>`:''}<button class="olb ${V.ovEdit?'on':''}" data-a="ovedit">${ic('edit')} ${V.ovEdit?'Done':'Edit'}</button></div></div>`}
+  if(!V.ovEdit)h+=renderStack(s);else{h+=`<div class="h2">Exercises<small>SETS</small></div>`;
   h+=s.items.map((it,i)=>`<div class="li" data-sw="ex|${i}" ${V.ovEdit?`data-ld="ov|${i}" style="cursor:default"`:`data-a="goex" data-x="${i}"`}><div class="g"><div class="tt" ${i===s.i?'style="color:var(--cy)"':''}>${esc(ex(it.exId).name)}</div><div class="sb">${inSS(i)?'<span class="sstag sm2">SUPERSET</span> ':''}${it.sets.filter(x=>x.done&&!x.wu).length} of ${it.sets.filter(x=>!x.wu).length} logged${(()=>{if(ex(it.exId).type!=='barbell')return '';const nx=it.sets.find(x=>!x.done&&!x.wu)||it.sets[it.sets.length-1];if(!nx||nx.w<=bar())return '';const pl=greedy((nx.w-bar())/2);return pl.length?`<div class="plstrip">${fmt(nx.w)}: ${pl.map(p=>`<i style="--s:${(.55+.45*Math.sqrt(p/PLATES[U()][0])).toFixed(2)}">${fmt(p)}</i>`).join('')}<em>per side</em></div>`:''})()}</div></div>${V.ovEdit?`${i<s.items.length-1?`<button class="ico ${it.sn?'lon':''}" data-a="exss" data-x="${i}" title="Superset with next">${ic('link')}</button>`:''}<button class="ico" data-a="exdel" data-x="${i}">${ic('x')}</button><span class="ico ldh" aria-label="Hold and drag to reorder">${ic('grip')}</span>`:`<div class="stp"><button data-a="ovsets" data-x="${i}|-1">${ic('back',2)}</button><span>${it.sets.length}</span><button data-a="ovsets" data-x="${i}|1">${ic('chev',2)}</button></div>`}</div>`).join('');
-  h+=`<button class="cyl" data-a="saddex">${ic('plusc')} Add Exercise</button>`;
+  h+=`<button class="cyl" data-a="saddex">${ic('plusc')} Add Exercise</button>`}
   const dn0=s.rid&&s.did&&R(s.rid)?(R(s.rid).days.find(d=>d.id===s.did)||{}).notes:'';
   h+=`<div class="h2" style="border:0">Notes</div><div class="shp">${dn0?`<div class="tnote">${esc(dn0)}</div>`:''}<textarea class="inp notes" rows="2" data-in="snote" placeholder="How did today feel? Anything to remember next time…">${esc(s.note||'')}</textarea></div>`;
-  if(!s.pre){h+=`<div class="h2" style="border:0">This Workout<small id="el" style="font-size:14px;letter-spacing:0">${mmss((Date.now()-s.start)/1000)}</small></div>`;
+  if(!s.pre&&V.ovEdit){h+=`<div class="h2" style="border:0">This Workout<small id="el" style="font-size:14px;letter-spacing:0">${mmss((Date.now()-s.start)/1000)}</small></div>`;
   h+=statsGrid(s.items.length,doneSets.length,sum(doneSets.map(x=>x.r)),fmt(Math.round(sum(s.items.map(it=>sum(it.sets.filter(x=>x.done&&!x.wu).map(x=>x.w*x.r*vf(ex(it.exId).type))))))))}
   if(V.ovEdit)h+=`<p class="xs mute" style="padding:10px 20px 0;margin:0">Tap ${'🔗'} to superset an exercise with the one below it.</p>`;
-  h+=s.pre?`<button class="olb" data-a="minimize" style="margin-top:22px">Save for Later</button>`:`<button class="olb" data-a="ovedit" style="margin-top:22px">${V.ovEdit?'Done Editing':'Edit Exercises'}</button><button class="olb" data-a="minimize">Minimize Workout</button><button class="dng" data-a="discard">Discard workout</button>`;
+  h+=s.pre?`<div class="ovacts"><button data-a="minimize">Save for later</button></div>`:`<div class="ovacts"><button data-a="ovedit">${V.ovEdit?'Done editing':'Edit lifts'}</button><button data-a="minimize">Minimize</button><button class="dz" data-a="discard">Discard</button></div>`;
   const it=s.items[s.i];
-  const bottom=s.pre?`<div class="ovbar prego"><button class="pkb" data-a="go">${ic('play')} Start Workout</button></div>`:it?`<div class="ovbar ins" data-a="ovclose"><button class="ovnav" data-a="ovmove" data-x="-1" aria-label="Previous set">${ic('dl',2.2)}</button><div class="g"><div>${esc(ex(it.exId).name)}</div><div>${setLabel(it,s.s).toLowerCase().replace(/^./,c=>c.toUpperCase())}</div></div><button class="ovnav" data-a="ovmove" data-x="1" aria-label="Next set">${ic('dr',2.2)}</button></div>`:'';
-  return hd(esc(s.name),'',s.pre?`<button class="lnk" data-a="precancel">Cancel</button>`:`<button class="lnk" data-a="finish">Finish</button>`,s.pre?'READY':'OVERVIEW')+`<main class="pg" style="padding-bottom:calc(170px + var(--sab))">${h}</main>`+bottom+renderTabs();
+  const bottom=s.pre?`<div class="ovbar prego ovgo"><button class="ovback" data-a="go"><span>Start ${esc(s.name)}</span><em>${sum(s.items.map(it=>it.sets.filter(x=>!x.wu).length))} sets · let’s raise the bar</em></button></div>`:it?`<div class="ovbar ovgo"><button class="ovback" data-a="ovclose"><span>Back to the bar</span><em>${esc(ex(it.exId).name)} · ${setLabel(it,s.s).toLowerCase().replace(/\/\d+$/,'')}</em></button></div>`:'';
+  return hd(esc(s.name),'',s.pre?`<button class="lnk" data-a="precancel">Cancel</button>`:`<button class="lnk ovwrap" data-a="finish">Wrap up</button>`,s.pre?'Ready when you are':`<span id="el">${mmss((Date.now()-s.start)/1000)}</span>`)+`<main class="pg" style="padding-bottom:calc(170px + var(--sab))">${h}</main>`+bottom+renderTabs();
 }
 function renderRest(){const rs=S.session.rest;const C=2*Math.PI*88;const left=rs?Math.max(0,(rs.end-Date.now())/1000):S.rest;const frac=rs?left*1000/rs.total:1;
   return `<div class="modal" data-a="rclose"><div class="tcard" data-a="noop"><button class="x" data-a="rclose">${ic('x',2)}</button><h3>Rest Timer</h3><div class="ring"><svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="88" fill="none" stroke="var(--track)" stroke-width="5"/><circle id="rring" cx="100" cy="100" r="88" fill="none" stroke="var(--pk)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-frac)}"/></svg><div class="tm" id="rt">${mmss(Math.ceil(left))}</div></div><div class="adj"><button data-a="radj" data-x="-30">-30 <small>sec</small></button><button data-a="radj" data-x="30">+30 <small>sec</small></button></div>${rs?`<button class="pkb" data-a="rstop">Stop</button>`:`<button class="pkb" data-a="rgo">Start</button>`}</div></div>`}
@@ -1480,13 +1530,13 @@ function renderSession(){
   if(V.restOpen)out+=renderRest();
   return out;
 }
-function closePanel(){const el=$('#sp');const done=()=>{V.ov=true;V.ovEdit=false;render()};if(!el||!el.style){done();return}el.style.transition='transform .28s cubic-bezier(.2,.8,.2,1)';el.style.transform='translateY(100%)';setTimeout(done,270)}
+function closePanel(){const el=$('#sp');V.ov=true;V.ovEdit=false;if(!el||!el.style){render();return}el.removeAttribute('id');el.style.pointerEvents='none';render();const app=$('#app');if(app)app.appendChild(el);el.style.transition='transform .34s cubic-bezier(.2,.8,.2,1)';requestAnimationFrame(()=>requestAnimationFrame(()=>{el.style.transform='translateY(100%)'}));setTimeout(()=>el.remove(),380)}
 function openPanel(){V.ov=false;V.animIn=true;render();V.animIn=false}
 
 function renderSub(){const k=V.sub.split(':')[0],id=V.sub.slice(k.length+1);return k==='routines'?renderRoutines():k==='routine'?renderRoutine(id):k==='day'?renderDay(id):k==='exercises'?renderExercises():k==='hist'?renderHist(id):renderHome()}
 function scr0(){const m=document.querySelector('#app main');if(m)m.scrollTop=0}
 function render(){syncBars();
-  const app=$('#app');let out;const pm=document.querySelector('#app main'),pmt=pm?pm.scrollTop:0,vk=[V.tab,V.sub,!!V.inSession,V.ov].join('|'),samev=vk===V._vk;V._vk=vk;
+  const app=$('#app');let out;const pm=document.querySelector('#app main'),pmt=pm?pm.scrollTop:0,vk=[V.tab,V.sub,!!V.inSession,V.ov].join('|'),samev=vk===V._vk;V._vk=vk;V.fresh=!samev;
   if(S.session&&V.inSession)out=renderSession();
   else{if(!S.session)V.inSession=false;out=(V.sub?renderSub():({home:renderHome,log:renderLog,goals:renderGoals,prog:renderProgress,tools:renderToolsTab,more:renderMore}[V.tab])())+renderTabs()}
   if(V.calc)out+=renderCalc();
@@ -1568,7 +1618,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.97';
+const APPV='1.98';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 
@@ -4485,6 +4535,7 @@ const ACT={
   // session
   ovopen:()=>closePanel(),
   ovclose:()=>openPanel(),
+  ovpick:x=>{const [i,j]=x.split('|').map(Number);const s=S.session;if(s.pre){ACT.goex(i);return}s.i=i;s.s=j;save();openPanel()},
   ovedit:()=>{V.ovEdit=!V.ovEdit;render()},
   goex:x=>{const s=S.session;if(s.pre){const rw=recWarn(s);if(rw.length){V.recEx=+x;openSheet(recWarnHtml(rw,'goex'));return}s.pre=false;s.start=Date.now()}s.i=+x;const k=s.items[s.i].sets.findIndex(z=>!z.done);s.s=k<0?0:k;save();openPanel()},
   ovsets:x=>{const [i,d]=x.split('|').map(Number),it=S.session.items[i];if(d>0){if(it.sets.length>=12)return;const l=it.sets[it.sets.length-1];it.sets.push({w:l.w,r:l.r,done:false,p:l.p?[...l.p]:undefined})}else{if(it.sets.length<=1)return;it.sets.pop();if(S.session.i===i)S.session.s=Math.min(S.session.s,it.sets.length-1)}RS()},
