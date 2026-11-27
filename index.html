@@ -894,7 +894,7 @@ html[data-theme="light"] .hpills button{background:#fff;border-color:#e5e5ea;col
 .lft{flex:1;min-width:0;display:flex;flex-direction:column}.lft b{font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lft em{font-style:normal;font-size:12.5px;font-weight:500;color:#a1a1aa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lfi{width:46px;height:46px;border-radius:23px;background:var(--pk);color:#0b0b0c;display:flex;align-items:center;justify-content:center;flex:none}.lfi .i,.lfi svg{width:20px;height:20px}
 #lnm{position:fixed;inset:0;z-index:60;-webkit-user-select:none;user-select:none}
-.lnbg{position:absolute;inset:0;background:rgba(0,0,0,.55);opacity:0;transition:opacity .28s ease}#lnm.in .lnbg{opacity:1}
+.lnbg{position:absolute;inset:0;background:rgba(0,0,0,.78);opacity:0;transition:opacity .28s ease}#lnm.in .lnbg{opacity:1}
 .lnst{position:absolute;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
 .lnp{height:50px;border-radius:25px;border:0;background:var(--pk);color:#0b0b0c;display:flex;align-items:center;gap:10px;padding:0 18px;font-family:inherit;font-size:17px;font-weight:800;transform-origin:left center;opacity:0;transform:translate3d(0,22px,0) scale(.35,.6);transition:transform .46s cubic-bezier(.2,1.22,.4,1),opacity .22s ease,box-shadow .2s,background-color .18s,color .18s;transition-delay:calc(var(--k)*38ms);will-change:transform}
 .lnp .i,.lnp svg{width:22px;height:22px;flex:none}.lnp.mid{background:#f4f4f5}.lnp.cur::after{content:'';width:8px;height:8px;border-radius:4px;background:#0b0b0c;margin-left:auto;flex:none}
@@ -1040,6 +1040,29 @@ main.edout>*{animation:edOut .15s ease forwards}main.edin>*{animation:edIn .38s 
 .hsec[data-p="1"] .wmus{flex:none}
 .hsec.f1 .wtot b{font-size:17px}.hsec.f1 .wtot>div{padding:8px 10px}.hsec.f2 .wtot{display:none}
 .hsec[data-p="0"] .hup{margin-top:10px!important}.hsec[data-p="0"] .hbars{flex:1 0 auto;justify-content:center}
+
+#lnm{touch-action:none}
+.hrow{display:flex;gap:8px;margin:10px 16px 0;align-items:stretch}.hrow .hup{flex:1;min-width:0;margin:0!important}.hrow .hupk{display:none}
+.hcar{width:84px;flex:none;border:0;border-radius:28px;background:rgba(255,255,255,.045);color:#f4f4f5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:14px 6px;font-family:inherit;position:relative;overflow:hidden}
+.hcar .hcri{width:40px;height:40px;border-radius:20px;background:var(--pk);color:#0b0b0c;display:flex;align-items:center;justify-content:center;margin-bottom:4px}.hcar .hcri .i,.hcar .hcri svg{width:20px;height:20px}
+.hcar b{font-size:14px;font-weight:800}.hcar em{font-style:normal;font-size:11.5px;font-weight:600;color:var(--mute);line-height:1.25;text-align:center}
+.hcar i{position:absolute;left:10px;right:10px;bottom:8px;height:4px;border-radius:2px;background:rgba(255,255,255,.08);display:block;overflow:hidden}.hcar i s{display:block;height:4px!important;background:var(--pk)}
+.tbig.one{grid-template-columns:1fr}
+.pchk{margin:12px 16px 0;background:rgba(255,255,255,.045);border-radius:24px;padding:14px}
+.pchh{display:flex;justify-content:space-between;align-items:baseline;padding:0 4px 10px}.pchh b{font-size:17px;font-weight:800}.pchh span{font-size:12px;color:var(--mute);font-weight:600}
+.pchr{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pchr button{display:flex;align-items:center;gap:10px;text-align:left;border:0;border-radius:18px;background:rgba(255,255,255,.06);color:#f4f4f5;padding:12px;font-family:inherit;min-width:0}
+.pchr button>span{width:36px;height:36px;border-radius:18px;background:var(--pk);color:#0b0b0c;display:flex;align-items:center;justify-content:center;flex:none}.pchr button>span .i,.pchr button>span svg{width:18px;height:18px}
+.pchr b{display:block;font-size:14px}.pchr em{display:block;font-style:normal;font-size:11.5px;color:var(--mute);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pchr div{min-width:0}
+.pchr button.done>span{background:rgba(255,214,10,.16);color:var(--pk)}
+
+.lnlogo svg.nlg{width:auto;height:30px;overflow:visible}
+.hpi{top:50%!important}
+.hrow .hup{flex:1.45}.hcar{width:auto;flex:1;min-width:0}
+.hpvi{width:48px;min-width:48px;padding:0!important;flex:none;display:flex;align-items:center;justify-content:center}.hpvi .i,.hpvi svg{width:20px;height:20px}
+.hrow .hupb .hgo{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hrow .hupl em{display:none}
+.hsec .hrow .hup{margin:0!important}
 </style>
 </head>
 <body>
@@ -1139,7 +1162,7 @@ const IP={
  goals:'<path d="M8 3h8l-2.5 5.5h-3z"/><circle cx="12" cy="14.5" r="5.5"/><circle cx="12" cy="14.5" r="2"/>',
  more:'<circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/>',
  plus:'<path d="M12 5v14M5 12h14"/>',minus:'<path d="M5 12h14"/>',
- chev:'<path d="M9.5 6l6 6-6 6"/>',back:'<path d="M15 6l-6 6 6 6"/>',down:'<path d="M5 9l7 6 7-6"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',
+ chev:'<path d="M9.5 6l6 6-6 6"/>',eye:'<path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>',back:'<path d="M15 6l-6 6 6 6"/>',down:'<path d="M5 9l7 6 7-6"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',
  clock:'<path d="M4.5 8A8.5 8.5 0 1 1 3.5 12"/><path d="M3 5v3.5h3.5"/><path d="M12 8v4.5l3 1.8"/>',
  play:'<circle cx="12" cy="12" r="9"/><path d="M10.2 8.5v7l5.3-3.5z"/>',
  plusc:'<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',minusc:'<circle cx="12" cy="12" r="9"/><path d="M8 12h8"/>',
@@ -1293,12 +1316,12 @@ const hd=(t,l='',r='',st='')=>`<header class="hd"><div class="hl">${l}</div><h1>
 const back=()=>`<button class="bkb" data-a="back" aria-label="Back">${ic('back',2.4)}</button>`;
 function statsGrid(a,b,c,d){return `<div class="stats"><div>${ic('dumb')}<div><b>${a}</b><span>Exercises</span></div></div><div>${ic('log')}<div><b>${b}</b><span>Sets</span></div></div><div>${ic('rep')}<div><b>${c}</b><span>Reps</span></div></div><div>${ic('target')}<div><b>${d}<small> ${U()}</small></b><span>Weight lifted</span></div></div></div>`}
 const NAVI=[['prog','Progress','prog'],['goals','Goals','goals'],['home','Home','home'],['tools','Tools','tools'],['lib','Library','log']],NAVW=[71,91,66,96,74];
-function navLogo(){return `<svg viewBox="0 0 96 61" aria-hidden="true">${NAVW.map((w,k)=>`<rect x="0" y="${k*13}" width="${w}" height="9" rx="4.5" fill="${k===2?'#f4f4f5':'var(--pk)'}"/>`).join('')}</svg>`}
+function navLogo(){return `<svg class="nlg" viewBox="0 0 96 134" aria-hidden="true">${[67,88,59,96,68].map((w,k)=>`<rect x="0" y="${k*28.5}" width="${w}" height="20" rx="10" fill="${k===2?'#f4f4f5':'var(--pk)'}"/>`).join('')}</svg>`}
 function renderTabs(){if(V.inSession)return '';const s=S.session;let t,sub,a;
   let ring='';if(s){const ws=s.items.flatMap(it=>it.sets.filter(x=>!x.wu)),dn2=ws.filter(x=>x.done).length,fr=ws.length?dn2/ws.length:0,C=2*Math.PI*21;
-    t=s.pre?esc(s.name):`${esc(s.name)} · <span id="el4">${mmss((Date.now()-s.start)/1000)}</span>`;sub=s.pre?'Ready when you are':`${dn2} of ${ws.length} sets`;a='plus';
+    t=s.pre?esc(s.name):`${esc(s.name)} · <span id="el4">${mmss((Date.now()-s.start)/1000)}</span>`;sub=s.pre?'Ready when you are':`${dn2} of ${ws.length} sets`;a='resume';
     ring=`<svg class="lfr" viewBox="0 0 46 46" aria-hidden="true"><circle cx="23" cy="23" r="21"/><circle class="lfrp" cx="23" cy="23" r="21" stroke-dasharray="${(C*fr).toFixed(1)} ${C.toFixed(1)}"/></svg>`}
-  else{const n=homeNext();t='Lift';sub=n?`${esc(n.d0.name)} is up next`:'Start a workout';a='plus'}
+  else{const n=homeNext();t='Lift';sub=n?`${esc(n.d0.name)} is up next`:'Start a workout';a='qlift'}
   const cur=NAVI.find(x=>x[0]===V.tab);
   const qo=(()=>{const w=document.getElementById('sheet');return w&&w.classList.contains('qpop')&&!w.classList.contains('out')})();return `<nav class="lnav${qo?' qopen':''}" aria-label="Main"><button class="lnlogo" aria-haspopup="menu" aria-expanded="false" aria-label="Menu${cur?', on '+cur[1]:''}">${navLogo()}</button><button class="lift" data-a="${a}"><span class="lft"><b>${t}</b><em>${sub}</em></span><span class="lfi${s?' live':''}" data-a="liftgo" role="button" aria-label="${s?'Resume workout':'Start the next workout'}">${ring}<span class="lfp">${ic('play')}</span><span class="lfx">${ic('x')}</span></span></button></nav>`}
 
@@ -1311,7 +1334,7 @@ function renderHome(){
   h+=homeWeek();
   h+=cycChip();
   const top=`<div class="hhead">${h}</div>`;h=`<section class="hsec" data-p="0" aria-label="Today">`;
-  h+=homeUpNext();
+  h+=`<div class="hrow">${homeUpNext()}${homeCardio()}</div>`;
   h+=homeBars();
   {const td=clsToday();if(td.length)h+=td.map(c=>clsRow(c,true)).join('')}
   h+=deloadCard();
@@ -1348,7 +1371,7 @@ function homeRecentPage(){const H=S.history.slice(0,3);
 function hpFit(secs){(secs||document.querySelectorAll('.hsec')).forEach(sc=>{sc.classList.remove('f1','f2','f3');for(let k=1;k<=3&&sc.scrollHeight>sc.clientHeight+1;k++)sc.classList.add('f'+k)})}
 function hpInit(){const m=document.querySelector('#app main.hpage'),nav=document.querySelector('.hpi');if(!m||!nav)return;const secs=[...m.querySelectorAll('.hsec')];
   const setH=()=>{m.style.setProperty('--ph',m.clientHeight+'px')};setH();if(!window._hpR){window._hpR=1;addEventListener('resize',()=>{const mm=document.querySelector('#app main.hpage');if(mm){mm.style.setProperty('--ph',mm.clientHeight+'px');hpFit()}})}
-  nav.style.top=(m.offsetTop+m.clientHeight/2)+'px';hpFit(secs);const re=()=>{if(!m.isConnected)return;setH();nav.style.top=(m.offsetTop+m.clientHeight/2)+'px';hpFit(secs)};requestAnimationFrame(re);setTimeout(re,350);setTimeout(re,1200);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(re);const want=Math.min(2,V.hpg||0);if(Math.round(m.scrollTop/Math.max(1,m.clientHeight))!==want)m.scrollTop=want*m.clientHeight;
+  hpFit(secs);const re=()=>{if(!m.isConnected)return;setH();hpFit(secs)};requestAnimationFrame(re);setTimeout(re,350);setTimeout(re,1200);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(re);const want=Math.min(2,V.hpg||0);if(Math.round(m.scrollTop/Math.max(1,m.clientHeight))!==want)m.scrollTop=want*m.clientHeight;
   let raf=0;m.addEventListener('scroll',()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;const i=Math.max(0,Math.min(secs.length-1,Math.round(m.scrollTop/Math.max(1,m.clientHeight))));nav.querySelectorAll('button').forEach((b,k)=>b.classList.toggle('on',k===i));
     if(i!==(V.hpg||0))V.hpg=i;})},{passive:true});
   nav.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.pg;m.scrollTo({top:i*m.clientHeight,behavior:'smooth'})}))}
@@ -1358,11 +1381,12 @@ function homeBars(){const t0=dayStart(Date.now()),st=dayStats(t0),n=closedCount(
 function homeNext(){const r=S.routines.find(x=>x.active);if(!r||!r.days.length)return null;const p=planToday();let d0=null,lab='Up next',rest=false;
   if(p&&p.today&&!p.todayDone){d0=p.today;lab='Today'}else{if(p&&!p.today)rest=true;const nx=nextDay(r);d0=r.days.find(d=>d.id===nx)||r.days[0]}
   const i0=Math.max(0,r.days.indexOf(d0)),ord=r.days.slice(i0).concat(r.days.slice(0,i0));return {r,d0,lab,rest,ord,miss:p&&p.miss}}
+function homeCardio(){const g=G().weekCardio,wk=Math.round(wkCardio()),fr=g?Math.min(1,wk/g):0;return `<button class="hcar" data-a="qcar" aria-label="Cardio"><span class="hcri">${ic('heart')}</span><b>Cardio</b><em>${wk}/${g}<br>min</em><i><s style="width:${(fr*100).toFixed(0)}%"></s></i></button>`}
 function homeUpNext(){const n=homeNext();
   if(!n)return `<div class="hup"><div class="hupl"><span>No plan yet</span></div><div class="hupn">Pick a plan</div><div class="hupm">Choose a program or template, or just start lifting.</div><div class="hupb"><button class="hgo" data-a="libgo" data-x="routines">Browse plans</button><button class="hpv" data-a="qlift">Quick workout</button></div></div>`;
   const {r,d0,lab,rest,miss}=n,sets=d0.items.reduce((a,it)=>a+(+it.sets||0),0),mins=Math.round(sets*2.5+8),mx=Math.max(1,...d0.items.map(it=>+it.sets||0)),its=d0.items.slice(0,5);
   const mk=its.length?`<svg class="hupk" viewBox="0 0 96 ${its.length*13-4}" aria-hidden="true">${its.map((it,k)=>`<rect x="0" y="${k*13}" width="${Math.max(24,96*(+it.sets||0)/mx)}" height="9" rx="4.5" fill="${k===0?'var(--pk)':'rgba(255,255,255,.16)'}"/>`).join('')}</svg>`:'';
-  return `<div class="hup" data-a="hupopen" data-x="${r.id}|${d0.id}" role="button" aria-label="Open ${esc(r.name)}"><div class="hupl"><span>${rest?'Rest day · or get ahead':lab}</span><em>${esc(r.name)}</em></div><div class="hupt"><div><div class="hupn">${esc(d0.name)}</div><div class="hupm">${d0.items.length} lift${d0.items.length===1?'':'s'} · ${sets} sets · ~${mins} min</div>${its[0]?`<div class="hupf">First: ${esc(ex(its[0].exId).name)}</div>`:''}</div>${mk}</div>${miss?`<button class="hmiss" data-a="startd" data-x="${r.id}|${miss.d.id}">Catch up: ${esc(miss.d.name)} from ${WDN[miss.k]}</button>`:''}<div class="hupb">${S.session?`<button class="hgo" data-a="resume">Resume ${esc(S.session.name.toLowerCase())}</button>`:`<button class="hgo" data-a="startd" data-x="${r.id}|${d0.id}">Start ${esc(d0.name.toLowerCase())}</button>`}<button class="hpv" data-a="preview" data-x="${r.id}|${d0.id}">Preview</button></div></div>`}
+  return `<div class="hup" data-a="hupopen" data-x="${r.id}|${d0.id}" role="button" aria-label="Open ${esc(r.name)}"><div class="hupl"><span>${rest?'Rest day · or get ahead':lab}</span><em>${esc(r.name)}</em></div><div class="hupt"><div><div class="hupn">${esc(d0.name)}</div><div class="hupm">${d0.items.length} lift${d0.items.length===1?'':'s'} · ${sets} sets · ~${mins} min</div>${its[0]?`<div class="hupf">First: ${esc(ex(its[0].exId).name)}</div>`:''}</div>${mk}</div>${miss?`<button class="hmiss" data-a="startd" data-x="${r.id}|${miss.d.id}">Catch up: ${esc(miss.d.name)} from ${WDN[miss.k]}</button>`:''}<div class="hupb">${S.session?`<button class="hgo" data-a="resume">Resume ${esc(S.session.name.toLowerCase())}</button>`:`<button class="hgo" data-a="startd" data-x="${r.id}|${d0.id}">Start ${esc(d0.name.toLowerCase())}</button>`}<button class="hpv hpvi" data-a="preview" data-x="${r.id}|${d0.id}" aria-label="Preview">${ic('eye')}</button></div></div>`}
 function homeWeek(){const t0=dayStart(Date.now()),ws=weekStart(t0);let lifts=0;
   const ds=[...Array(7)].map((_,k)=>{const d=ws+k*864e5,hs=S.history.filter(x=>x.date>=d&&x.date<d+864e5),lift=hs.some(x=>!x.act),act=hs.some(x=>x.act),o=dayOv(d),rest=o&&o.skip;if(lift)lifts+=hs.filter(x=>!x.act).length;
     return `<button class="${lift?'wl':act?'wa':rest?'wr':''} ${d===t0?'td':''} ${d>t0?'fut':''}" data-a="dayopt" data-x="${d}" aria-label="${WDN[k]}${lift?', lifted':act?', active':rest?', rest day':''}. Open day">${'MTWTFSS'[k]}</button>`}).join('');
@@ -1575,10 +1599,12 @@ function renderGoals(){
 
   return hd('Goals')+`<main class="pg">${h}</main>`;
 }
+function progCheck(){const rd=typeof readyToday==='function'?readyToday():null,b=S.body.find(x=>x.bw),td=b&&dayStart(b.date)===dayStart(Date.now());
+  return `<div class="pchk"><div class="pchh"><b>Check in</b><span>${dlong(Date.now())}</span></div><div class="pchr"><button data-a="rdopen" class="${rd&&rd.score?'done':''}"><span>${ic('gauge')}</span><div><b>How you feel</b><em>${rd&&rd.score?'Done today ✓':'Sleep, energy, soreness'}</em></div></button><button data-a="bodylog" class="${td?'done':''}"><span>${ic('scale')}</span><div><b>Body</b><em>${b?fmt(b.bw)+' '+U()+(td?' today ✓':' · '+dlong(b.date)):'Weight & measures'}</em></div></button></div></div>`}
 function renderProgress(){const ps=V.ps||'stats';
   const sw=`<div class="pseg"><div class="seg">${[['stats','Stats'],['history','History']].map(([k,l])=>`<button class="${ps===k?'on':''}" data-a="pseg" data-x="${k}">${l}</button>`).join('')}</div></div>`;
   if(ps==='history')return hd('Progress')+`<main class="pg">${sw}${streakStrip()}${calendar()}<div class="h2">History</div>${S.history.map(histRow).join('')||`<div class="empty">No finished workouts yet.<br><span class="sm">Complete a workout and it'll show up here.</span></div>`}</main>`;
-  let h=sw+recapBanner()+progGrid()+bodySection('prog')+insTiles();
+  let h=sw+progCheck()+recapBanner()+progGrid()+bodySection('prog')+insTiles();
   return hd('Progress')+`<main class="pg">${h}</main>`;
 }
 function renderCalc(){
@@ -1783,7 +1809,7 @@ function renderOverview(){
   if(V.ovEdit)h+=`<p class="xs mute" style="padding:10px 20px 0;margin:0">Tap ${'🔗'} to superset an exercise with the one below it.</p>`;
   h+=s.pre?`<div class="ovacts"><button data-a="minimize">Save for later</button></div>`:`<div class="ovacts"><button data-a="ovedit">${V.ovEdit?'Done editing':'Edit lifts'}</button><button data-a="minimize">Minimize</button><button class="dz" data-a="discard">Discard</button></div>`;
   const it=s.items[s.i];
-  const bottom=s.pre?`<div class="ovbar prego ovgo"><button class="lnlogo" aria-haspopup="menu" aria-expanded="false" aria-label="Menu">${navLogo()}</button><button class="ovback" data-a="go"><span>Start ${esc(s.name)}</span><em>${sum(s.items.map(it=>it.sets.filter(x=>!x.wu).length))} sets · let’s raise the bar</em></button></div>`:it?`<div class="ovbar ovgo"><button class="lnlogo" aria-haspopup="menu" aria-expanded="false" aria-label="Menu">${navLogo()}</button><button class="ovback" data-a="ovclose" data-lp="plus"><span>Back to the bar</span><em>${esc(ex(it.exId).name)} · ${setLabel(it,s.s).toLowerCase().replace(/\/\d+$/,'')}</em></button></div>`:'';
+  const bottom=s.pre?`<div class="ovbar prego ovgo"><button class="lnlogo" aria-haspopup="menu" aria-expanded="false" aria-label="Menu">${navLogo()}</button><button class="ovback" data-a="go"><span>Start ${esc(s.name)}</span><em>${sum(s.items.map(it=>it.sets.filter(x=>!x.wu).length))} sets · let’s raise the bar</em></button></div>`:it?`<div class="ovbar ovgo"><button class="lnlogo" aria-haspopup="menu" aria-expanded="false" aria-label="Menu">${navLogo()}</button><button class="ovback" data-a="ovclose"><span>Back to the bar</span><em>${esc(ex(it.exId).name)} · ${setLabel(it,s.s).toLowerCase().replace(/\/\d+$/,'')}</em></button></div>`:'';
   return hd(esc(s.name),`<button class="bkb ovhome" data-a="minimize" aria-label="Back to home (workout keeps running)">${ic('back',2.4)}</button>`,s.pre?`<button class="lnk" data-a="precancel">Cancel</button>`:`<button class="lnk ovwrap" data-a="finish">Wrap up</button>`,s.pre?'Ready when you are':`<span id="el">${mmss((Date.now()-s.start)/1000)}</span>`)+`<main class="pg" style="padding-bottom:calc(170px + var(--sab))">${h}</main>`+bottom+renderTabs();
 }
 function renderRest(){const rs=S.session.rest;const C=2*Math.PI*88;const left=rs?Math.max(0,(rs.end-Date.now())/1000):S.rest;const frac=rs?left*1000/rs.total:1;
@@ -1886,7 +1912,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='2.22';
+const APPV='2.24';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 
@@ -2097,7 +2123,7 @@ function tIcon(k,big){const c=TCAT[k];return `<span class="ic ${TCOL[c]}">${ic(T
 function renderToolsTab(){const f=V.tf||'all',ed=V.tedit,pn=pins(),seen=S.seenT||[];
   const cell=(k,a,x,label,col,icn,dot)=>`<button class="tdr" data-a="${a}" data-x="${x}" data-q="${esc(label.toLowerCase())} ${TCAT[k]||''}"><span class="ic ${col}">${ic(icn)}${ed&&TCAT[k]?`<em class="${pn.includes(k)?'on':''}">${pn.includes(k)?'✓':'+'}</em>`:''}</span>${label}${dot?'<i class="dot"></i>':''}</button>`;
   const list=tOrder().filter(k=>(f==='all'||TCAT[k]===f)&&!pn.includes(k)),pc=k=>'g';
-  let h=`<div class="tbig"><button data-a="sub" data-x="routines"><span class="ic y">${ic('log')}</span><div><b>Routines</b><em>${S.routines.length} saved</em></div></button><button data-a="sub" data-x="exercises"><span class="ic y">${ic('dumb')}</span><div><b>Exercises</b><em>${S.exercises.length} in library</em></div></button></div><div class="srch">${ic('search')}<input data-in="tsearch" placeholder="Search tools" value=""></div>
+  let h=`<div class="tbig one"><button data-a="bld"><span class="ic y">${ic('target')}</span><div><b>Build Me a Workout</b><em>Picked from fresh muscles and your time</em></div></button></div><div class="srch">${ic('search')}<input data-in="tsearch" placeholder="Search tools" value=""></div>
   <div class="chips2 tfil">${TFIL.map(([k,l])=>`<button class="${f===k?'on':''}" data-a="tfil" data-x="${k}">${l}</button>`).join('')}</div>
   <div class="tpinw"><div class="secl tsec" style="display:flex;justify-content:space-between;border:0"><span>Pinned</span><button class="lnk xs" data-a="tedit">${ed?'DONE':'EDIT'}</button></div>
   <div class="tpins ${ed?'ed':''} n${pn.length}" style="grid-template-columns:repeat(${Math.max(3,pn.length)},minmax(0,1fr))">${pn.map((k,i)=>`<button class="tpin" data-a="${ed?'tpin':'tool'}" data-x="${k}"><span class="tpi">${ic(TOOLS.find(x=>x[0]===k)[3])}</span><b>${TSHORT[k]}</b><span>${pinSub(k)}</span>${ed?'<em>✕</em>':''}</button>`).join('')||'<div class="xs mute" style="padding:8px 4px">Tap EDIT, then tap tools to pin them here.</div>'}</div>
@@ -4135,14 +4161,13 @@ function tSample(){const g=$q('.wtg');if(!g||g.querySelector('.tsample')||g.quer
   g.insertAdjacentHTML('afterbegin',`<div class="wtl tsample"><span class="tsmp">SAMPLE</span><div class="wtn">Barbell Bench Press</div><div class="wtv"><b>175</b><span>${U()} 1RM</span></div><div class="wtsp">${spark(pts)}</div><div class="wtpr">${ic('trophy')} PR 155 × 6 · Nov 18</div></div>`)}
 const TOUR=[
  {c:'Welcome',go:()=>tBase('home'),t:'Welcome to Bars',d:'Let’s walk through the app together. I’ll open each screen so you can see exactly where things live and what they do. About two minutes. You can end the tour any time.'},
- {c:'Home',go:()=>tBase('home'),sel:'.hbw',tap:'.hbars',dock:'bottom',t:'Today’s Bars',d:'Five daily goals, like rings on a watch. Workouts, sets, minutes and cardio fill them in. Close all five for a full set.'},
- {c:'Home',go:()=>{tBase('home');ACT.stackinfo();setTimeout(()=>ACT.bxtog('_choose'),60)},wait:560,sel:()=>[$q('#bx .bxs.open'),$q('#bx .bpk')],t:'Make the bars yours',d:'Tapping the card opens your bars full screen. Tap any bar for details, or open Choose Your Bars to pick your five and set a goal for each.'},
+ {c:'Home',go:()=>tBase('home'),sel:'.hbw',tap:'.hbars',dock:'top',t:'Today’s Bars',d:'Five daily goals, like rings on a watch. Workouts, sets, minutes and cardio fill them in. Close all five for a full set.'},
+ {c:'Home',go:()=>{tBase('home');ACT.stackinfo();setTimeout(()=>ACT.bxtog('_choose'),60)},wait:560,sel:()=>$q('#bx .bpk')||$q('#bx .bxs.open'),t:'Make the bars yours',d:'Tapping the card opens your bars full screen. Tap any bar for details, or open Choose Your Bars to pick your five and set a goal for each.'},
  {c:'Home',go:()=>tBase('home'),sel:()=>[$q('.hup'),$q('.hwk')],t:'Your week, planned',d:'Your routine for the week. The suggested workout sits on top: tap Start to go or Preview to look first. Done days get a yellow ✓.'},
  {c:'Home',go:()=>tBase('home'),sel:'.lnav .lnlogo',round:1,t:'Routines and exercises',d:'Your routines and the full exercise library live in Library, at the bottom of the logo menu.'},
  {c:'Menu',go:()=>tBase('home'),sel:'.lnav .lnlogo',round:1,pulse:'.lnav .lnlogo',t:'The logo is your menu',d:'Tap it to fan out Today, Progress, Goals, Tools and Settings, or press and slide up to jump straight there. Swipe it sideways to flip between screens.'},
  {c:'Quick Actions',go:()=>tBase('home'),sel:'.lnav .lift',pulse:'.lnav .lift',t:'Lift',d:'Everything you start begins here. Let’s open it.'},
- {c:'Quick Actions',go:()=>{tBase('home');openQuick()},wait:60,sel:'.qheros',t:'Lift or Cardio',d:'The two ways to train. Lift starts a weights workout. Cardio tracks a run, ride or row, or logs a class.'},
- {c:'Quick Actions',go:()=>{tBase('home');openQuick()},wait:60,sel:'.qgrid.qd',tap:'.qh[data-a=qlift]',t:'Your shortcuts',d:'Handy shortcuts. Press and hold any tile to customize: remove, add tools, and drag to reorder.'},
+ {c:'Home',go:()=>{tBase('home')},wait:60,sel:'.lnav .lift',t:'Your activity bar',d:'Tap it to pick any workout, or tap play to start your next one right away. During a workout it shows your time and sets, and takes you straight back in.'},
  {c:'Quick Actions',go:()=>{tBase('home');ACT.qlift()},sel:()=>{const r=$q('.sheet .sugrow');return [r&&r.previousElementSibling,r,...after(r,2)]},t:'Picking a lift',d:'Every workout in your routines. Your next one is highlighted, but you can start any of them. Empty Workout and Build Me a Workout are further down.'},
  {c:'Quick Actions',go:()=>{tBase('home');ACT.qcar()},sel:()=>{const a=secl('Track Live');return [a,...after(a,2)]},t:'Picking cardio',d:'Track a machine live with time, distance and pace. Below that you can log a class you already did, or follow a guided session.'},
  {c:'Working Out',demo:1,dock:'mid',dim:'.ovbar.prego .pkb',go:()=>{tBase('home');tDemo(true)},sel:()=>[...document.querySelectorAll('#app [data-sw^="ex|"]')],tap:'.ovbar.prego .pkb',t:'The Ready screen',d:'Starting a workout opens this first. Check your exercises, reorder or swap them, then tap Start Workout. This is a practice run, so nothing gets saved.'},
@@ -4753,7 +4778,7 @@ const ACT={
   dowk:()=>{closeSheet();openSheet(liftHtml())},
   preview:x=>{const [ri,di]=x.split('|');openSheet(previewHtml(ri,di))},
   startd:x=>{const [ri,di]=x.split('|');startWorkout(ri,di)},
-  plus:()=>openQuick(),
+  plus:()=>ACT.qlift(),
   liftgo:()=>{{const w=document.getElementById('sheet');if(w&&w.classList.contains('qpop')){closeSheetAnim();return}}if(S.session){ACT.resume();return}const n=homeNext();if(n)startWorkout(n.r.id,n.d0.id);else openQuick()},
   hupopen:x=>{const [r,d]=x.split('|');V.rhl=d;V.libSeg='routines';ACT.sub('routine:'+r)},
   libgo:x=>{V.libSeg=x;ACT.tab('lib')},
@@ -4976,8 +5001,8 @@ try{if('serviceWorker' in navigator&&location.protocol==='https:'){const had=!!n
     const wasOpen=!!M;G0={id:e.pointerId,x:e.clientX,y:e.clientY,t:performance.now(),open:wasOpen,wasOpen,cyc:false,moved:false,tm:null};
     if(!wasOpen){open(b);G0.open=true}},{passive:false});
   document.addEventListener('pointermove',e=>{if(!G0||e.pointerId!==G0.id)return;const dx=e.clientX-G0.x,dy=e.clientY-G0.y;if(Math.abs(dx)>6||Math.abs(dy)>6)G0.moved=true;
-    if(!G0.cyc&&!G0.wasOpen&&!(M&&M.hov)&&Math.abs(dx)>22&&Math.abs(dx)>Math.abs(dy)*1.4){G0.cyc=true;close();return}
-    if(G0.open&&M&&!G0.cyc&&dy<-4)hover(e.clientY)});
+    if(dy<-10)G0.vert=true;if(!G0.cyc&&!G0.vert&&!G0.wasOpen&&!(M&&M.hov)&&Math.abs(dx)>26&&Math.abs(dy)<14&&Math.abs(dx)>Math.abs(dy)*2){G0.cyc=true;close();return}
+    if(G0.open&&M&&!G0.cyc&&(dy<-4||G0.vert))hover(e.clientY)});
   const end=e=>{if(!G0||e.pointerId!==G0.id)return;const g=G0;G0=null;clearTimeout(g.tm);const dx=e.clientX-g.x;
     if(e.type==='pointercancel'){if(M&&!g.wasOpen&&g.moved)close();return}
     if(g.cyc){cycle(dx<0?1:-1);return}
