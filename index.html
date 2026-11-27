@@ -975,6 +975,7 @@ main.edout>*{animation:edOut .15s ease forwards}main.edin>*{animation:edIn .38s 
 #app header.hdin{animation:hdIn .3s ease both}
 #lnm.drag .lnp{background:#6b5c0e;color:#151309}#lnm.drag .lnp.mid{background:#6f6f73}#lnm.drag .lnp.hov{background:var(--pk);color:#0b0b0c}#lnm.drag .lnp.mid.hov{background:#f4f4f5}#lnm.drag .lnp.hov{--s:1.2!important;--tx:12px;box-shadow:0 0 0 5px rgba(255,214,10,.3),0 14px 30px rgba(0,0,0,.55)}#lnm.drag .lnp.mid.hov{box-shadow:0 0 0 5px rgba(255,255,255,.3),0 14px 30px rgba(0,0,0,.55)}
 .ovhome{width:40px;height:40px;border-radius:20px;border:0;background:rgba(255,255,255,.08);color:#f4f4f5;display:flex;align-items:center;justify-content:center}.ovhome .i,.ovhome svg{width:20px;height:20px}
+.bxtop{padding-left:16px!important}.bxtop b{flex:1;text-align:center}.bxsp{width:40px;flex:none}.bxb .i,.bxb svg{width:20px;height:20px}
 </style>
 </head>
 <body>
@@ -1782,7 +1783,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='2.13';
+const APPV='2.14';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 
@@ -1852,7 +1853,7 @@ function bxBody(){const t0=dayStart(Date.now()),st=dayStats(t0),n=closedCount(st
 function bxRender(){const b=$('#bx .bxsc');if(b){const y=b.scrollTop;b.innerHTML=bxBody();b.scrollTop=y}}
 function bxOpen(){if($('#bx'))return;V.bx=true;V.bxo=null;
   const w=document.createElement('div');w.id='bx';w.setAttribute('role','dialog');w.setAttribute('aria-label',"Today's Bars");
-  w.innerHTML=`<div class="bxbg"></div><div class="bxpane"><div class="bxtop"><b>Today’s Bars</b><button class="bxx" data-a="bxclose" aria-label="Close">${ic('x',2.2)}</button></div><div class="bxsc">${bxBody()}</div></div>`;
+  w.innerHTML=`<div class="bxbg"></div><div class="bxpane"><div class="bxtop"><button class="bxx bxb" data-a="bxclose" aria-label="Back">${ic('back',2.4)}</button><b>Today’s Bars</b><span class="bxsp" aria-hidden="true"></span></div><div class="bxsc">${bxBody()}</div></div>`;
   document.body.appendChild(w);const pn=w.querySelector('.bxpane'),bg=w.querySelector('.bxbg');
   const tp=V.tapPt,hb=document.querySelector('.hbw');let ox=innerWidth/2,oy=innerHeight/2;if(tp&&Date.now()-tp.t<900){ox=tp.x;oy=tp.y}else if(hb){const r=hb.getBoundingClientRect();ox=r.left+r.width/2;oy=r.top+r.height/2}
   pn.style.transformOrigin=`${ox}px ${oy}px`;void pn.offsetHeight;requestAnimationFrame(()=>requestAnimationFrame(()=>w.classList.add('in')));
@@ -4571,7 +4572,7 @@ const ACT={
   cstep:x=>{const [k,d]=x.split('|'),st=cur(),stp={dist:.1,cal:10,lvl:k==='lvl'?.5:1}[k];st[k]=Math.max(0,Math.round(((st[k]||0)+ +d*stp)*100)/100);RS()},
   ctype:x=>{const st=cur();if(x==='dur'){if(st.run){st.dur=cEl(st);st.run=null}numSheet('Duration (minutes)',Math.round(cEl(st)/6)/10,v=>{st.dur=Math.max(0,v*60)})}else numSheet({dist:'Distance ('+du()+')',cal:'Calories',lvl:'Level / incline'}[x],st[x]||0,v=>{st[x]=Math.max(0,v)})},
   stackinfo:()=>bxOpen(),
-  bxclose:()=>bxClose(),
+  bxclose:()=>bxClose({swipe:true,v:1}),
   bxtog:x=>{V.bxo=V.bxo===x?null:x;const b=$('#bx');if(!b)return;const E='cubic-bezier(.25,.85,.3,1)';b.querySelectorAll('.bxr').forEach(r=>{const h=r.querySelector('.bxh'),on=!!h&&h.dataset.x===V.bxo;if(r.classList.contains('open')===on)return;const bi=r.querySelector('.bxi');
     const from=bi?bi.getBoundingClientRect().height:0;if(bi&&bi._an)bi._an.cancel();r.classList.toggle('open',on);if(h)h.setAttribute('aria-expanded',on);if(!bi)return;
     const to=on?bi.firstElementChild.offsetHeight:0;bi._an=bi.animate([{height:from+'px'},{height:to+'px'}],{duration:on?360:280,easing:E});bi._an.onfinish=()=>{bi._an=null};
