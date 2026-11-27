@@ -7,13 +7,14 @@ export default {async fetch(req,env){const h=cors(env,req);if(req.method==='OPTI
   const u=new URL(req.url);if(req.method==='GET'&&u.pathname==='/')return j({ok:true,service:'bars-push'},200,h);
   const LOG=env.TIMER.get(env.TIMER.idFromName('__log'));
   if(req.method==='GET'&&u.pathname==='/debug'){if(u.searchParams.get('self')){await LOG.selfTest()}return j(await LOG.getLog(),200,h)}
-  if(req.method!=='POST')return j({error:'method'},405,h);if(h['Access-Control-Allow-Origin']==='null')return j({error:'origin'},403,h);
-  let d;try{d=await req.json()}catch(_){return j({error:'json'},400,h)}
-  const sub=d&&d.sub;if(!sub||typeof sub.endpoint!=='string'||!/^https:\/\//.test(sub.endpoint)||!sub.keys||!sub.keys.p256dh||!sub.keys.auth)return j({error:'sub'},400,h);
+  const rej=async why=>{try{await LOG.log({ev:'reject',why,path:u.pathname,origin:req.headers.get('Origin')||''})}catch(_){}};
+  if(req.method!=='POST'){await rej('method');return j({error:'method'},405,h)}if(h['Access-Control-Allow-Origin']==='null'){await rej('origin');return j({error:'origin'},403,h)}
+  let d;try{d=JSON.parse(await req.text())}catch(_){await rej('json');return j({error:'json'},400,h)}
+  const sub=d&&d.sub;if(!sub||typeof sub.endpoint!=='string'||!/^https:\/\//.test(sub.endpoint)||!sub.keys||!sub.keys.p256dh||!sub.keys.auth){await rej('sub');return j({error:'sub'},400,h)}
   const stub=env.TIMER.get(env.TIMER.idFromName(sub.endpoint)),host=new URL(sub.endpoint).host;
   if(u.pathname==='/schedule'){const end=+d.end;await LOG.log({ev:'schedule',inSec:Math.round((end-Date.now())/1000),host,title:String(d.title||'').slice(0,30)});if(!(end>Date.now()-5000&&end<Date.now()+3*3600e3))return j({error:'end'},400,h);
     await stub.schedule({sub,end,title:String(d.title||'Rest is over').slice(0,80),body:String(d.body||'Time for your next set').slice(0,160)});return j({ok:true},200,h)}
-  if(u.pathname==='/status')return j(await stub.status(),200,h);
+  if(u.pathname==='/status'){await LOG.log({ev:'status',host});return j(await stub.status(),200,h)}
   if(u.pathname==='/cancel'){await LOG.log({ev:'cancel',host});await stub.cancel();return j({ok:true},200,h)}
   if(u.pathname==='/test'){const r=await sendPush(sub,JSON.stringify({title:'Bars',body:'Rest alerts are on 💪'}),env);return j({ok:r.ok,status:r.status},200,h)}
   return j({error:'path'},404,h)}};
