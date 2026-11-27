@@ -58,7 +58,14 @@ html,body{height:var(--fh,100%);overflow:hidden;overscroll-behavior:none}body{po
 .tabs .fab .i{width:28px;height:28px}
 .fablogo{width:34px;height:34px;margin-left:4px}
 .inp{width:100%;background:rgba(var(--deepr),.55);border:1px solid var(--line);color:#fff;border-radius:6px;padding:12px;font-size:16px;outline:none}
-.inp:focus{border-color:var(--cy)}.inp.big{font-size:30px;text-align:center;font-weight:300}
+.inp:focus{border-color:var(--cy)}
+.npd{display:flex;justify-content:center;padding:6px 20px 14px}
+.npv{position:relative;font-size:52px;font-weight:300;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1;min-height:57px;padding:0 4px}
+.npv.fresh{color:var(--pk)}.npv.empty{color:var(--mute)}
+.npv::after{content:'';position:absolute;right:-3px;top:10%;bottom:10%;width:2.5px;border-radius:2px;background:var(--pk);animation:npc 1.05s steps(1) infinite}
+@keyframes npc{50%{opacity:0}}
+.npk{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 20px}
+.npb{height:58px;border:0;border-radius:18px;background:rgba(127,127,127,.15);color:inherit;font:inherit;font-size:26px;font-weight:500;display:flex;align-items:center;justify-content:center;-webkit-user-select:none;user-select:none;touch-action:manipulation}.inp.big{font-size:30px;text-align:center;font-weight:300}
 textarea.inp{font-size:12px;font-family:ui-monospace,Menlo,monospace}
 .tog{width:50px;height:30px;border-radius:999px;background:var(--tog);position:relative;flex:none;transition:.2s}
 .tog::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s}
@@ -1009,7 +1016,10 @@ function openSheet(html){closeSheet();const d=document.createElement('div');d.cl
 function refreshSheet(html){const c=$('#shc');if(c){c.innerHTML=html;figMountSheet()}if(V.bx)bxRender()}
 function closeSheet(){const d=$('#sheet');if(d)d.remove()}
 function confirmSheet(msg,fn,label='Confirm',safe=false){CB=fn;openSheet(`<div class="sh-t center">${esc(msg)}</div><button class="pkb" data-a="cbok" ${safe?'':'style="background:#c22b55"'}>${label}</button><button class="olb" data-a="close">Cancel</button>`)}
-function numSheet(title,val,fn){CB=fn;openSheet(`<div class="sh-t">${esc(title)}</div><div class="shp"><input id="numin" class="inp big" type="number" inputmode="decimal" value="${val}"></div><button class="pkb" data-a="numok">Save</button>`);setTimeout(()=>{const i=$('#numin');if(i){i.focus();i.select()}},60)}
+function numSheet(title,val,fn,int){CB=fn;const v=(val===''||val==null||isNaN(+val))?'':String(+val);V.num={s:v,fresh:true,int:!!int};
+  const k=x=>`<button class="npb" data-a="npk" data-x="${x}" aria-label="${x==='b'?'Delete':x}">${x==='b'?'<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11v12H9l-6-6z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/></svg>':x}</button>`;
+  openSheet(`<div class="sh-t">${esc(title)}</div><div class="npd"><div class="npv fresh" id="npv" aria-live="polite">${v||'0'}</div></div><div class="npk">${['1','2','3','4','5','6','7','8','9',int?'':'.','0','b'].map(x=>x?k(x):'<span></span>').join('')}</div><button class="pkb" data-a="numok">Save</button>`)}
+function npUpd(){const e=$('#npv');if(!e)return;const n=V.num;e.textContent=n.s||'0';e.classList.toggle('fresh',!!n.fresh);e.classList.toggle('empty',!n.s)}
 function pickExercise(fn,ctx,multi){PICK=fn;PICKM=multi||null;V.pf={q:'',eq:'',mg:'',ctx:ctx||[],multi:!!multi,sel:[]};openSheet(`<div class="sh-t">${multi?'Add Exercises<div class="xs mute" style="font-weight:400">Tap to select as many as you like</div>':'Add Exercise'}</div><div class="shp stick"><input class="inp" id="pq" placeholder="Search ${S.exercises.length} exercises" data-in="pq" autocomplete="off"></div><div id="pl">${pickBody()}</div><button class="cyl" data-a="newexp" style="border:0">${ic('plusc')} Create custom exercise</button>${multi?'<div class="pkbar" id="pkbar"><button data-a="pickdone"></button></div>':''}`)}
 function pkBar(){const b=$('#pkbar');if(!b)return;const n=V.pf.sel.length;b.classList.toggle('on',n>0);b.firstChild.textContent=`Add ${n} exercise${n===1?'':'s'}`}
 function pkMark(e){const k=V.pf.sel.indexOf(e.id);return k<0?`<span class="pk" style="color:var(--cy)">${ic('plusc')}</span>`:`<span class="pk"><b>${k+1}</b></span>`}
@@ -1557,7 +1567,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.94';
+const APPV='1.95';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 
@@ -4456,7 +4466,9 @@ const ACT={
   shsub:x=>{closeSheet();ACT.sub(x)},
   shcalc:()=>{closeSheet();ACT.calc()},
   cbok:()=>{const f=CB;CB=null;closeSheet();if(f)f()},
-  numok:()=>{const v=parseFloat($('#numin').value);const f=CB;CB=null;closeSheet();if(!isNaN(v)&&f){f(v);RS()}},
+  npk:x=>{const n=V.num;if(!n)return;if(x==='b'){n.s=n.fresh?'':n.s.slice(0,-1);n.fresh=false;npUpd();return}if(n.fresh){n.s='';n.fresh=false}
+    if(x==='.'){if(n.int||n.s.includes('.'))return;n.s=(n.s||'0')+'.'}else{if(n.s==='0')n.s='';const dp=n.s.indexOf('.');if(n.s.replace('.','').length>=6||(dp>=0&&n.s.length-dp>2))return;n.s+=x}npUpd()},
+  numok:()=>{const n=V.num;const v=parseFloat(n&&n.s!==''?n.s:'NaN');V.num=null;const f=CB;CB=null;closeSheet();if(!isNaN(v)&&f){f(v);RS()}},
   pick:x=>{if(V.pf&&V.pf.multi){const a=V.pf.sel,k=a.indexOf(x);if(k<0)a.push(x);else a.splice(k,1);try{navigator.vibrate&&navigator.vibrate(8)}catch(_){}document.querySelectorAll('#pl [data-a="pick"]').forEach(r=>{const id=r.dataset.x,on=a.includes(id);r.classList.toggle('psel',on);const m=r.querySelector('.pk');if(m)m.outerHTML=pkMark({id})});pkBar();return}
     const f=PICK;PICK=null;closeSheet();if(f)f(x)},
   pickdone:()=>{const ids=V.pf.sel.slice(),f=PICK,fm=PICKM;PICK=null;PICKM=null;closeSheet();if(!ids.length)return;if(fm)fm(ids);else if(f)ids.forEach(f);toast(`Added ${ids.length} exercise${ids.length===1?'':'s'}`)},
@@ -4487,7 +4499,7 @@ const ACT={
   w:x=>{const st=cur();st.w=Math.max(0,Math.round((st.w+ +x*step())*100)/100);RS()},
   r:x=>{const st=cur();st.r=Math.max(0,st.r+ +x);RS()},
   typew:()=>numSheet('Weight ('+U()+')',cur().w,v=>{const st=cur();st.w=Math.max(0,v);delete st.p}),
-  typer:()=>numSheet('Reps',cur().r,v=>{cur().r=Math.max(0,Math.round(v))}),
+  typer:()=>numSheet('Reps',cur().r,v=>{cur().r=Math.max(0,Math.round(v))},true),
   plate:x=>{const p=+x,st=cur(),now=Date.now();st.p=st.p||[];const rm=()=>{const k=st.p.lastIndexOf(p);if(k>=0)st.p.splice(k,1)};
     if(lastTap.p===p&&now-lastTap.t<350){rm();rm();lastTap={p:null,t:0}}else{st.p.push(p);st.p.sort((a,b)=>b-a);lastTap={p,t:now}}setW(st);RS()},
   rmplate:(x,el)=>{if(V.rmBusy)return;const go=()=>{V.rmBusy=false;const st=cur();st.p.splice(+x,1);setW(st);RS()};if(el&&el.classList&&el.getBBox){V.rmBusy=true;el.classList.add('out');setTimeout(go,200)}else go()},
@@ -4587,7 +4599,7 @@ document.addEventListener('input',e=>{const el=e.target,k=el.dataset.in;if(!k)re
   else if(k==='pbtm'){V.pb[x]=el.value}
   else if(k==='pq'){V.pf.q=el.value;$('#pl').innerHTML=pickBody()}
   else if(k==='calc'){V.calc={w:$('#cw').value,r:$('#cr').value};$('#crows').innerHTML=calcRows()}});
-document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='numin')ACT.numok()});
+document.addEventListener('keydown',e=>{if(!V.num||!$('#npv')||/INPUT|TEXTAREA/.test(e.target.tagName))return;if(e.key==='Enter'){e.preventDefault();ACT.numok()}else if(/^[0-9.]$/.test(e.key))ACT.npk(e.key);else if(e.key==='Backspace')ACT.npk('b')});
 
 function tick(){const s=S.session;if(!s)return;try{const it=s.items[s.i],st=it&&it.sets[s.s];if(st&&st.run){const el=cEl(st),c=$('#cdur');if(c)c.textContent=mmss(el);const pc=$('#cpace');if(pc)pc.textContent=paceTxt(el,st.dist)}}catch(e){}const t=mmss((Date.now()-s.start)/1000);const el=$('#el');if(el)el.textContent=t;const e2=$('#el2');if(e2)e2.textContent=t;const e3=$('#el3');if(e3)e3.textContent=t+' elapsed';
   if(s.rest){const left=(s.rest.end-Date.now())/1000;if(left<=0){restDone(true);return}const txt=mmss(Math.ceil(left));const rt=$('#rt');if(rt)rt.textContent=txt;const r2=$('#rt2');if(r2)r2.textContent=txt.replace(/^0(\d:)/,'$1');const rr=$('#rring');if(rr){const C=2*Math.PI*88;rr.setAttribute('stroke-dashoffset',C*(1-left*1000/s.rest.total))}}}
