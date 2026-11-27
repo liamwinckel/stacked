@@ -1,0 +1,10 @@
+name: Rest-alert server log
+on: workflow_dispatch
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl -s "https://bars-push.liam-bars.workers.dev/debug?self=1"; echo
+          sleep 10
+          curl -s "https://bars-push.liam-bars.workers.dev/debug"; echo
