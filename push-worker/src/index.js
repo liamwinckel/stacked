@@ -1,3 +1,4 @@
+import {DurableObject} from 'cloudflare:workers';
 import {sendPush} from './webpush.js';
 // Bars rest-alert server. POST /schedule {sub,end,title,body} · POST /cancel {sub}
 const cors=(env,req)=>{const o=req.headers.get('Origin')||'';const ok=(env.ALLOW_ORIGINS||'').split(',').map(s=>s.trim()).includes(o);return {'Access-Control-Allow-Origin':ok?o:'null','Access-Control-Allow-Methods':'POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type','Access-Control-Max-Age':'86400',Vary:'Origin'}};
@@ -16,7 +17,7 @@ export default {async fetch(req,env){const h=cors(env,req);if(req.method==='OPTI
   if(u.pathname==='/cancel'){await LOG.log({ev:'cancel',host});await stub.cancel();return j({ok:true},200,h)}
   if(u.pathname==='/test'){const r=await sendPush(sub,JSON.stringify({title:'Bars',body:'Rest alerts are on 💪'}),env);return j({ok:r.ok,status:r.status},200,h)}
   return j({error:'path'},404,h)}};
-export class RestTimer{constructor(state,env){this.state=state;this.env=env}
+export class RestTimer extends DurableObject{constructor(ctx,env){super(ctx,env);this.state=ctx;this.env=env}
   async log(e){const a=(await this.state.storage.get('log'))||[];a.unshift(Object.assign({at:new Date().toISOString()},e));await this.state.storage.put('log',a.slice(0,40))}
   async getLog(){return {now:new Date().toISOString(),log:(await this.state.storage.get('log'))||[]}}
   async selfTest(){await this.state.storage.put('selfdue',Date.now()+5000);await this.state.storage.setAlarm(Date.now()+5000);await this.log({ev:'selftest-set'})}
