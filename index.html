@@ -774,6 +774,7 @@ html[data-theme="light"] .hpills button{background:#fff;border-color:#e5e5ea;col
 .bxsvg{flex:1}.bxsvg svg{width:100%;height:auto}
 .bxsum{text-align:right}.bxsum b{display:block;font-size:56px;font-weight:200;line-height:1;letter-spacing:-.03em}.bxsum b small{font-size:22px;color:var(--mute);font-weight:400}.bxsum span{font-size:13px;color:var(--mute)}
 .bxlist{background:#1c1c1e;border-radius:24px;padding:4px 0;margin-bottom:14px}
+.pshb{flex:none;border:0;border-radius:18px;padding:9px 14px;background:#2c2c2e;color:#f4f4f5;font:inherit;font-size:14px;font-weight:700}
 .bxr{position:relative;will-change:transform}.bxr+.bxr{border-top:1px solid #2c2c2e}
 .bxh{width:100%;display:flex;align-items:center;gap:12px;padding:14px 16px 10px;border:0;background:none;color:#f4f4f5;font:inherit;text-align:left}
 .bxs .bxh{padding:14px 16px}
@@ -973,12 +974,18 @@ function restExit(fn){const p=$('#lgp');if(!p||!p.classList.contains('rest')){fn
 const PUSH_URL='https://bars-push.liam-bars.workers.dev',VAPID_PUB='BBBrk82LZLfUuuJJ-8tbLWUMiVeZsOdCl8woNMsguKPsY5t_k6kUB3T8f8WSkdzBGfXoL4BCakLHgym0yT5QEOY';
 function u8(b){b=b.replace(/-/g,'+').replace(/_/g,'/');while(b.length%4)b+='=';const r=atob(b),a=new Uint8Array(r.length);for(let i=0;i<r.length;i++)a[i]=r.charCodeAt(i);return a}
 async function pushSub(ask){if(!PUSH_URL||!('serviceWorker' in navigator)||!('PushManager' in window))return null;const reg=await navigator.serviceWorker.ready;let sub=await reg.pushManager.getSubscription();if(!sub&&ask){const pm=await Notification.requestPermission();if(pm!=='granted')return null;sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID_PUB)})}return sub}
-let PSUB=null;function pushCache(){if(!PUSH_URL||!S.pushOn)return;pushSub(false).then(sb=>{PSUB=sb?sb.toJSON():null}).catch(()=>{})}
+let PSUB=null;function pushCache(){if(!PUSH_URL||!S.pushOn)return;pushSub(false).then(async sb=>{if(!sb){PSUB=null;return}PSUB=sb.toJSON();await pushStatus()}).catch(()=>{})}
+async function pushStatus(){if(!PSUB)return;try{const r=await fetch(PUSH_URL+'/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sub:PSUB})});const d=await r.json();if(!d||!d.ok)return;S.pushLast=d.last||null;save();
+  if(d.last&&[403,404,410].includes(d.last.status)&&d.last.t>(S.pushFix||0)){S.pushFix=Date.now();save();const reg=await navigator.serviceWorker.ready,old=await reg.pushManager.getSubscription();if(old)await old.unsubscribe();const nw=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID_PUB)});PSUB=nw.toJSON()}
+  if(V.tab==='tools'||$('.pushst'))render()}catch(_){}}
+function pushStTxt(){const l=S.pushLast;if(!l)return 'No alerts sent yet';const ago=Math.max(0,Math.round((Date.now()-l.t)/60000)),when=ago<1?'just now':ago<60?ago+' min ago':ago<1440?Math.round(ago/60)+' h ago':Math.round(ago/1440)+' d ago';
+  return l.status>=200&&l.status<300?`Last alert accepted by Apple ${when}`:`Last alert failed ${when} (code ${l.status}${l.msg?': '+esc(String(l.msg).slice(0,60)):''})`}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(pushCache,400)});
 function pushPost(path,data){const go=sub=>fetch(PUSH_URL+path,{method:'POST',keepalive:true,headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({sub},data||{}))}).then(r=>{if(!r.ok)throw 0;return r});
   if(PSUB)return go(PSUB).catch(()=>{});return pushSub(false).then(sb=>{if(!sb)return;PSUB=sb.toJSON();return go(PSUB)}).catch(()=>{})}
-function pushWant(hid){const s=S.session,rs=s&&s.rest;if(!S.pushOn||!rs||!rs.end)return 0;const left=rs.end-Date.now();if(left<=(hid?1000:2500))return 0;return rs.end}
+function pushWant(hid){const s=S.session,rs=s&&s.rest;if(S.pushOn&&!rs&&V.pushTest&&V.pushTest>Date.now()+1000)return V.pushTest;if(!S.pushOn||!rs||!rs.end)return 0;const left=rs.end-Date.now();if(left<=(hid?1000:2500))return 0;return rs.end}
 function pushArm(force){if(!PUSH_URL||(!S.pushOn&&!V.pushEnd))return;const hid=document.hidden,want=pushWant(hid);if(!force&&want===(V.pushEnd||0))return;
-  if(want){const s=S.session,it=s.items[s.i],e=it&&ex(it.exId);pushPost('/schedule',{end:want,title:'Rest is over',body:e?`Time for ${e.name}`:'Time for your next set'})}else if(V.pushEnd||force)pushPost('/cancel');V.pushEnd=want}
+  if(want){const s=S.session,it=s&&s.items[s.i],e=it&&ex(it.exId);pushPost('/schedule',want===V.pushTest&&!(s&&s.rest)?{end:want,title:'Bars test alert',body:'Rest alerts are working 💪'}:{end:want,title:'Rest is over',body:e?`Time for ${e.name}`:'Time for your next set'})}else if(V.pushEnd||force)pushPost('/cancel');V.pushEnd=want}
 function pushSync(){pushArm(document.hidden)}
 document.addEventListener('visibilitychange',pushSync);window.addEventListener('pagehide',()=>pushArm(true));setInterval(()=>{if(!document.hidden)pushArm(false)},1000);setTimeout(pushCache,800);
 function restNotify(){try{if(!S.restNotify||!('Notification' in window)||Notification.permission!=='granted'||!document.hidden)return;const s=S.session,it=s&&s.items[s.i],t='Rest is over',body=it?`Time for ${ex(it.exId).name}`:'Time for your next set';if(navigator.serviceWorker)navigator.serviceWorker.ready.then(r=>r.showNotification(t,{body,tag:'bars-rest',icon:'icon-bars-192.png',renotify:true})).catch(()=>{});else new Notification(t,{body})}catch(_){}}
@@ -1283,7 +1290,7 @@ function renderMore(){
   <div class="li" style="cursor:default"><div class="g">Units</div><div class="seg" style="width:150px">${['lb','kg'].map(u=>`<button class="${U()===u?'on':''}" data-a="units" data-x="${u}">${u.toUpperCase()}</button>`).join('')}</div></div>
   <div class="li" style="cursor:default"><div class="g"><div class="tt">Default rest</div><div class="sb">For exercises you haven’t set a rest for yet</div></div><div class="stp w"><button data-a="rest" data-x="-15">${ic('minusc')}</button><span>${mmss(S.restDef||120)}</span><button data-a="rest" data-x="15">${ic('plusc')}</button></div></div>
   <div class="li" style="cursor:default"><div class="g">Auto-start rest timer after each set</div><button class="tog ${S.autoRest?'on':''}" data-a="auto"></button></div>
-  ${PUSH_URL?`<div class="li" style="cursor:default"><div class="g"><div class="tt">Rest alerts outside the app</div><div class="sb">Get a notification when rest ends, even with Bars closed</div></div><button class="tog ${S.pushOn?'on':''}" data-a="pushon" aria-label="Rest alerts outside the app"></button></div>`:''}
+  ${PUSH_URL?`<div class="li" style="cursor:default"><div class="g"><div class="tt">Rest alerts outside the app</div><div class="sb">Get a notification when rest ends, even with Bars closed</div></div><button class="tog ${S.pushOn?'on':''}" data-a="pushon" aria-label="Rest alerts outside the app"></button></div>${S.pushOn?`<div class="li" style="cursor:default"><div class="g"><div class="tt">Test rest alert</div><div class="sb pushst">${pushStTxt()}</div></div><button class="pshb" data-a="pushtest">Test in 10s</button></div>`:''}`:''}
   <div class="li" style="cursor:default"><div class="g"><div class="tt">Progression suggestions</div><div class="sb">Suggests +1 rep, then more weight at the top of your range</div></div><button class="tog ${S.autoProg!==false?'on':''}" data-a="autoprog"></button></div>
   <div class="li" style="cursor:default"><div class="g"><div class="tt">Effort per set</div><div class="sb">Log reps left in the tank for smarter progression</div></div><button class="tog ${S.rirOn!==false?'on':''}" data-a="rirtog"></button></div>
   <div class="li" style="cursor:default"><div class="g"><div class="tt">Recovery reminders</div><div class="sb">Warn me before training a muscle that hasn’t recovered</div></div><button class="tog ${S.recWarn!==false?'on':''}" data-a="recwarn"></button></div>
@@ -1548,7 +1555,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='1.91';
+const APPV='1.92';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 
@@ -4496,6 +4503,7 @@ const ACT={
   smnote:()=>{closeSheet();setTimeout(()=>ACT.exnote(),250)},
   whtap:(x,el)=>{const b=el&&el.closest?el.closest('.whi'):null;if(!b)return;const w=b.closest('.whl'),kind=w&&w.dataset.wh;if(b.classList.contains('on')){if(kind==='r')ACT.typer();else ACT.typew();return}const k=[...b.parentNode.children].indexOf(b);if(w._go)w._go(k)},
   setautorest:()=>{S.autoRest=!S.autoRest;save();refreshSheet(restSheet())},
+  pushtest:()=>{if(S.session&&S.session.rest){toast('Finish your rest first');return}V.pushTest=Date.now()+10000;V.pushEnd=0;pushArm(false);toast('Now switch to another app. Alert in 10 seconds')},
   pushon:()=>{if(S.pushOn){pushPost('/cancel');S.pushOn=false;V.pushEnd=0;save();render();return}pushSub(true).then(sub=>{if(!sub){toast('Allow notifications for Bars in iPhone Settings, then try again');return}PSUB=sub.toJSON();S.pushOn=true;save();render();fetch(PUSH_URL+'/test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sub:sub.toJSON()})}).then(r=>r.json()).then(d=>toast(d.ok?'Rest alerts are on. Test sent':'Couldn’t reach the alert server')).catch(()=>toast('Couldn’t reach the alert server'))}).catch(()=>toast('Notifications aren’t available. Open Bars from your Home Screen'))},
   rtap:()=>{if(V.lpUp&&Date.now()-V.lpUp<400)return;const s=S.session;if(!s)return;if(V.rbar){rbarClose();return}if(s.rest){rbarOpen();return}startRest();s.rest.fromLog=false;V.restAnim=true;RS()},
   rnext:()=>{if(V.lpUp&&Date.now()-V.lpUp<400)return;const s=S.session;if(!s||!s.rest)return;if(V.rbar){V.rbar=false;const rb=$('#sp .rbar'),ro=$('#sp .rbov');if(rb)rb.remove();if(ro)ro.remove()}restExit(()=>{const st=cur();if(!s.rest.fromLog&&!st.done){V.noRest=true;s.rest=null;ACT.nexts();V.noRest=false}else{s.rest=null;RS()}V.lastLog=null})},

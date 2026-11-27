@@ -10,11 +10,14 @@ export default {async fetch(req,env){const h=cors(env,req);if(req.method==='OPTI
   const stub=env.TIMER.get(env.TIMER.idFromName(sub.endpoint));
   if(u.pathname==='/schedule'){const end=+d.end;if(!(end>Date.now()-5000&&end<Date.now()+3*3600e3))return j({error:'end'},400,h);
     await stub.schedule({sub,end,title:String(d.title||'Rest is over').slice(0,80),body:String(d.body||'Time for your next set').slice(0,160)});return j({ok:true},200,h)}
+  if(u.pathname==='/status')return j(await stub.status(),200,h);
   if(u.pathname==='/cancel'){await stub.cancel();return j({ok:true},200,h)}
   if(u.pathname==='/test'){const r=await sendPush(sub,JSON.stringify({title:'Bars',body:'Rest alerts are on 💪'}),env);return j({ok:r.ok,status:r.status},200,h)}
   return j({error:'path'},404,h)}};
 export class RestTimer{constructor(state,env){this.state=state;this.env=env}
+  async status(){const [job,last]=await Promise.all([this.state.storage.get('job'),this.state.storage.get('last')]);return {ok:true,pending:job?job.end:0,last:last||null}}
   async schedule(job){await this.state.storage.put('job',job);await this.state.storage.setAlarm(Math.max(Date.now()+200,job.end))}
   async cancel(){await this.state.storage.delete('job');await this.state.storage.deleteAlarm()}
   async alarm(){const job=await this.state.storage.get('job');if(!job)return;await this.state.storage.delete('job');
-    const r=await sendPush(job.sub,JSON.stringify({title:job.title,body:job.body}),this.env);if(r.status>=500)throw new Error('push '+r.status)}}
+    const r=await sendPush(job.sub,JSON.stringify({title:job.title,body:job.body,tag:'rest-'+job.end}),this.env);let txt='';try{txt=(await r.text()).slice(0,200)}catch(_){}
+    await this.state.storage.put('last',{t:Date.now(),due:job.end,status:r.status,msg:txt});if(r.status>=500){await this.state.storage.put('job',job);throw new Error('push '+r.status)}}}
