@@ -963,6 +963,14 @@ main.edout>*{animation:edOut .15s ease forwards}main.edin>*{animation:edIn .38s 
 .lfi{position:relative}.lfi>span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transition:transform .38s cubic-bezier(.2,1.3,.4,1),opacity .2s ease}
 .lfi .lfx{opacity:0;transform:rotate(-90deg) scale(.5)}.lfi .lfx .i,.lfi .lfx svg{width:24px;height:24px}
 .lnav.qopen .lfp{opacity:0;transform:rotate(90deg) scale(.5)}.lnav.qopen .lfx{opacity:1;transform:none}
+
+/* cohesive screen motion: rise from where you tapped, settle on back */
+@keyframes riseIn{from{opacity:0;transform:scale(.9);border-radius:30px}to{opacity:1;transform:none;border-radius:0}}
+@keyframes settleIn{from{opacity:0;transform:scale(1.035)}to{opacity:1;transform:none}}
+@keyframes hdIn{from{opacity:0}to{opacity:1}}
+#app main.rise{animation:riseIn .46s cubic-bezier(.2,1.04,.3,1) both;transform-origin:var(--tox,50%) var(--toy,100%);will-change:transform,opacity}
+#app main.settle{animation:settleIn .36s cubic-bezier(.2,.88,.2,1) both;transform-origin:50% 40%}
+#app header.hdin{animation:hdIn .3s ease both}
 </style>
 </head>
 <body>
@@ -1696,7 +1704,7 @@ function render(){syncBars();
   if(samev&&pmt){const nm=document.querySelector('#app main');if(nm)nm.scrollTop=pmt}
   const sp2=$('#sp');if(sp2&&st)sp2.scrollTop=st;
   try{document.body.style.overflow=sp2?'hidden':''}catch(e){}
-  if(V.anim){const m=$('#app main');if(m&&m.classList)m.classList.add(V.anim);V.anim=null}
+  if(V.anim){const m=$('#app main'),cls={push:'rise',pop:'settle',fade:'rise'}[V.anim]||V.anim;if(m&&m.classList&&!matchMedia('(prefers-reduced-motion: reduce)').matches){const tp=V.tapPt;if(cls==='rise'){const r=m.getBoundingClientRect();if(tp&&Date.now()-tp.t<900){m.style.setProperty('--tox',Math.max(0,Math.min(r.width,tp.x-r.left))+'px');m.style.setProperty('--toy',Math.max(0,Math.min(r.height,tp.y-r.top))+'px')}}m.classList.add(cls);const hd=document.querySelector('#app header.hd');if(hd)hd.classList.add('hdin');setTimeout(()=>{m.classList.remove(cls);if(hd)hd.classList.remove('hdin')},520)}V.anim=null}
   if(V.prKey&&Date.now()-V.prKey.t<400){const k=V.prKey;V.prKey=null;const sel=`[data-a="${k.a}"]`+(k.x!=null?`[data-x="${CSS.escape(k.x)}"]`:'');const el=document.querySelector(sel);if(el&&!el.classList.contains('prl')){el.classList.add('prl');setTimeout(()=>el.classList.remove('prl'),480)}}
   if(V.bx)bxRender();
   if(S.showCel!==ymd(Date.now()))setTimeout(showCheck,250);
@@ -1770,7 +1778,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='2.09';
+const APPV='2.10';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 
@@ -2162,6 +2170,7 @@ document.addEventListener('contextmenu',e=>{if(e.target.closest&&e.target.closes
 document.addEventListener('touchmove',e=>{if(V.rbar&&e.cancelable&&e.target.closest&&e.target.closest('.rbar,.rbov'))e.preventDefault()},{passive:false});
 
 /* ===== press feedback ===== */
+document.addEventListener('pointerdown',e=>{V.tapPt={x:e.clientX,y:e.clientY,t:Date.now()}},{passive:true,capture:true});
 let PR=null,PRT=0;const prCancel=()=>{clearTimeout(PRT);if(!PR)return;const el=PR.el;if(!PR.pending){el.classList.remove('prs')}PR=null};const prOff=()=>{clearTimeout(PRT);if(!PR)return;const el=PR.el;PR=null;if(el.dataset&&el.dataset.a)V.prKey={a:el.dataset.a,x:el.dataset.x,t:Date.now()};el.classList.remove('prs');void el.offsetWidth;el.classList.add('prl');clearTimeout(el._prl);el._prl=setTimeout(()=>el.classList.remove('prl'),480)};
 document.addEventListener('pointerdown',e=>{if(e.button>0)return;const el=e.target.closest&&e.target.closest('button,a[href],[data-a],.li');if(!el||el.closest('.whl,.bp,.lnlogo,#lnm')||el.matches('.rbov,.smov,[disabled]'))return;prOff();PR={el,x:e.clientX,y:e.clientY,pending:true};const hh=el.offsetHeight;if(hh>56&&!el.style.getPropertyValue('--ps'))el.style.setProperty('--ps',hh>110?'.988':'.975');PRT=setTimeout(()=>{if(PR&&PR.el===el){PR.pending=false;el.classList.remove('prl');el.classList.add('prs')}},75)},{passive:true,capture:true});
 document.addEventListener('pointermove',e=>{if(PR&&Math.hypot(e.clientX-PR.x,e.clientY-PR.y)>6)prCancel()},{passive:true});
@@ -4640,8 +4649,8 @@ const ACT={
     document.querySelectorAll('.libsw button').forEach(b=>{const on=b.dataset.x===x;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)});
     if(k){k.classList.remove('mv');void k.offsetWidth;k.classList.add('mv');k.style.transform=`translateX(${x==='exercises'?'100%':'0'})`}
     if(!m||matchMedia('(prefers-reduced-motion: reduce)').matches){V.libSeg=x;render();scr0();return}
-    V._libT=1;const out=m.animate([{opacity:1,transform:'none'},{opacity:0,transform:`translate3d(${-dir*28}px,0,0)`}],{duration:170,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'});
-    out.onfinish=()=>{V.libSeg=x;V.anim=null;render();scr0();const m2=document.querySelector('#app main');if(m2)m2.animate([{opacity:0,transform:`translate3d(${dir*34}px,0,0)`},{opacity:1,transform:'none'}],{duration:380,easing:'cubic-bezier(.2,.88,.2,1)'});V._libT=0}},
+    V._libT=1;const out=m.animate([{opacity:1,transform:'none'},{opacity:0,transform:'translate3d(0,6px,0) scale(.97)'}],{duration:170,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'});
+    out.onfinish=()=>{V.libSeg=x;V.anim=null;render();scr0();const m2=document.querySelector('#app main');if(m2){m2.style.transformOrigin='50% 0';m2.animate([{opacity:0,transform:'translate3d(0,14px,0) scale(.95)'},{opacity:1,transform:'none'}],{duration:440,easing:'cubic-bezier(.2,1.05,.3,1)'})}V._libT=0}},
   qlift:()=>{closeSheet();openSheet(liftHtml())},
   sugr:x=>{openSheet(routineSheet(x))},
   bal:x=>{V.balUndo=null;openSheet(balanceHtml(x))},
