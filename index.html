@@ -905,11 +905,12 @@ html[data-theme="light"] .hpills button{background:#fff;border-color:#e5e5ea;col
 @media (prefers-reduced-motion:reduce){.lnp,.hb{transition:none!important;animation:none!important}}
 
 /* library + routine highlight */
-.libhd .hl{width:44px;flex:none}.libhd .hr{width:44px;flex:none;display:flex;justify-content:flex-end}
+.libhd .hl{width:44px;min-width:0;flex:none}.libhd .hr{width:44px;min-width:0;flex:none;display:flex;justify-content:flex-end}.libhd{justify-content:space-between}
 .libsw{position:relative;flex:none;display:flex;background:rgba(255,255,255,.08);border-radius:22px;padding:4px;margin:0 auto;box-shadow:0 6px 20px rgba(0,0,0,.35)}
-.libsw button{position:relative;z-index:1;width:118px;height:36px;border-radius:18px;border:0;background:none;color:#c4c4cc;font-family:inherit;font-size:15px;font-weight:700;transition:color .3s}
+.libsw button{position:relative;z-index:1;width:112px;height:36px;border-radius:18px;border:0;background:none;color:#c4c4cc;font-family:inherit;font-size:15px;font-weight:700;transition:color .3s}
 .libsw button.on{color:#0b0b0c}
-.libk{position:absolute;left:4px;top:4px;width:118px;height:36px;border-radius:18px;background:var(--pk);transition:transform .38s cubic-bezier(.2,.88,.2,1);display:block}
+.libk{position:absolute;left:4px;top:4px;width:112px;height:36px;border-radius:18px;background:var(--pk);transition:transform .42s cubic-bezier(.3,1.25,.4,1),width .42s;display:block;will-change:transform}
+.libk.mv{animation:libSq .42s cubic-bezier(.3,.9,.3,1)}@keyframes libSq{40%{scale:1.12 .9}}
 .libadd{width:40px;height:40px;border-radius:20px;border:0;background:rgba(255,255,255,.08);color:#f4f4f5;display:flex;align-items:center;justify-content:center}.libadd .i,.libadd svg{width:20px;height:20px}
 .rday.rhl{background:rgba(255,214,10,.07);box-shadow:inset 3px 0 0 var(--pk)}
 .rhlt{font-size:11px;font-weight:700;color:var(--pk);margin-bottom:1px}
@@ -1760,7 +1761,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='2.04';
+const APPV='2.05';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 
@@ -4626,7 +4627,12 @@ const ACT={
   liftgo:()=>{if(S.session){ACT.resume();return}const n=homeNext();if(n)startWorkout(n.r.id,n.d0.id);else openQuick()},
   hupopen:x=>{const [r,d]=x.split('|');V.rhl=d;V.libSeg='routines';ACT.sub('routine:'+r)},
   libgo:x=>{V.libSeg=x;ACT.tab('lib')},
-  libseg:x=>{if(V.libSeg===x)return;V.libSeg=x;V.anim='fade';render();scr0()},
+  libseg:x=>{if(V.libSeg===x||V._libT)return;const dir=x==='exercises'?1:-1,k=document.querySelector('.libk'),m=document.querySelector('#app main');
+    document.querySelectorAll('.libsw button').forEach(b=>{const on=b.dataset.x===x;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)});
+    if(k){k.classList.remove('mv');void k.offsetWidth;k.classList.add('mv');k.style.transform=`translateX(${x==='exercises'?'100%':'0'})`}
+    if(!m||matchMedia('(prefers-reduced-motion: reduce)').matches){V.libSeg=x;render();scr0();return}
+    V._libT=1;const out=m.animate([{opacity:1,transform:'none'},{opacity:0,transform:`translate3d(${-dir*28}px,0,0)`}],{duration:170,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'});
+    out.onfinish=()=>{V.libSeg=x;V.anim=null;render();scr0();const m2=document.querySelector('#app main');if(m2)m2.animate([{opacity:0,transform:`translate3d(${dir*34}px,0,0)`},{opacity:1,transform:'none'}],{duration:380,easing:'cubic-bezier(.2,.88,.2,1)'});V._libT=0}},
   qlift:()=>{closeSheet();openSheet(liftHtml())},
   sugr:x=>{openSheet(routineSheet(x))},
   bal:x=>{V.balUndo=null;openSheet(balanceHtml(x))},
