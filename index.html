@@ -1326,7 +1326,7 @@ function navLogo(){return `<svg class="nlg" viewBox="0 0 96 134" aria-hidden="tr
 function renderTabs(){if(V.inSession)return '';const s=S.session;let t,sub,a;
   let ring='';if(s){const ws=s.items.flatMap(it=>it.sets.filter(x=>!x.wu)),dn2=ws.filter(x=>x.done).length,fr=ws.length?dn2/ws.length:0,C=2*Math.PI*21;
     t=s.pre?esc(s.name):`${esc(s.name)} · <span id="el4">${mmss((Date.now()-s.start)/1000)}</span>`;sub=s.pre?'Ready when you are':`${dn2} of ${ws.length} sets`;a='resume';
-    ring=`<svg class="lfr" viewBox="0 0 46 46" aria-hidden="true"><circle cx="23" cy="23" r="21"/><circle class="lfrp" cx="23" cy="23" r="21" stroke-dasharray="${(C*fr).toFixed(1)} ${C.toFixed(1)}"/></svg>`}
+}
   else{const n=homeNext();t='Lift';sub=n?`${esc(n.d0.name)} is up next`:'Start a workout';a='qlift'}
   const cur=NAVI.find(x=>x[0]===V.tab);
   const qo=(()=>{const w=document.getElementById('sheet');return w&&w.classList.contains('qpop')&&!w.classList.contains('out')})();return `<nav class="lnav${qo?' qopen':''}" aria-label="Main"><button class="lnlogo" aria-haspopup="menu" aria-expanded="false" aria-label="Menu${cur?', on '+cur[1]:''}">${navLogo()}</button><button class="lift" data-a="${a}"><span class="lft"><b>${t}</b><em>${sub}</em></span><span class="lfi${s?' live':''}" data-a="liftgo" role="button" aria-label="${s?'Resume workout':'Start the next workout'}">${ring}<span class="lfp">${ic('play')}</span><span class="lfx">${ic('x')}</span></span></button></nav>`}
@@ -1919,7 +1919,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='2.28';
+const APPV='2.29';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 
