@@ -1129,7 +1129,21 @@ function seed(){
     history:[],widgets:[],session:null};
 }
 function load(){try{const s=localStorage.getItem(KEY);if(s)return JSON.parse(s)}catch(e){}return null}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function save(){let j='';try{j=JSON.stringify(S);localStorage.setItem(KEY,j)}catch(e){}if(NATIVE)natSave(j)}
+/* ===== native iPhone app bridge (no-op on the website) ===== */
+const NATIVE=!!(window.webkit&&window.webkit.messageHandlers&&window.webkit.messageHandlers.bars);
+function nat(t,d){if(!NATIVE)return;try{window.webkit.messageHandlers.bars.postMessage({t,d:d===undefined?null:d})}catch(e){}}
+let _natT=0,_natJ='';function natSave(j){_natJ=j||_natJ;clearTimeout(_natT);_natT=setTimeout(natFlush,200)}
+function natFlush(){clearTimeout(_natT);if(!_natJ)return;let w=null;try{const ws=weekStart(Date.now()),n=homeNext(),s=S.session;
+    w={next:n?n.d0.name:'',plan:n?n.r.name:'',lifts:S.history.filter(h=>h.date>=ws&&!h.act).length,goal:S.weekGoal||3,
+      days:[...Array(7)].map((_,k)=>{const d=ws+k*864e5,hs=S.history.filter(x=>x.date>=d&&x.date<d+864e5);return hs.some(x=>!x.act)?2:hs.length?1:0}),
+      today:Math.floor((dayStart(Date.now())-ws)/864e5),cardio:Math.round(wkCardio()),cardioGoal:G().weekCardio,
+      live:s&&!s.pre?{name:s.name,start:s.start}:null}}catch(e){}
+  let rest=null;try{const s=S.session,rs=s&&s.rest;if(rs&&rs.end&&rs.end>Date.now()){const it=s.items[s.i],e=it&&ex(it.exId);rest={end:rs.end,ex:e?e.name:'',workout:s.name,on:S.natRest!==false}}}catch(e){}
+  let hist=[];try{hist=S.history.slice(0,5).map(h=>({id:h.id,name:h.name,start:h.date,dur:h.dur||0,act:h.act?h.act.k:'',cardio:!h.act&&h.entries.length&&h.entries.every(e=>isCardio(e.exId))?ex(h.entries[0].exId).name:''}))}catch(e){}
+  nat('sync',{state:_natJ,w,rest,hist,session:!!(S.session&&!S.session.pre),unit:U()});_natJ=''}
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&NATIVE)natFlush()});
+window.natHealth=txt=>hImport(txt);
 const DEFAULT_THEME='volt';
 const THEMES={navy:{name:'Navy & Pink',meta:'#10215f',bg:'#10215f',a:'#ec3a6e',b:'#5fd0f3',sw:['#14297a','#ec3a6e','#5fd0f3']},volt:{name:'Black & Yellow',meta:'#151517',bg:'#151517',a:'#ffd60a',b:'#f4f4f5',sw:['#26262a','#ffd60a','#f4f4f5']}};
 function appIcon(t,px){const T=THEMES[t];return `<svg width="${px}" height="${px}" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="${T.bg}"/>${[16,32,48,32,16].map((w,k)=>`<rect x="26" y="${22+k*12}" width="${w}" height="8" rx="2" fill="${k===2?T.b:T.a}"/>`).join('')}</svg>`}
@@ -1643,7 +1657,7 @@ function renderMore(){
   <div class="li" style="cursor:default"><div class="g">Units</div><div class="seg" style="width:150px">${['lb','kg'].map(u=>`<button class="${U()===u?'on':''}" data-a="units" data-x="${u}">${u.toUpperCase()}</button>`).join('')}</div></div>
   <div class="li" style="cursor:default"><div class="g"><div class="tt">Default rest</div><div class="sb">For exercises you haven’t set a rest for yet</div></div><div class="stp w"><button data-a="rest" data-x="-15">${ic('minusc')}</button><span>${mmss(S.restDef||120)}</span><button data-a="rest" data-x="15">${ic('plusc')}</button></div></div>
   <div class="li" style="cursor:default"><div class="g">Auto-start rest timer after each set</div><button class="tog ${S.autoRest?'on':''}" data-a="auto"></button></div>
-  ${PUSH_URL?`<div class="li" style="cursor:default"><div class="g"><div class="tt">Rest alerts outside the app</div><div class="sb">Get a notification when rest ends, even with Bars closed</div></div><button class="tog ${S.pushOn?'on':''}" data-a="pushon" aria-label="Rest alerts outside the app"></button></div>`:''}
+  ${NATIVE?`<div class="li" style="cursor:default"><div class="g"><div class="tt">Rest timer on Lock Screen</div><div class="sb">Countdown in the Dynamic Island and an alert when rest ends</div></div><button class="tog ${S.natRest!==false?'on':''}" data-a="natrest" aria-label="Rest timer on Lock Screen"></button></div>`:PUSH_URL?`<div class="li" style="cursor:default"><div class="g"><div class="tt">Rest alerts outside the app</div><div class="sb">Get a notification when rest ends, even with Bars closed</div></div><button class="tog ${S.pushOn?'on':''}" data-a="pushon" aria-label="Rest alerts outside the app"></button></div>`:''}
   <div class="li" style="cursor:default"><div class="g"><div class="tt">Progression suggestions</div><div class="sb">Suggests +1 rep, then more weight at the top of your range</div></div><button class="tog ${S.autoProg!==false?'on':''}" data-a="autoprog"></button></div>
   <div class="li" style="cursor:default"><div class="g"><div class="tt">Effort per set</div><div class="sb">Log reps left in the tank for smarter progression</div></div><button class="tog ${S.rirOn!==false?'on':''}" data-a="rirtog"></button></div>
   <div class="li" style="cursor:default"><div class="g"><div class="tt">Recovery reminders</div><div class="sb">Warn me before training a muscle that hasn’t recovered</div></div><button class="tog ${S.recWarn!==false?'on':''}" data-a="recwarn"></button></div>
@@ -1660,7 +1674,7 @@ function renderMore(){
   <label class="li" style="cursor:pointer"><span style="color:var(--cy);display:flex">${ic('log')}</span><div class="g"><div class="tt">Restore from backup file</div><div class="sb">Pick a stacked-backup .json from Files</div></div><span class="chev">${ic('chev')}</span><input type="file" id="rfile" accept=".json,application/json" style="display:none"></label>
   <div class="li" data-a="export"><div class="g"><div class="tt">Copy backup as text</div><div class="sb">Fallback if file saving isn't available</div></div><span class="chev">${ic('chev')}</span></div>
   <div class="li" data-a="import"><div class="g">Restore from pasted text</div><span class="chev">${ic('chev')}</span></div>
-  <div class="h2">Install</div><div class="li sm mute" style="cursor:default">In Safari, tap Share → Add to Home Screen to launch this like a regular app.</div>
+  ${NATIVE?'<div class="h2">Help</div>':`<div class="h2">Install</div><div class="li sm mute" style="cursor:default">In Safari, tap Share → Add to Home Screen to launch this like a regular app.</div>`}
   <div class="li" data-a="tourstart"><span style="color:var(--cy);display:flex">${ic('play')}</span><div class="g"><div class="tt">Take the tour</div><div class="sb">A quick walk-through of the app</div></div><span class="chev">${ic('chev')}</span></div>
   <button class="dng" data-a="reset">Reset all data</button><p class="xs mute center" style="margin-top:14px">Bars · Version ${APPV}</p></main>`;
 }
@@ -1930,7 +1944,7 @@ function logIntervals(T){const secs=T.n*T.w+(T.n-1)*T.r;if(secs<60)return;const 
   else{S.history.unshift({id:uid(),name:'Intervals',date:Date.now()-secs*1000,dur:secs,entries:[{exId:e.id,sets:[set]}]});save();toast(`Logged ${Math.round(secs/60)} min of cardio`)}}
 
 /* ===== close your stack ===== */
-const APPV='2.31';
+const APPV='2.32';
 let SBARS=[['show','Show Up'],['lift','Lift'],['move','Move'],['cardio','Cardio'],['beat','Beat It']];
 function G(){return Object.assign({sets:15,move:45,cardio:20,weekCardio:150,train:30,steps:8000,mobility:10,water:8,sleep:7,mindful:10},S.goals||{})}
 
@@ -3993,7 +4007,7 @@ function dayOptHtml(d0){const o=dayOv(d0)||{},st=dayStats(d0),fut=d0>dayStart(Da
 /* ===== routine share links ===== */
 function b64u(str){return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
 function unb64u(b){b=b.replace(/-/g,'+').replace(/_/g,'/');while(b.length%4)b+='=';return decodeURIComponent(escape(atob(b)))}
-function routineLink(r){const p={v:1,n:r.name,d:r.days.map(d=>({n:d.name,o:d.notes||undefined,i:d.items.map(it=>{const e=ex(it.exId),lib=LIB.some(l=>l.name===e.name);return [e.name,it.sets,it.rr||'',it.sn?1:0,lib?0:[e.eq||'M',e.mg||'']]})}))};return location.origin+location.pathname+'#r='+b64u(JSON.stringify(p))}
+function routineLink(r){const p={v:1,n:r.name,d:r.days.map(d=>({n:d.name,o:d.notes||undefined,i:d.items.map(it=>{const e=ex(it.exId),lib=LIB.some(l=>l.name===e.name);return [e.name,it.sets,it.rr||'',it.sn?1:0,lib?0:[e.eq||'M',e.mg||'']]})}))};return (NATIVE?'https://liamwinckel.github.io/stacked/':location.origin+location.pathname)+'#r='+b64u(JSON.stringify(p))}
 function shareRoutine(id){const r=R(id);if(!r)return;const url=routineLink(r);
   if(navigator.share){navigator.share({title:r.name+' · Bars',text:`Try my "${r.name}" routine in Bars`,url}).catch(()=>{});return}
   if(navigator.clipboard)navigator.clipboard.writeText(url).then(()=>toast('Link copied')).catch(()=>openSheet(`<div class="sh-t">Routine link</div><div class="shp"><textarea class="inp" rows="4" style="width:100%">${esc(url)}</textarea></div>`));
@@ -4699,7 +4713,7 @@ const ACT={
   sugdismiss:()=>{S.sugDismiss=sugSig(suggestStack());save();render()},
   pseg:x=>{V.ps=x;render();scr0()},
   gseg:x=>{V.gs=x;render();scr0()},
-  hsync:()=>{closeSheet();if(!S.hsGuided){S.hsGuided=1;save();openSheet(hGuide());return}try{localStorage.setItem('stk-hpend',Date.now())}catch(e){}location.href='shortcuts://run-shortcut?name='+encodeURIComponent(HSC)},
+  hsync:()=>{closeSheet();if(NATIVE){toast('Reading Apple Health…');nat('hsync');return}if(!S.hsGuided){S.hsGuided=1;save();openSheet(hGuide());return}try{localStorage.setItem('stk-hpend',Date.now())}catch(e){}location.href='shortcuts://run-shortcut?name='+encodeURIComponent(HSC)},
   hguide:()=>{S.hsGuided=1;save();closeSheet();openSheet(hGuide())},
   himport:()=>{closeSheet();openSheet(hImportSheet())},
   hpaste:()=>{if(!navigator.clipboard||!navigator.clipboard.readText){toast('Paste it into the box below');return}navigator.clipboard.readText().then(t=>hImport(t)).catch(()=>toast('Couldn\'t read the clipboard. Paste into the box below'))},
@@ -4908,6 +4922,7 @@ const ACT={
       const reg=await navigator.serviceWorker.ready;let sb=await reg.pushManager.getSubscription(),re='';if(!sb){sb=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID_PUB)});re=' (re-registered)'}PSUB=sb.toJSON();
       const end=Date.now()+10000;let r,d;try{r=await fetch(PUSH_URL+'/schedule',{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify({sub:PSUB,end,title:'Bars test alert',body:'Rest alerts are working 💪'})});d=await r.json()}catch(e){say('Couldn’t reach the alert server: '+(e&&e.message||e));return}
       if(!r.ok||!d.ok){say('Server said '+r.status+' '+JSON.stringify(d));return}V.pushEnd=end;V.pushTest=end;say('✓ Booked'+re+'. Switch apps now. Alert in 10 s');toast('Switch apps now. Alert in 10 seconds')}catch(e){say('Error: '+(e&&e.message||e))}},
+  natrest:()=>{S.natRest=S.natRest===false;save();render()},
   pushon:()=>{if(S.pushOn){pushPost('/cancel');S.pushOn=false;V.pushEnd=0;save();render();return}pushSub(true).then(sub=>{if(!sub){toast('Allow notifications for Bars in iPhone Settings, then try again');return}PSUB=sub.toJSON();S.pushOn=true;save();render();fetch(PUSH_URL+'/test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sub:sub.toJSON()})}).then(r=>r.json()).then(d=>toast(d.ok?'Rest alerts are on. Test sent':'Couldn’t reach the alert server')).catch(()=>toast('Couldn’t reach the alert server'))}).catch(()=>toast('Notifications aren’t available. Open Bars from your Home Screen'))},
   rtap:()=>{if(V.lpUp&&Date.now()-V.lpUp<400)return;const s=S.session;if(!s)return;if(V.rbar){rbarClose();return}if(s.rest){rbarOpen();return}startRest();s.rest.fromLog=false;V.restAnim=true;RS()},
   rnext:()=>{if(V.lpUp&&Date.now()-V.lpUp<400)return;const s=S.session;if(!s||!s.rest)return;if(V.rbar){V.rbar=false;const rb=$('#sp .rbar'),ro=$('#sp .rbov');if(rb)rb.remove();if(ro)ro.remove()}restExit(()=>{const st=cur();if(!s.rest.fromLog&&!st.done){V.noRest=true;s.rest=null;ACT.nexts();V.noRest=false}else{s.rest=null;RS()}V.lastLog=null})},
